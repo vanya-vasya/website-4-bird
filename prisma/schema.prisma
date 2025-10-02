@@ -17,9 +17,9 @@ model User {
   lastName             String?
   usedGenerations      Int           @default(0)
   availableGenerations Int           @default(15)
-  initialTokensGranted Boolean       @default(true)
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
+  initialTokensGranted Boolean?      @default(true)
+  createdAt            DateTime?     @default(now())
+  updatedAt            DateTime?     @updatedAt
   transactions         Transaction[]
 }
 
