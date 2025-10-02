@@ -37,6 +37,16 @@ export async function getUserById(userId: string){
   try {
     const user = await prismadb.user.findUnique({
       where: { clerkId: userId },
+      select: {
+        id: true,
+        clerkId: true,
+        email: true,
+        photo: true,
+        firstName: true,
+        lastName: true,
+        usedGenerations: true,
+        availableGenerations: true,
+      },
     });
 
     if (!user) throw new Error("User not found");
@@ -70,6 +80,10 @@ export async function deleteUser(clerkId: string) {
     // Find user to delete
     const userToDelete = await prismadb.user.findUnique({
       where: { clerkId },
+      select: {
+        id: true,
+        clerkId: true,
+      },
     });
 
     if (!userToDelete) {

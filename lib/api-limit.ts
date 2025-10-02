@@ -12,6 +12,16 @@ export const incrementApiLimit = async (value: number) => {
 
   const userApiLimit = await prismadb.user.findUnique({
     where: { clerkId: userId },
+    select: {
+      id: true,
+      clerkId: true,
+      email: true,
+      photo: true,
+      firstName: true,
+      lastName: true,
+      usedGenerations: true,
+      availableGenerations: true,
+    },
   });
 
   if (userApiLimit) {
@@ -31,6 +41,12 @@ export const checkApiLimit = async (generationPrice: number) => {
 
   const userApiLimit = await prismadb.user.findUnique({
     where: { clerkId: userId },
+    select: {
+      id: true,
+      clerkId: true,
+      usedGenerations: true,
+      availableGenerations: true,
+    },
   });
   if (
     userApiLimit &&
@@ -55,6 +71,9 @@ export const getApiAvailableGenerations = async () => {
     where: {
       clerkId: userId,
     },
+    select: {
+      availableGenerations: true,
+    },
   });
 
   if (!userApiLimit) {
@@ -73,6 +92,9 @@ export const getApiUsedGenerations = async () => {
   const userApiLimit = await prismadb.user.findUnique({
     where: {
       clerkId: userId,
+    },
+    select: {
+      usedGenerations: true,
     },
   });
 
