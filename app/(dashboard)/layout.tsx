@@ -5,7 +5,8 @@ import {
 import { AnimatedLayout, AnimatedPage } from "@/components/animated-layout";
 import Link from "next/link";
 import Image from "next/image";
-import DashboardHeader from "@/components/dashboard-header";
+import Navbar from "@/components/navbar";
+import { Sidebar } from "@/components/sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -16,19 +17,16 @@ export default async function DashboardLayout({
   const apiAvailableGenerations = await getApiAvailableGenerations();
 
   return (
-    <div className="h-auto relative min-h-screen bg-white">
-
-      <AnimatedLayout>
-        <DashboardHeader 
-          initialUsedGenerations={apiUsedGenerations}
-          initialAvailableGenerations={apiAvailableGenerations}
+    <div className="h-full relative bg-[#111827]">
+      <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-80 bg-gray-900">
+        <Sidebar 
+          apiUsedGenerations={apiUsedGenerations}
+          apiAvailableGenerations={apiAvailableGenerations}
         />
-      </AnimatedLayout>
-
-      <main className="flex-1 py-12 lg:pt-16 relative z-10">
-        <div className="container py-8 md:py-10">
-          <AnimatedPage>{children}</AnimatedPage>
-        </div>
+      </div>
+      <main className="md:pl-72 pb-10">
+        <Navbar />
+        <AnimatedPage>{children}</AnimatedPage>
       </main>
 
       <footer className="py-6 border-t border-gray-200 bg-white">
