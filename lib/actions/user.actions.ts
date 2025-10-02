@@ -4,16 +4,31 @@ import { revalidatePath } from "next/cache";
 // NOTE: Keep imports minimal; we do not auto-create users here to avoid backend logic changes.
 import prismadb from "@/lib/prismadb";
 
-// CREATE
+// CREATE - Idempotent user creation with 15 initial tokens
 export async function createUser(user: any) {
   try {
-    const newUser = await prismadb.user.create({
-      data: user,
+    // Use upsert to ensure idempotency in case of concurrent webhook calls
+    const newUser = await prismadb.user.upsert({
+      where: { clerkId: user.clerkId },
+      update: {
+        // Only update non-critical fields if user already exists
+        email: user.email,
+        photo: user.photo,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+      create: {
+        ...user,
+        usedGenerations: 0,
+        availableGenerations: 15, // Initial welcome bonus
+        initialTokensGranted: true,
+      },
     });
 
     return newUser;
   } catch (error) {
-    console.error(error);
+    console.error("[CREATE_USER_ERROR]", error);
+    throw error; // Re-throw to allow webhook handler to report failure
   }
 }
 
