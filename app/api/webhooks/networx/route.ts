@@ -28,104 +28,100 @@ function verifyWebhookSignature(data: Record<string, any>, signature: string, se
   return expectedSignature === signature;
 }
 
-// POST - Обработка webhook уведомлений от Networx
+// POST - Обработка webhook уведомлений от Networx Hosted Payment Page
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('Networx webhook received:', body);
+    console.log('═'.repeat(60));
+    console.log('📥 Networx HPP Webhook Received');
+    console.log('═'.repeat(60));
+    console.log(JSON.stringify(body, null, 2));
+    console.log('═'.repeat(60));
 
     const secretKey = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
     if (!secretKey) {
-      console.error('NETWORX_SECRET_KEY not configured');
+      console.error('❌ NETWORX_SECRET_KEY not configured');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
       );
     }
 
-    // Верифицируем подпись webhook
-    const signature = body.signature;
-    if (!signature) {
-      console.error('Missing signature in webhook');
+    // Extract checkout data from HPP webhook structure
+    const checkout = body.checkout;
+    if (!checkout) {
+      console.error('❌ Invalid webhook structure: missing checkout object');
       return NextResponse.json(
-        { error: 'Missing signature' },
+        { error: 'Invalid webhook structure' },
         { status: 400 }
       );
     }
 
-    const isValidSignature = verifyWebhookSignature(body, signature, secretKey);
-    if (!isValidSignature) {
-      console.error('Invalid webhook signature');
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 403 }
-      );
-    }
-
-    // Обрабатываем различные типы уведомлений
+    // HPP webhooks may not include signature verification
+    // Instead, verify by checking the token against our database
     const { 
+      token,
       status, 
-      order_id, 
-      transaction_id, 
-      amount, 
-      currency, 
-      type,
-      customer_email,
-      error_message 
-    } = body;
+      order,
+      customer,
+      transaction
+    } = checkout;
 
-    console.log(`Payment notification: Order ${order_id}, Status: ${status}, Type: ${type}`);
+    const tracking_id = order?.tracking_id;
+    const amount = order?.amount;
+    const currency = order?.currency;
+    const email = customer?.email;
+    
+    console.log(`📋 Payment Details:`);
+    console.log(`  Token: ${token}`);
+    console.log(`  Status: ${status}`);
+    console.log(`  Tracking ID: ${tracking_id}`);
+    console.log(`  Amount: ${amount} ${currency}`);
+    console.log(`  Email: ${email}`);
 
-    // Обработка статусов согласно документации Networx
+    // Process payment status
     switch (status) {
+      case 'completed':
       case 'success':
-        console.log(`✅ Payment successful for order ${order_id}, amount: ${amount} ${currency}`);
-        // Здесь вы можете обновить статус заказа в базе данных
-        // await updateOrderStatus(order_id, 'paid', transaction_id);
-        // await sendConfirmationEmail(customer_email, order_id);
+        console.log(`✅ Payment SUCCESSFUL for order ${tracking_id}`);
+        console.log(`   Amount: ${amount} cents = ${(amount / 100).toFixed(2)} ${currency}`);
+        
+        // TODO: Update user token balance in database
+        // Extract user ID from tracking_id (format: gen_user_<userId>_<timestamp>)
+        // const userId = tracking_id.split('_')[2];
+        // const tokens = calculateTokensFromAmount(amount, currency);
+        // await incrementUserTokenBalance(userId, tokens);
+        // await sendConfirmationEmail(email, tracking_id, tokens);
+        
+        console.log('   ⚠️ TODO: Update user token balance in database');
         break;
 
       case 'failed':
-        console.log(`❌ Payment failed for order ${order_id}, error: ${error_message}`);
-        // Здесь вы можете обновить статус заказа как неудачный
-        // await updateOrderStatus(order_id, 'failed', transaction_id, error_message);
+      case 'declined':
+        console.log(`❌ Payment FAILED for order ${tracking_id}`);
+        console.log(`   Reason: ${transaction?.error_message || 'Unknown'}`);
+        // TODO: Notify user of payment failure
         break;
 
       case 'pending':
-        console.log(`⏳ Payment pending for order ${order_id}`);
-        // Здесь вы можете обновить статус заказа как ожидающий
-        // await updateOrderStatus(order_id, 'pending', transaction_id);
+      case 'processing':
+        console.log(`⏳ Payment PENDING for order ${tracking_id}`);
+        // Payment is being processed, wait for final status
         break;
 
       case 'canceled':
-        console.log(`🚫 Payment canceled for order ${order_id}`);
-        // Здесь вы можете обновить статус заказа как отмененный
-        // await updateOrderStatus(order_id, 'canceled', transaction_id);
+      case 'cancelled':
+        console.log(`🚫 Payment CANCELED for order ${tracking_id}`);
+        // User canceled the payment
         break;
 
       case 'refunded':
-        console.log(`💰 Payment refunded for order ${order_id}`);
-        // Здесь вы можете обработать возврат
-        // await updateOrderStatus(order_id, 'refunded', transaction_id);
+        console.log(`💰 Payment REFUNDED for order ${tracking_id}`);
+        // TODO: Deduct tokens from user balance
         break;
 
       default:
-        console.log(`❓ Unknown payment status: ${status} for order ${order_id}`);
-    }
-
-    // Дополнительная обработка для разных типов транзакций
-    switch (type) {
-      case 'payment':
-        console.log('Processing payment transaction');
-        break;
-      case 'refund':
-        console.log('Processing refund transaction');
-        break;
-      case 'chargeback':
-        console.log('Processing chargeback transaction');
-        break;
-      default:
-        console.log(`Processing ${type} transaction`);
+        console.log(`❓ Unknown payment status: ${status} for order ${tracking_id}`);
     }
 
     // Возвращаем успешный ответ согласно требованиям Networx

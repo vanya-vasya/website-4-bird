@@ -61,33 +61,35 @@ export async function POST(request: NextRequest) {
     
     console.log('API Version: 2, Authentication: HTTP Basic, Using Hosted Payment Page');
 
-    // Convert amount to integer (cents) - ensure no floating point
-    // If amount is 2.38 EUR, we need to send 238 (cents)
-    const amountInCents = Math.round(amount * 100);
+    // Convert amount to integer (cents/minor units)
+    // Amount comes in major units (e.g., 2.38 EUR), we need minor units (238 cents)
+    // Round to 2 decimal places first to avoid floating point errors, then convert to cents
+    const amountRounded = Math.round(amount * 100) / 100; // Round to 2 decimals: 2.38
+    const amountInCents = Math.round(amountRounded * 100); // Convert to cents: 238
     
-    // Request structure for hosted payment page according to NetworkX Pay API v2
+    // Request structure for Networx Pay Hosted Payment Page API v2
     const requestData = {
       checkout: {
         test: testMode, // Use test mode from environment variable
         transaction_type: "payment",
         order: {
-          amount: amountInCents, // Amount in cents as INTEGER (EUR 2.38 = 238)
+          amount: amountInCents, // Amount as INTEGER in minor units (cents)
           currency: currency,
           description: description || 'Payment for order',
-          tracking_id: orderId // Связываем платёж с заказом
+          tracking_id: orderId
         },
         customer: {
-          email: customerEmail || 'test@example.com' // Always include customer email
+          email: customerEmail || 'test@example.com'
         },
         settings: {
-          return_url: returnUrl, // URL для возврата после успешной оплаты
-          notification_url: notificationUrl // URL для получения webhook уведомлений
+          return_url: returnUrl,
+          notification_url: notificationUrl
         }
       }
     };
 
     console.log('Final request data:', JSON.stringify(requestData, null, 2));
-    console.log(`Amount conversion: ${amount} ${currency} -> ${amountInCents} cents`);
+    console.log(`Amount conversion: ${amount} ${currency} -> ${amountRounded} (rounded) -> ${amountInCents} cents`);
     
     // Make API call to Networx Pay
     // The 'test' parameter in requestData controls sandbox/production mode
@@ -122,18 +124,22 @@ export async function POST(request: NextRequest) {
       }
 
       const networxResult = await networxResponse.json();
-      console.log('Networx API Success Response:', networxResult);
+      console.log('Networx API Success Response:', JSON.stringify(networxResult, null, 2));
 
-      // Проверяем успешность ответа от Networx hosted payment page
+      // Check for successful response with token and redirect_url
       if (networxResult.checkout && networxResult.checkout.token && networxResult.checkout.redirect_url) {
+        console.log('✅ Payment checkout created successfully');
+        console.log('Token:', networxResult.checkout.token);
+        console.log('Redirect URL:', networxResult.checkout.redirect_url);
+        
         return NextResponse.json({
           success: true,
           token: networxResult.checkout.token,
-          payment_url: networxResult.checkout.redirect_url,
-          checkout_id: networxResult.checkout.token, // Используем token как идентификатор
+          redirect_url: networxResult.checkout.redirect_url, // Use redirect_url (not payment_url)
+          checkout_id: networxResult.checkout.token,
         });
       } else {
-        console.error('Networx API returned unsuccessful response:', networxResult);
+        console.error('❌ Networx API returned unsuccessful response:', networxResult);
         return NextResponse.json(
           { 
             error: 'Payment checkout creation failed',

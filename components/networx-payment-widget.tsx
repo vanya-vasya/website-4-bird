@@ -71,20 +71,17 @@ export const NetworkPaymentWidget: React.FC<NetworkPaymentWidgetProps> = ({
 
       const data: PaymentResponse = await response.json();
       
-      console.log('API Response:', data);
+      console.log('✅ Payment API Response:', data);
 
-      // Support both redirect_url (new) and payment_url (legacy)
-      const paymentUrl = data.redirect_url || data.payment_url;
-
-      if (data.success && data.token && paymentUrl) {
-        // Immediately redirect to payment page WITHOUT setting state
-        console.log('Redirecting to payment page:', paymentUrl);
+      if (data.success && data.redirect_url) {
+        // Immediately redirect to Networx payment page
+        console.log('🔄 Redirecting to payment page:', data.redirect_url);
         toast.loading('Redirecting to payment...', { duration: 500 });
         
-        // Redirect immediately
-        window.location.href = paymentUrl;
+        // Redirect to Networx hosted payment page
+        window.location.href = data.redirect_url;
       } else {
-        console.error('Payment token creation failed:', data);
+        console.error('❌ Payment token creation failed:', data);
         toast.error(data.error || 'Failed to create payment token');
         onError?.(data);
       }
