@@ -22,7 +22,8 @@ interface NetworkPaymentWidgetProps {
 interface PaymentResponse {
   success: boolean;
   token?: string;
-  payment_url?: string;
+  redirect_url?: string;
+  payment_url?: string; // Legacy support
   error?: string;
   details?: any;
   mock?: boolean;
@@ -69,14 +70,18 @@ export const NetworkPaymentWidget: React.FC<NetworkPaymentWidgetProps> = ({
       });
 
       const data: PaymentResponse = await response.json();
+      
+      console.log('✅ Payment API Response:', data);
 
-      if (data.success && data.token && data.payment_url) {
-        setPaymentToken(data.token);
-        setPaymentUrl(data.payment_url);
+      if (data.success && data.redirect_url) {
+        // Immediately redirect to Networx payment page
+        console.log('🔄 Redirecting to payment page:', data.redirect_url);
+        toast.loading('Redirecting to payment...', { duration: 500 });
         
-        toast.success('Payment token created successfully');
+        // Redirect to Networx hosted payment page
+        window.location.href = data.redirect_url;
       } else {
-        console.error('Payment token creation failed:', data);
+        console.error('❌ Payment token creation failed:', data);
         toast.error(data.error || 'Failed to create payment token');
         onError?.(data);
       }

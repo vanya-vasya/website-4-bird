@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
     const shopId = process.env.NETWORX_SHOP_ID || '29959';
     const secretKey = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
     // Use checkout.networxpay.com - verified working endpoint
-    const apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
+    // Remove /ctp/api/checkouts if it's already in the env variable (avoid duplication)
+    let apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
+    apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip trailing path if present
     // Force correct URLs (override old env variables)
     const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success';
     const notificationUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx';
@@ -59,54 +61,43 @@ export async function POST(request: NextRequest) {
     
     console.log('API Version: 2, Authentication: HTTP Basic, Using Hosted Payment Page');
 
-    // Request structure for hosted payment page according to working NetworkX Pay example
+    // Convert amount to integer (cents/minor units)
+    // Amount comes in major units (e.g., 2.38 EUR), we need minor units (238 cents)
+    // Round to 2 decimal places first to avoid floating point errors, then convert to cents
+    const amountRounded = Math.round(amount * 100) / 100; // Round to 2 decimals: 2.38
+    const amountInCents = Math.round(amountRounded * 100); // Convert to cents: 238
+    
+    // Request structure for Networx Pay Hosted Payment Page API v2
     const requestData = {
       checkout: {
         test: testMode, // Use test mode from environment variable
         transaction_type: "payment",
         order: {
-          amount: amount * 100, // Amount in cents (EUR 2.50 = 250)
+          amount: amountInCents, // Amount as INTEGER in minor units (cents)
           currency: currency,
           description: description || 'Payment for order',
-          tracking_id: orderId // Связываем платёж с заказом
+          tracking_id: orderId
         },
         customer: {
-          email: customerEmail || 'test@example.com' // Always include customer email
+          email: customerEmail || 'test@example.com'
         },
         settings: {
-          return_url: returnUrl, // URL для возврата после успешной оплаты
-          notification_url: notificationUrl // URL для получения webhook уведомлений
+          return_url: returnUrl,
+          notification_url: notificationUrl
         }
       }
     };
 
-    console.log('Final request data:', requestData);
+    console.log('Final request data:', JSON.stringify(requestData, null, 2));
+    console.log(`Amount conversion: ${amount} ${currency} -> ${amountRounded} (rounded) -> ${amountInCents} cents`);
     
-    // FOR DEVELOPMENT: Use test mode implementation until correct API endpoints are confirmed
-    if (testMode) {
-      console.log('🧪 TEST MODE: Simulating payment token creation');
-      
-      // Generate a test token for development
-      const testToken = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const testTransactionId = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      console.log('✅ TEST MODE: Token created successfully:', testToken);
-      
-      return NextResponse.json({
-        success: true,
-        token: testToken,
-        payment_url: `https://checkout.networxpay.com/ctp/pay/${testToken}`,
-        checkout_id: testTransactionId,
-        test_mode: true,
-        message: 'Test payment checkout created successfully (development mode)'
-      });
-    }
-    
-    // Make real API call to Networx Pay (Production mode)
-    // Try widget API endpoint instead of CTP
-    const networxApiUrl = `${apiUrl}/api/v1/payment/init`;  // Widget HPP API endpoint (attempt)
+    // Make API call to Networx Pay
+    // The 'test' parameter in requestData controls sandbox/production mode
+    // NetworxPay will return a real token, but the transaction will be test/production based on the 'test' flag
+    const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
     console.log('Making request to:', networxApiUrl);
-    console.log('NOTE: Trying Widget HPP API endpoint - may need adjustment based on Networx docs');
+    console.log(`Mode: ${testMode ? '🧪 SANDBOX (test cards)' : '💳 PRODUCTION (real cards)'}`);
+    console.log('Using Networx Pay API v2 with correct endpoint');
 
     try {
       const networxResponse = await fetch(networxApiUrl, {
@@ -133,18 +124,22 @@ export async function POST(request: NextRequest) {
       }
 
       const networxResult = await networxResponse.json();
-      console.log('Networx API Success Response:', networxResult);
+      console.log('Networx API Success Response:', JSON.stringify(networxResult, null, 2));
 
-      // Проверяем успешность ответа от Networx hosted payment page
+      // Check for successful response with token and redirect_url
       if (networxResult.checkout && networxResult.checkout.token && networxResult.checkout.redirect_url) {
+        console.log('✅ Payment checkout created successfully');
+        console.log('Token:', networxResult.checkout.token);
+        console.log('Redirect URL:', networxResult.checkout.redirect_url);
+        
         return NextResponse.json({
           success: true,
           token: networxResult.checkout.token,
-          payment_url: networxResult.checkout.redirect_url,
-          checkout_id: networxResult.checkout.token, // Используем token как идентификатор
+          redirect_url: networxResult.checkout.redirect_url, // Use redirect_url (not payment_url)
+          checkout_id: networxResult.checkout.token,
         });
       } else {
-        console.error('Networx API returned unsuccessful response:', networxResult);
+        console.error('❌ Networx API returned unsuccessful response:', networxResult);
         return NextResponse.json(
           { 
             error: 'Payment checkout creation failed',
