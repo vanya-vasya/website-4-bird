@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
     const shopId = process.env.NETWORX_SHOP_ID || '29959';
     const secretKey = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
     // Use checkout.networxpay.com - verified working endpoint
-    const apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
+    // Remove /ctp/api/checkouts if it's already in the env variable (avoid duplication)
+    let apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
+    apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip trailing path if present
     // Force correct URLs (override old env variables)
     const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success';
     const notificationUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx';
