@@ -87,30 +87,12 @@ export async function POST(request: NextRequest) {
     console.log('Final request data:', JSON.stringify(requestData, null, 2));
     console.log(`Amount conversion: ${amount} ${currency} -> ${amountInCents} cents`);
     
-    // FOR DEVELOPMENT: Use test mode implementation until correct API endpoints are confirmed
-    if (testMode) {
-      console.log('🧪 TEST MODE: Simulating payment token creation');
-      
-      // Generate a test token for development
-      const testToken = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const testTransactionId = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      console.log('✅ TEST MODE: Token created successfully:', testToken);
-      
-      return NextResponse.json({
-        success: true,
-        token: testToken,
-        redirect_url: `https://checkout.networxpay.com/widget/hpp.html?token=${testToken}`,
-        checkout_id: testTransactionId,
-        test_mode: true,
-        message: 'Test payment checkout created successfully (development mode)'
-      });
-    }
-    
-    // Make real API call to Networx Pay (Production mode)
-    // Correct endpoint: /ctp/api/checkouts
+    // Make API call to Networx Pay
+    // The 'test' parameter in requestData controls sandbox/production mode
+    // NetworxPay will return a real token, but the transaction will be test/production based on the 'test' flag
     const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
     console.log('Making request to:', networxApiUrl);
+    console.log(`Mode: ${testMode ? '🧪 SANDBOX (test cards)' : '💳 PRODUCTION (real cards)'}`);
     console.log('Using Networx Pay API v2 with correct endpoint');
 
     try {
