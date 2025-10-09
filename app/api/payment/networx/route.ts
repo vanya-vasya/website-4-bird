@@ -59,13 +59,17 @@ export async function POST(request: NextRequest) {
     
     console.log('API Version: 2, Authentication: HTTP Basic, Using Hosted Payment Page');
 
-    // Request structure for hosted payment page according to working NetworkX Pay example
+    // Convert amount to integer (cents) - ensure no floating point
+    // If amount is 2.38 EUR, we need to send 238 (cents)
+    const amountInCents = Math.round(amount * 100);
+    
+    // Request structure for hosted payment page according to NetworkX Pay API v2
     const requestData = {
       checkout: {
         test: testMode, // Use test mode from environment variable
         transaction_type: "payment",
         order: {
-          amount: amount * 100, // Amount in cents (EUR 2.50 = 250)
+          amount: amountInCents, // Amount in cents as INTEGER (EUR 2.38 = 238)
           currency: currency,
           description: description || 'Payment for order',
           tracking_id: orderId // Связываем платёж с заказом
@@ -80,7 +84,8 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    console.log('Final request data:', requestData);
+    console.log('Final request data:', JSON.stringify(requestData, null, 2));
+    console.log(`Amount conversion: ${amount} ${currency} -> ${amountInCents} cents`);
     
     // FOR DEVELOPMENT: Use test mode implementation until correct API endpoints are confirmed
     if (testMode) {
@@ -95,7 +100,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         token: testToken,
-        payment_url: `https://checkout.networxpay.com/ctp/pay/${testToken}`,
+        redirect_url: `https://checkout.networxpay.com/widget/hpp.html?token=${testToken}`,
         checkout_id: testTransactionId,
         test_mode: true,
         message: 'Test payment checkout created successfully (development mode)'
@@ -103,10 +108,10 @@ export async function POST(request: NextRequest) {
     }
     
     // Make real API call to Networx Pay (Production mode)
-    // Try widget API endpoint instead of CTP
-    const networxApiUrl = `${apiUrl}/api/v1/payment/init`;  // Widget HPP API endpoint (attempt)
+    // Correct endpoint: /ctp/api/checkouts
+    const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
     console.log('Making request to:', networxApiUrl);
-    console.log('NOTE: Trying Widget HPP API endpoint - may need adjustment based on Networx docs');
+    console.log('Using Networx Pay API v2 with correct endpoint');
 
     try {
       const networxResponse = await fetch(networxApiUrl, {
