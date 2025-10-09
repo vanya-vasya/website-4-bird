@@ -31,6 +31,10 @@ const routes = [
     name: "Contact",
     href: "/contact",
   },
+  {
+    name: "Payment History",
+    href: "/dashboard/billing/payment-history",
+  },
 ];
 
 interface DashboardHeaderProps {
@@ -92,6 +96,7 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
                 key={route.name}
                 href={route.href}
                 className="nav-link"
+                aria-label={`Navigate to ${route.name}`}
               >
                 {route.name}
               </Link>
