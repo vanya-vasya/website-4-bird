@@ -70,22 +70,19 @@ export const NetworkPaymentWidget: React.FC<NetworkPaymentWidgetProps> = ({
       });
 
       const data: PaymentResponse = await response.json();
+      
+      console.log('API Response:', data);
 
       // Support both redirect_url (new) and payment_url (legacy)
       const paymentUrl = data.redirect_url || data.payment_url;
 
       if (data.success && data.token && paymentUrl) {
-        setPaymentToken(data.token);
-        setPaymentUrl(paymentUrl);
-        
-        // Immediately redirect to payment page
+        // Immediately redirect to payment page WITHOUT setting state
         console.log('Redirecting to payment page:', paymentUrl);
-        toast.loading('Redirecting to payment page...', { duration: 1000 });
+        toast.loading('Redirecting to payment...', { duration: 500 });
         
-        // Small delay to show the toast, then redirect
-        setTimeout(() => {
-          window.location.href = paymentUrl;
-        }, 500);
+        // Redirect immediately
+        window.location.href = paymentUrl;
       } else {
         console.error('Payment token creation failed:', data);
         toast.error(data.error || 'Failed to create payment token');
