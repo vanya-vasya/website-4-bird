@@ -5,6 +5,7 @@ import { GuestMobileSidebar } from "@/components/guest-mobile-sidebar";
 import { UsageProgress } from "@/components/usage-progress";
 import { UserButton } from "@clerk/nextjs";
 import { ChevronDown } from "lucide-react";
+import { PaymentHistoryAnalytics } from "@/lib/analytics";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,6 +97,11 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
                 key={route.name}
                 href={route.href}
                 className="nav-link"
+                onClick={() => {
+                  if (route.name === 'Payment History') {
+                    PaymentHistoryAnalytics.clickPaymentHistoryLink('dashboard_header');
+                  }
+                }}
               >
                 {route.name}
               </Link>
