@@ -48,7 +48,10 @@ export async function POST(request: NextRequest) {
     let apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
     apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip trailing path if present
     // Force correct URLs (override old env variables)
-    const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success';
+    // ⚠️ IMPORTANT: returnUrl is set to webhook endpoint per user request
+    // This means users will see JSON response instead of a success page after payment
+    // Consider using /payment/success for better UX if needed
+    const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx';
     const notificationUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx';
     const testMode = process.env.NETWORX_TEST_MODE === 'true'; // Use test mode based on env variable
     
