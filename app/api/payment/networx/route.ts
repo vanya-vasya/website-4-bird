@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
     let apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
     apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip trailing path if present
     // Force correct URLs (override old env variables)
-    // Return URL updated to redirect users to dashboard after payment
-    const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/dashboard';
-    const notificationUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx';
+    // Production URLs using custom domain yum-mi.com
+    const returnUrl = 'https://www.yum-mi.com/dashboard';
+    const notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx';
     const testMode = process.env.NETWORX_TEST_MODE === 'true'; // Use test mode based on env variable
     
     console.log('Environment variables:', {
