@@ -33,6 +33,7 @@ import { getFormSchema } from "./constants";
 import { MODEL_GENERATIONS_PRICE, tools } from "@/constants";
 import { N8nWebhookClient } from "@/lib/n8n-webhook";
 import { getApiAvailableGenerations, getApiUsedGenerations } from "@/lib/api-limit";
+import { useCredits } from "@/lib/contexts/credit-context";
 
 // Define ChatCompletionRequestMessage type locally with friendly response support
 type ChatCompletionRequestMessage = {
@@ -162,9 +163,9 @@ const ConversationPage = () => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [description, setDescription] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [creditBalance, setCreditBalance] = useState<number>(0);
-  const [usedCredits, setUsedCredits] = useState<number>(0);
-  const [isLoadingCredits, setIsLoadingCredits] = useState(true);
+  
+  // Use centralized credit context instead of local state
+  const { remainingCredits, usedGenerations, availableGenerations, deductCredits, refreshCredits, isLoading: isLoadingCredits } = useCredits();
 
   // Получаем конфигурацию для текущего инструмента
   const currentTool = toolConfigs[toolId as keyof typeof toolConfigs] || toolConfigs['master-chef'];
@@ -180,7 +181,7 @@ const ConversationPage = () => {
   };
   
   const toolPrice = getToolPrice(toolId);
-  const availableCredits = creditBalance - usedCredits;
+  const availableCredits = remainingCredits; // Use context value
   const hasInsufficientCredits = toolPrice > 0 && availableCredits < toolPrice; // Free tools (toolPrice = 0) never have insufficient credits
   
   // Dynamic button styles based on current tool
@@ -211,41 +212,6 @@ const ConversationPage = () => {
     },
   });
 
-  // Load credit balance on component mount
-  const loadCreditBalance = useCallback(async () => {
-    if (!userId) return;
-    
-    try {
-      setIsLoadingCredits(true);
-      
-      // Fetch credit data from API route
-      const response = await fetch('/api/generations', { method: 'GET' });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setCreditBalance(data.available || 0);
-        setUsedCredits(data.used || 0);
-        
-        console.log('[ConversationPage] Credit balance loaded:', {
-          available: data.available,
-          used: data.used,
-          remaining: data.remaining
-        });
-      } else {
-        console.error('[ConversationPage] Failed to fetch credits:', response.status, response.statusText);
-        toast.error('Failed to load credit balance');
-      }
-    } catch (error) {
-      console.error('[ConversationPage] Failed to load credit balance:', error);
-      toast.error('Failed to load credit balance');
-    } finally {
-      setIsLoadingCredits(false);
-    }
-  }, [userId]);
-  
-  useEffect(() => {
-    loadCreditBalance();
-  }, [userId, loadCreditBalance]);
 
   // Reset form when tool changes
   useEffect(() => {
@@ -380,13 +346,19 @@ const ConversationPage = () => {
         
         setMessages((current) => [...current, assistantMessage]);
         
-        // Update local credit balance (optimistic update) - skip for free tools
+        // Deduct credits using context (optimistic update) - skip for free tools
         if (toolPrice > 0) {
-          setUsedCredits(prev => prev + toolPrice);
+          deductCredits(toolPrice);
         }
         
         // Show success feedback
         toast.success(successMessage);
+        
+        // Refresh credits from server after successful generation
+        setTimeout(async () => {
+          await refreshCredits();
+          router.refresh(); // Also refresh server components
+        }, 500); // Small delay to ensure backend has processed
         
       } else if (webhookResponse.error) {
         // Handle webhook errors
