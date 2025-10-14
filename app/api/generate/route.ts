@@ -16,50 +16,79 @@ const TOOL_NAMES: Record<string, string> = {
   'cal-tracker': 'Your Own Tracker',
 };
 
+// Helper function to get N8N webhook URL based on tool ID
+function getN8nWebhookUrl(toolId: string): string {
+  const urls = {
+    'cal-tracker': 'https://vanya-vasya.app.n8n.cloud/webhook/02d7bdba-03a4-4f98-bc49-c44d32349a47',
+    'master-nutritionist': process.env.NEXT_PUBLIC_N8N_MASTER_NUTRITIONIST_URL || 'https://vanya-vasya.app.n8n.cloud/webhook/7a104f81-c923-49cd-abf4-562204fc06e9',
+    'master-chef': 'https://vanya-vasya.app.n8n.cloud/webhook/4c6c4649-99ef-4598-b77b-6cb12ab6a102',
+  };
+  return urls[toolId as keyof typeof urls] || urls['master-chef'];
+}
+
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
+  const correlationId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  console.log(`[API_GENERATE:${correlationId}] Request started`);
   
   // 1. AUTHENTICATE USER
   const { userId } = auth();
   if (!userId) {
-    console.warn('[API_GENERATE] Unauthorized request');
+    console.warn(`[API_GENERATE:${correlationId}] Unauthorized request`);
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  
+  console.log(`[API_GENERATE:${correlationId}] User authenticated: ${userId}`);
 
-  // Get webhook URL from environment variables
-  const WEBHOOK_URL = process.env.N8N_WEBHOOK_URL ?? process.env.WEBHOOK_URL;
-  if (!WEBHOOK_URL) {
-    console.error('[API_GENERATE] N8N webhook URL not configured');
-    return NextResponse.json({ error: 'Webhook URL not configured' }, { status: 500 });
-  }
-
-  // Parse request payload
+  // 2. PARSE REQUEST (Support both JSON and multipart/form-data)
+  const contentType = req.headers.get('content-type') || '';
   let payload: any = {};
-  try { 
-    payload = await req.json(); 
-  } catch (e) {
-    console.warn('[API_GENERATE] Failed to parse JSON payload');
+  let file: File | null = null;
+  let toolId: string;
+
+  try {
+    if (contentType.includes('multipart/form-data')) {
+      console.log(`[API_GENERATE:${correlationId}] Parsing multipart/form-data`);
+      const formData = await req.formData();
+      file = formData.get('file') as File;
+      const messageStr = formData.get('message') as string;
+      
+      if (messageStr) {
+        payload = JSON.parse(messageStr);
+      }
+      
+      toolId = payload.toolId || 'master-chef';
+      console.log(`[API_GENERATE:${correlationId}] File upload detected:`, {
+        fileName: file?.name,
+        fileSize: file?.size,
+        toolId,
+      });
+    } else {
+      console.log(`[API_GENERATE:${correlationId}] Parsing JSON payload`);
+      payload = await req.json();
+      toolId = payload.tool?.id || payload.toolId || 'master-chef';
+    }
+  } catch (e: any) {
+    console.error(`[API_GENERATE:${correlationId}] Failed to parse request:`, e.message);
     return NextResponse.json({ error: 'Invalid request payload' }, { status: 400 });
   }
 
   // Extract tool information
-  const toolId = payload.tool?.id;
   const toolPrice = TOOL_PRICES[toolId] || 0;
   const toolName = TOOL_NAMES[toolId] || 'Unknown Tool';
-
-  // Log request details
-  console.log(`[API_GENERATE] Processing request:`, {
-    userId,
+  
+  console.log(`[API_GENERATE:${correlationId}] Tool info:`, {
     toolId,
     toolPrice,
-    messageLength: payload.message?.content?.length,
-    hasImage: !!payload.image,
-    timestamp: new Date().toISOString(),
+    toolName,
+    hasFile: !!file,
   });
 
-  // 2. CHECK CREDIT BALANCE (BEFORE AI GENERATION)
+  // 3. CHECK CREDIT BALANCE (BEFORE AI GENERATION)
   if (toolPrice > 0) {
     try {
+      console.log(`[API_GENERATE:${correlationId}] Checking credit balance`);
       const user = await prismadb.user.findUnique({
         where: { clerkId: userId },
         select: {
@@ -69,14 +98,14 @@ export async function POST(req: NextRequest) {
       });
 
       if (!user) {
-        console.error('[API_GENERATE] User not found in database:', userId);
+        console.error(`[API_GENERATE:${correlationId}] User not found in database:`, userId);
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
       const remainingCredits = user.availableGenerations - user.usedGenerations;
 
       if (remainingCredits < toolPrice) {
-        console.warn('[API_GENERATE] Insufficient credits:', {
+        console.warn(`[API_GENERATE:${correlationId}] Insufficient credits:`, {
           userId,
           required: toolPrice,
           available: remainingCredits,
@@ -88,32 +117,65 @@ export async function POST(req: NextRequest) {
         }, { status: 403 });
       }
 
-      console.log('[API_GENERATE] Credit check passed:', {
+      console.log(`[API_GENERATE:${correlationId}] Credit check passed:`, {
         userId,
         required: toolPrice,
         available: remainingCredits,
         remaining: remainingCredits - toolPrice,
       });
     } catch (error) {
-      console.error('[API_GENERATE] Database error during credit check:', error);
+      console.error(`[API_GENERATE:${correlationId}] Database error during credit check:`, error);
       return NextResponse.json({ error: 'Failed to verify credits' }, { status: 500 });
     }
   }
 
-  // 3. CALL N8N WEBHOOK
+  // 4. FORWARD TO N8N WEBHOOK
+  const n8nUrl = getN8nWebhookUrl(toolId);
+  console.log(`[API_GENERATE:${correlationId}] Forwarding to N8N:`, n8nUrl);
+  
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
 
-    const n8nRes = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
+    let n8nRes: Response;
+    
+    if (file) {
+      // Forward as multipart/form-data (file upload)
+      console.log(`[API_GENERATE:${correlationId}] Forwarding file to N8N`);
+      const n8nFormData = new FormData();
+      n8nFormData.append('file', file);
+      n8nFormData.append('message', JSON.stringify({
+        toolId,
+        content: payload.content || 'Analyze this food image',
+        userId,
+        timestamp: new Date().toISOString(),
+        sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      }));
+
+      n8nRes = await fetch(n8nUrl, {
+        method: 'POST',
+        body: n8nFormData,
+        signal: controller.signal,
+      });
+    } else {
+      // Forward as JSON (description/text)
+      console.log(`[API_GENERATE:${correlationId}] Forwarding JSON to N8N`);
+      n8nRes = await fetch(n8nUrl, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+    }
 
     clearTimeout(timeoutId);
     const processingTime = Date.now() - startTime;
+    
+    console.log(`[API_GENERATE:${correlationId}] N8N response received:`, {
+      status: n8nRes.status,
+      ok: n8nRes.ok,
+      processingTime,
+    });
     
     // Get response text (handles both JSON and plain text)
     const text = await n8nRes.text();
@@ -124,8 +186,9 @@ export async function POST(req: NextRequest) {
       responseSize: text.length,
     });
 
-    // 4. DEDUCT TOKENS ONLY IF N8N CALL WAS SUCCESSFUL
+    // 5. DEDUCT TOKENS ONLY IF N8N CALL WAS SUCCESSFUL
     if (n8nRes.ok && toolPrice > 0) {
+      console.log(`[API_GENERATE:${correlationId}] N8N successful, deducting ${toolPrice} tokens`);
       try {
         await prismadb.$transaction(async (tx) => {
           // Increment usedGenerations
@@ -158,7 +221,7 @@ export async function POST(req: NextRequest) {
             },
           });
 
-          console.log('[API_GENERATE] ✅ Tokens deducted successfully:', {
+          console.log(`[API_GENERATE:${correlationId}] ✅ Tokens deducted successfully:`, {
             userId,
             toolId,
             toolPrice,
@@ -170,7 +233,7 @@ export async function POST(req: NextRequest) {
           });
         });
       } catch (dbError) {
-        console.error('[API_GENERATE] ⚠️ Failed to deduct tokens (AI generation succeeded but DB write failed):', {
+        console.error(`[API_GENERATE:${correlationId}] ⚠️ Failed to deduct tokens (AI generation succeeded but DB write failed):`, {
           userId,
           toolId,
           toolPrice,
@@ -179,6 +242,10 @@ export async function POST(req: NextRequest) {
         // NOTE: AI generation already succeeded, so we still return the response
         // but log the error for manual reconciliation
       }
+    } else if (!n8nRes.ok) {
+      console.warn(`[API_GENERATE:${correlationId}] N8N failed, skipping token deduction`);
+    } else {
+      console.log(`[API_GENERATE:${correlationId}] Free tool (${toolPrice} tokens), skipping deduction`);
     }
 
     // Return response with same status and content-type as N8N

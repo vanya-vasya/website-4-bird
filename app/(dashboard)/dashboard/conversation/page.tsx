@@ -346,19 +346,13 @@ const ConversationPage = () => {
         
         setMessages((current) => [...current, assistantMessage]);
         
-        // Deduct credits using context (optimistic update) - skip for free tools
-        if (toolPrice > 0) {
-          deductCredits(toolPrice);
-        }
-        
         // Show success feedback
         toast.success(successMessage);
         
-        // Refresh credits from server after successful generation
-        setTimeout(async () => {
-          await refreshCredits();
-          router.refresh(); // Also refresh server components
-        }, 500); // Small delay to ensure backend has processed
+        // Refresh credits from server (backend has already deducted tokens)
+        // No optimistic update needed - trust the backend
+        await refreshCredits();
+        router.refresh(); // Also refresh server components
         
       } else if (webhookResponse.error) {
         // Handle webhook errors
