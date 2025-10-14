@@ -41,6 +41,16 @@ export async function POST(request: NextRequest) {
     console.log(JSON.stringify(body, null, 2));
     console.log('═'.repeat(60));
 
+    // Structured logging for environment tracking
+    console.log('🔍 [WEBHOOK-ENV]', JSON.stringify({
+      environment: process.env.NODE_ENV || 'development',
+      testMode: process.env.NETWORX_TEST_MODE || 'not set',
+      databaseType: process.env.DATABASE_URL?.includes('neon.tech') ? 'Neon Production' : 
+                    process.env.DATABASE_URL?.includes('localhost') ? 'Local PostgreSQL' :
+                    process.env.DATABASE_URL?.startsWith('file:') ? 'SQLite' : 'Unknown',
+      timestamp: new Date().toISOString(),
+    }, null, 2));
+
     const secretKey = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
     if (!secretKey) {
       console.error('❌ NETWORX_SECRET_KEY not configured');
@@ -81,6 +91,19 @@ export async function POST(request: NextRequest) {
     console.log(`  Tracking ID: ${tracking_id}`);
     console.log(`  Amount: ${amount} ${currency}`);
     console.log(`  Email: ${email}`);
+
+    // Structured logging for webhook data tracking
+    console.log('🔍 [WEBHOOK-DATA]', JSON.stringify({
+      tracking_id: tracking_id,
+      amount: amount,
+      currency: currency,
+      status: status,
+      description: order?.description,
+      testFlag: checkout?.test, // Networks may include test flag
+      email: email,
+      transactionType: transaction?.type,
+      timestamp: new Date().toISOString(),
+    }, null, 2));
 
     // Process payment status
     switch (status) {
@@ -170,6 +193,18 @@ export async function POST(request: NextRequest) {
             data: transactionData,
           });
           console.log(`   ✅ Transaction saved to database: ${savedTransaction.id}`);
+
+          // Structured logging for database write confirmation
+          console.log('🔍 [WEBHOOK-DB-WRITE]', JSON.stringify({
+            transactionId: savedTransaction.id,
+            userId: userId,
+            amount: amount,
+            currency: currency,
+            tokens: tokens,
+            status: status,
+            databaseType: process.env.DATABASE_URL?.includes('neon.tech') ? 'Neon Production' : 'Other',
+            timestamp: new Date().toISOString(),
+          }, null, 2));
 
           // Generate and send receipt email
           try {
