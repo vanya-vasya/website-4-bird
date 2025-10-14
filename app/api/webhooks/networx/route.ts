@@ -60,30 +60,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extract checkout data from HPP webhook structure
-    const checkout = body.checkout;
-    if (!checkout) {
-      console.error('❌ Invalid webhook structure: missing checkout object');
+    // Networks sends webhooks in two possible formats:
+    // Format 1 (Direct API): { "transaction": {...} }
+    // Format 2 (HPP): { "checkout": {...} }
+    
+    let tracking_id, amount, currency, email, status, transaction, token, description;
+    
+    if (body.transaction) {
+      // Format 1: Direct transaction webhook
+      console.log('📋 Webhook Format: Direct Transaction API');
+      transaction = body.transaction;
+      tracking_id = transaction.tracking_id;
+      amount = transaction.amount;
+      currency = transaction.currency;
+      email = transaction.customer?.email;
+      status = transaction.status; // "successful" not "completed"
+      description = transaction.description;
+      token = transaction.uid || transaction.id;
+    } else if (body.checkout) {
+      // Format 2: Hosted Payment Page (HPP) webhook
+      console.log('📋 Webhook Format: Hosted Payment Page (HPP)');
+      const checkout = body.checkout;
+      token = checkout.token;
+      status = checkout.status;
+      tracking_id = checkout.order?.tracking_id;
+      amount = checkout.order?.amount;
+      currency = checkout.order?.currency;
+      email = checkout.customer?.email;
+      description = checkout.order?.description;
+      transaction = checkout.transaction;
+    } else {
+      console.error('❌ Invalid webhook structure: missing transaction or checkout object');
       return NextResponse.json(
         { error: 'Invalid webhook structure' },
         { status: 400 }
       );
     }
-
-    // HPP webhooks may not include signature verification
-    // Instead, verify by checking the token against our database
-    const { 
-      token,
-      status, 
-      order,
-      customer,
-      transaction
-    } = checkout;
-
-    const tracking_id = order?.tracking_id;
-    const amount = order?.amount;
-    const currency = order?.currency;
-    const email = customer?.email;
     
     console.log(`📋 Payment Details:`);
     console.log(`  Token: ${token}`);
@@ -98,8 +110,8 @@ export async function POST(request: NextRequest) {
       amount: amount,
       currency: currency,
       status: status,
-      description: order?.description,
-      testFlag: checkout?.test, // Networks may include test flag
+      description: description,
+      testFlag: body.transaction?.test || body.checkout?.test,
       email: email,
       transactionType: transaction?.type,
       timestamp: new Date().toISOString(),
@@ -109,12 +121,26 @@ export async function POST(request: NextRequest) {
     switch (status) {
       case 'completed':
       case 'success':
+      case 'successful': // Networks uses "successful" not "completed"
         console.log(`✅ Payment SUCCESSFUL for order ${tracking_id}`);
         console.log(`   Amount: ${amount} cents = ${(amount / 100).toFixed(2)} ${currency}`);
         
         // Save transaction to database
         try {
-          const userId = tracking_id; // tracking_id IS the userId (clerkId)
+          // Extract userId (clerkId) from tracking_id
+          // tracking_id format: "gen_user_344EICxxMgU6nNDHbBdUskRUPOG_1760465466306"
+          // clerkId format: "user_344EICxxMgU6nNDHbBdUskRUPOG"
+          let userId = tracking_id;
+          
+          // If tracking_id starts with "gen_user_", extract the clerkId
+          if (tracking_id.startsWith('gen_user_')) {
+            // Remove "gen_" prefix and timestamp suffix
+            const parts = tracking_id.replace('gen_', '').split('_');
+            // Remove last part (timestamp) and rejoin
+            parts.pop();
+            userId = parts.join('_');
+            console.log(`   🔄 Converted tracking_id to userId: ${tracking_id} → ${userId}`);
+          }
           
           // Check for duplicate transaction (idempotency)
           const existingTransaction = await prismadb.transaction.findFirst({
@@ -149,12 +175,12 @@ export async function POST(request: NextRequest) {
             );
           }
 
-          // Extract token count from description (e.g., "Payment for 100 Tokens (100 Tokens)")
-          const description = order?.description || '';
-          const match = description.match(/\((\d+)\s+Tokens\)/i);
+          // Extract token count from description (e.g., "Payment for 100 Tokens (100 Tokens)" or "Yum-mi Tokens Purchase (20 Tokens)")
+          const desc = description || '';
+          const match = desc.match(/\((\d+)\s+Tokens\)/i);
           
           if (!match) {
-            console.error(`❌ Cannot extract token count from description: ${description}`);
+            console.error(`❌ Cannot extract token count from description: ${desc}`);
             return NextResponse.json(
               { error: 'Invalid description format' },
               { status: 400 }
@@ -181,12 +207,12 @@ export async function POST(request: NextRequest) {
             status: status,
             amount: amount,
             currency: currency,
-            description: description,
+            description: desc,
             type: transaction?.type || 'payment',
             payment_method_type: transaction?.payment_method_type || 'credit_card',
             message: transaction?.message || 'Payment successful',
             paid_at: transaction?.paid_at ? new Date(transaction.paid_at) : new Date(),
-            receipt_url: transaction?.receipt_url || null,
+            receipt_url: transaction?.receipt_url || body.transaction?.receipt_url || null,
           };
 
           const savedTransaction = await prismadb.transaction.create({
