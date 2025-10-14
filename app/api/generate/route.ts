@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import prismadb from '@/lib/prismadb';
 
-// Tool pricing configuration (must match frontend)
-const TOOL_PRICES: Record<string, number> = {
+// Tool pricing configuration in GBP pence (100 pence = £1.00)
+// Conversion: 1 token = £0.20, so 5 tokens = £1, 10 tokens = £2, 15 tokens = £3
+const TOOL_PRICES_GBP: Record<string, number> = {
+  'master-chef': 200,        // £2.00 in pence
+  'master-nutritionist': 300, // £3.00 in pence
+  'cal-tracker': 100,        // £1.00 in pence
+};
+
+// Legacy token prices for credit balance checks (kept for backward compatibility)
+const TOOL_PRICES_TOKENS: Record<string, number> = {
   'master-chef': 10,
   'master-nutritionist': 15,
   'cal-tracker': 5,
@@ -75,18 +83,21 @@ export async function POST(req: NextRequest) {
   }
 
   // Extract tool information
-  const toolPrice = TOOL_PRICES[toolId] || 0;
+  const toolPriceTokens = TOOL_PRICES_TOKENS[toolId] || 0; // For credit balance checks
+  const toolPriceGBP = TOOL_PRICES_GBP[toolId] || 0;      // For transaction records
   const toolName = TOOL_NAMES[toolId] || 'Unknown Tool';
   
   console.log(`[API_GENERATE:${correlationId}] Tool info:`, {
     toolId,
-    toolPrice,
+    toolPriceTokens,
+    toolPriceGBP: `£${(toolPriceGBP / 100).toFixed(2)}`,
     toolName,
     hasFile: !!file,
   });
 
   // 3. CHECK CREDIT BALANCE (BEFORE AI GENERATION)
-  if (toolPrice > 0) {
+  // Note: Credit balance is still tracked in tokens for backward compatibility
+  if (toolPriceTokens > 0) {
     try {
       console.log(`[API_GENERATE:${correlationId}] Checking credit balance`);
       const user = await prismadb.user.findUnique({
@@ -104,24 +115,24 @@ export async function POST(req: NextRequest) {
 
       const remainingCredits = user.availableGenerations - user.usedGenerations;
 
-      if (remainingCredits < toolPrice) {
+      if (remainingCredits < toolPriceTokens) {
         console.warn(`[API_GENERATE:${correlationId}] Insufficient credits:`, {
           userId,
-          required: toolPrice,
+          required: toolPriceTokens,
           available: remainingCredits,
         });
         return NextResponse.json({ 
           error: 'Insufficient credits',
-          required: toolPrice,
+          required: toolPriceTokens,
           available: remainingCredits,
         }, { status: 403 });
       }
 
       console.log(`[API_GENERATE:${correlationId}] Credit check passed:`, {
         userId,
-        required: toolPrice,
+        required: toolPriceTokens,
         available: remainingCredits,
-        remaining: remainingCredits - toolPrice,
+        remaining: remainingCredits - toolPriceTokens,
       });
     } catch (error) {
       console.error(`[API_GENERATE:${correlationId}] Database error during credit check:`, error);
@@ -186,16 +197,16 @@ export async function POST(req: NextRequest) {
       responseSize: text.length,
     });
 
-    // 5. DEDUCT TOKENS ONLY IF N8N CALL WAS SUCCESSFUL
-    if (n8nRes.ok && toolPrice > 0) {
-      console.log(`[API_GENERATE:${correlationId}] N8N successful, deducting ${toolPrice} tokens`);
+    // 5. DEDUCT CREDITS ONLY IF N8N CALL WAS SUCCESSFUL
+    if (n8nRes.ok && toolPriceTokens > 0) {
+      console.log(`[API_GENERATE:${correlationId}] N8N successful, deducting ${toolPriceTokens} tokens (£${(toolPriceGBP / 100).toFixed(2)})`);
       try {
         await prismadb.$transaction(async (tx) => {
-          // Increment usedGenerations
+          // Increment usedGenerations (still tracked in tokens for backward compatibility)
           const updatedUser = await tx.user.update({
             where: { clerkId: userId },
             data: { 
-              usedGenerations: { increment: toolPrice },
+              usedGenerations: { increment: toolPriceTokens },
             },
             select: {
               usedGenerations: true,
@@ -203,28 +214,29 @@ export async function POST(req: NextRequest) {
             },
           });
 
-          // Create transaction record for audit trail
+          // Create transaction record in GBP for audit trail
           const trackingId = `usage_${toolId}_${Date.now()}`;
           await tx.transaction.create({
             data: {
               tracking_id: trackingId,
               userId: userId,
               status: 'completed',
-              amount: -toolPrice, // Negative for deduction
-              currency: 'tokens',
+              amount: -toolPriceGBP, // Negative GBP amount in pence for deduction
+              currency: 'GBP',
               description: `${toolName} - AI Generation`,
               type: 'deduction',
               payment_method_type: null,
-              message: `${toolPrice} tokens deducted for ${toolName}`,
+              message: `£${(toolPriceGBP / 100).toFixed(2)} deducted for ${toolName}`,
               paid_at: new Date(),
               receipt_url: null,
             },
           });
 
-          console.log(`[API_GENERATE:${correlationId}] ✅ Tokens deducted successfully:`, {
+          console.log(`[API_GENERATE:${correlationId}] ✅ Credits deducted successfully:`, {
             userId,
             toolId,
-            toolPrice,
+            toolPriceTokens,
+            toolPriceGBP: `£${(toolPriceGBP / 100).toFixed(2)}`,
             trackingId,
             usedGenerations: updatedUser.usedGenerations,
             availableGenerations: updatedUser.availableGenerations,
@@ -233,19 +245,20 @@ export async function POST(req: NextRequest) {
           });
         });
       } catch (dbError) {
-        console.error(`[API_GENERATE:${correlationId}] ⚠️ Failed to deduct tokens (AI generation succeeded but DB write failed):`, {
+        console.error(`[API_GENERATE:${correlationId}] ⚠️ Failed to deduct credits (AI generation succeeded but DB write failed):`, {
           userId,
           toolId,
-          toolPrice,
+          toolPriceTokens,
+          toolPriceGBP,
           error: dbError,
         });
         // NOTE: AI generation already succeeded, so we still return the response
         // but log the error for manual reconciliation
       }
     } else if (!n8nRes.ok) {
-      console.warn(`[API_GENERATE:${correlationId}] N8N failed, skipping token deduction`);
+      console.warn(`[API_GENERATE:${correlationId}] N8N failed, skipping credit deduction`);
     } else {
-      console.log(`[API_GENERATE:${correlationId}] Free tool (${toolPrice} tokens), skipping deduction`);
+      console.log(`[API_GENERATE:${correlationId}] Free tool (${toolPriceTokens} tokens), skipping deduction`);
     }
 
     // Return response with same status and content-type as N8N

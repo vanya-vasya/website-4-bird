@@ -137,8 +137,15 @@ const PaymentHistoryPage = async () => {
                                         color: '#0f172a'
                                       }}
                                     >
-                                      {(transaction.amount ?? 0.0) / 100}{" "}
-                                      {transaction.currency}
+                                      {(() => {
+                                        const amount = transaction.amount ?? 0;
+                                        const currency = transaction.currency?.toUpperCase() || 'GBP';
+                                        const absAmount = Math.abs(amount) / 100;
+                                        const sign = amount < 0 ? '-' : '';
+                                        
+                                        // Always display in GBP format with £ symbol
+                                        return `${sign}£${absAmount.toFixed(2)}`;
+                                      })()}
                                     </td>
                                     <td 
                                       className="whitespace-nowrap px-3 py-4"
