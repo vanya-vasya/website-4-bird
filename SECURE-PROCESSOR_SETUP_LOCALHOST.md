@@ -8,7 +8,7 @@ Complete setup guide for integrating Secure-Processor Pay payment system with yo
 Your project already includes:
 - ✅ Payment API routes (`/api/payment/secure-processor`)
 - ✅ Webhook handler (`/api/webhooks/secure-processor`) 
-- ✅ Payment widget component (`NetworkPaymentWidget`)
+- ✅ Payment widget component (`SecureProcessorPaymentWidget`)
 - ✅ Success/Cancel result pages
 - ✅ HMAC SHA256 signature security
 - ✅ Test page for payment integration
@@ -162,14 +162,14 @@ curl http://localhost:3000/api/webhooks/secure-processor
 
 ## ⚡ Component Usage
 
-### NetworkPaymentWidget Component
+### SecureProcessorPaymentWidget Component
 
 ```jsx
-import { NetworkPaymentWidget } from '@/components/secure-processor-payment-widget';
+import { SecureProcessorPaymentWidget } from '@/components/secure-processor-payment-widget';
 
 function MyPaymentPage() {
   return (
-    <NetworkPaymentWidget
+    <SecureProcessorPaymentWidget
       amount={25.00}
       currency="USD"
       orderId="order_12345"

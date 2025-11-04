@@ -2,7 +2,7 @@
 /**
  * DIAGNOSTIC SCRIPT: Missing Test Transaction Records Investigation
  * 
- * This script investigates why test payments from Networks are not appearing
+ * This script investigates why test payments from Secure-Processor are not appearing
  * in the Neon Console Database after successful webhook processing.
  * 
  * Investigation Areas:
@@ -10,7 +10,7 @@
  * 2. Database connectivity and schema validation
  * 3. Webhook delivery and processing logs
  * 4. Transaction records analysis
- * 5. Networks API configuration
+ * 5. Secure-Processor API configuration
  * 
  * Usage:
  *   DATABASE_URL="postgresql://..." node scripts/diagnose-test-transactions.js
@@ -138,13 +138,13 @@ async function runDiagnostics() {
     
     log.divider();
     
-    // Check Networks configuration
+    // Check Secure-Processor configuration
     const secureProcessorShopId = process.env.SECURE_PROCESSOR_SHOP_ID || '29959';
     const secureProcessorSecretKey = process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
     const secureProcessorApiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
     const secureProcessorTestMode = process.env.SECURE_PROCESSOR_TEST_MODE || 'false';
     
-    log.info('Networks Configuration:');
+    log.info('Secure-Processor Configuration:');
     log.data('Shop ID', secureProcessorShopId);
     log.data('Secret Key', secureProcessorSecretKey ? `${secureProcessorSecretKey.slice(0, 10)}...${secureProcessorSecretKey.slice(-10)}` : 'MISSING');
     log.data('API URL', secureProcessorApiUrl);
@@ -306,7 +306,7 @@ async function runDiagnostics() {
   
   log.divider();
   log.info('Webhook Processing Flow:');
-  console.log('    1. Networks sends POST request to webhook URL');
+    console.log('    1. Secure-Processor sends POST request to webhook URL');
   console.log('    2. Webhook handler extracts checkout data from body.checkout');
   console.log('    3. Handler validates status (completed/success)');
   console.log('    4. Handler checks for duplicate transactions (idempotency)');
@@ -315,11 +315,11 @@ async function runDiagnostics() {
   console.log('    7. Handler updates user token balance');
   console.log('    8. Handler saves transaction to database');
   console.log('    9. Handler sends receipt email');
-  console.log('    10. Handler returns 200 OK to Networks');
+    console.log('    10. Handler returns 200 OK to Secure-Processor');
   
   log.divider();
   log.warning('Critical Points of Failure:');
-  console.log('    • If Networks sends webhooks to wrong URL → No webhook received');
+    console.log('    • If Secure-Processor sends webhooks to wrong URL → No webhook received');
   console.log('    • If status is not "completed" or "success" → No DB write');
   console.log('    • If user not found in database → Returns 404, no DB write');
   console.log('    • If description format wrong → Returns 400, no DB write');
@@ -347,7 +347,7 @@ async function runDiagnostics() {
   if (testMode) {
     log.info('In TEST MODE:');
     console.log('    • Uses test API keys (if different from production)');
-    console.log('    • Networks checkout uses test payment methods');
+    console.log('    • Secure-Processor checkout uses test payment methods');
     console.log('    • Test cards: 4200 0000 0000 0000 (success)');
     console.log('    • Webhooks still sent to SAME webhook URL');
     console.log('    • Transactions written to SAME database');
@@ -355,7 +355,7 @@ async function runDiagnostics() {
   } else {
     log.info('In PRODUCTION MODE:');
     console.log('    • Uses production API keys');
-    console.log('    • Networks checkout uses real payment methods');
+    console.log('    • Secure-Processor checkout uses real payment methods');
     console.log('    • Webhooks sent to production webhook URL');
     console.log('    • Transactions written to production database');
     console.log('    • checkout.test flag in request is set to false');
@@ -374,9 +374,9 @@ async function runDiagnostics() {
   
   const possibleCauses = [
     {
-      cause: 'Webhook not being delivered by Networks',
-      check: 'Check Networks dashboard for webhook delivery logs',
-      fix: 'Verify webhook URL in Networks dashboard matches: https://www.yum-mi.com/api/webhooks/secure-processor',
+      cause: 'Webhook not being delivered by Secure-Processor',
+      check: 'Check Secure-Processor dashboard for webhook delivery logs',
+      fix: 'Verify webhook URL in Secure-Processor dashboard matches: https://www.yum-mi.com/api/webhooks/secure-processor',
     },
     {
       cause: 'Webhook URL is incorrect or inaccessible',
@@ -396,7 +396,7 @@ async function runDiagnostics() {
     {
       cause: 'Webhook received but status is not "completed" or "success"',
       check: 'Check Vercel logs for webhook body to see actual status',
-      fix: 'Verify Networks sends status as "completed" or "success" (not "pending", "processing", etc.)',
+      fix: 'Verify Secure-Processor sends status as "completed" or "success" (not "pending", "processing", etc.)',
     },
     {
       cause: 'Looking at wrong database in Neon Console',
@@ -444,7 +444,7 @@ console.log('🔍 [WEBHOOK-DATA]', {
   currency: currency,
   status: status,
   description: order?.description,
-  testFlag: checkout?.test, // If Networks includes test flag
+  testFlag: checkout?.test, // If Secure-Processor includes test flag
 });
 
 ${colors.cyan}At line 172 (after database write):${colors.reset}
@@ -490,8 +490,8 @@ console.log('🔍 [WEBHOOK-DB-WRITE]', {
     • Or SQL:
       ${colors.dim}SELECT * FROM "Transaction" ORDER BY "paid_at" DESC LIMIT 5;${colors.reset}
   
-  ${colors.yellow}Step 6: Check Networks dashboard${colors.reset}
-    • Login to Networks merchant dashboard
+  ${colors.yellow}Step 6: Check Secure-Processor dashboard${colors.reset}
+    • Login to Secure-Processor merchant dashboard
     • Navigate to Webhooks section
     • Verify webhook URL: https://www.yum-mi.com/api/webhooks/secure-processor
     • Check webhook delivery logs
@@ -545,8 +545,8 @@ console.log('🔍 [WEBHOOK-DB-WRITE]', {
   log.header();
   
   console.log(`
-  ${colors.bright}${colors.red}1. Networks webhook not being delivered${colors.reset}
-     ${colors.dim}• Check Networks dashboard for webhook delivery logs
+  ${colors.bright}${colors.red}1. Secure-Processor webhook not being delivered${colors.reset}
+     ${colors.dim}• Check Secure-Processor dashboard for webhook delivery logs
      • Verify webhook URL matches: https://www.yum-mi.com/api/webhooks/secure-processor
      • Test webhook endpoint accessibility
      ${colors.reset}
@@ -584,13 +584,13 @@ console.log('🔍 [WEBHOOK-DB-WRITE]', {
   2️⃣  Deploy logging changes: ${colors.cyan}git push${colors.reset} or ${colors.cyan}vercel --prod${colors.reset}
   3️⃣  Monitor logs: ${colors.cyan}vercel logs --follow${colors.reset}
   4️⃣  Trigger test payment and capture logs
-  5️⃣  Check Networks dashboard webhook delivery logs
+  5️⃣  Check Secure-Processor dashboard webhook delivery logs
   6️⃣  Verify DATABASE_URL matches Neon Console view
   
   ${colors.bright}If issue persists:${colors.reset}
   
   • Share Vercel webhook logs (full webhook payload)
-  • Share Networks webhook delivery logs
+  • Share Secure-Processor webhook delivery logs
   • Confirm DATABASE_URL matches Neon project/branch
   • Run this script against production DB to verify connectivity
   `.trim());

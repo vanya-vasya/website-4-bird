@@ -1,6 +1,6 @@
-# NetworkPay Environment Variables Setup
+# Secure-Processor Environment Variables Setup
 
-This file contains the environment variables configuration for the NetworkPay payment gateway integration.
+This file contains the environment variables configuration for the Secure-Processor payment gateway integration.
 
 ## Required Environment Variables
 
@@ -42,7 +42,7 @@ The code has been updated to include fallback values for all environment variabl
 
 ## Changes Made
 
-1. ✅ Updated payment API to use real NetworkPay endpoints
+1. ✅ Updated payment API to use real Secure-Processor endpoints
 2. ✅ Removed mock responses and demo mode indicators
 3. ✅ Configured proper return URLs for the deployed website
 4. ✅ Updated webhook handler with new credentials
@@ -59,4 +59,4 @@ https://yum-mi.com/payment/test
 - The system is now configured for production mode with real payments
 - All URLs are set to use your deployed Vercel domain
 - The webhook endpoint is configured to receive payment notifications
-- The payment widget will open NetworkPay's checkout page for processing payments
+- The payment widget will open Secure-Processor's checkout page for processing payments

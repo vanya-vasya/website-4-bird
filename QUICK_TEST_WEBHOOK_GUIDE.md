@@ -28,10 +28,10 @@ npx prisma studio
 
 ## 🎯 Most Likely Issues (80% of cases)
 
-### Issue #1: Networks Not Sending Webhooks
-**Check:** Login to Networks dashboard → Webhooks section  
+### Issue #1: Secure-Processor Not Sending Webhooks
+**Check:** Login to Secure-Processor dashboard → Webhooks section  
 **Verify:** URL is `https://www.yum-mi.com/api/webhooks/secure-processor`  
-**Fix:** Update webhook URL in Networks dashboard  
+**Fix:** Update webhook URL in Secure-Processor dashboard  
 
 ### Issue #2: User Doesn't Exist in Database
 **Check:** Sign in BEFORE making payment  
@@ -50,7 +50,7 @@ npx prisma studio
 - [ ] Webhook endpoint is accessible (curl test passes)
 - [ ] User is signed in and exists in database
 - [ ] Monitoring Vercel logs (`vercel logs --follow`)
-- [ ] Networks dashboard shows webhook URL is configured
+- [ ] Secure-Processor dashboard shows webhook URL is configured
 - [ ] Test payment triggered with test card: 4200 0000 0000 0000
 - [ ] Webhook received (see log: "📥 Secure-Processor HPP Webhook Received")
 - [ ] [WEBHOOK-ENV] logged (shows environment and test mode)
@@ -108,8 +108,8 @@ cat .env.local | grep DATABASE_URL
 # Go to Neon Console and find matching project
 ```
 
-### Fix 3: Networks Webhook Not Configured
-1. Networks Dashboard → API Settings or Webhooks
+### Fix 3: Secure-Processor Webhook Not Configured
+1. Secure-Processor Dashboard → API Settings or Webhooks
 2. Set webhook URL: `https://www.yum-mi.com/api/webhooks/secure-processor`
 3. Enable webhooks for test transactions
 4. Save and test
@@ -156,9 +156,9 @@ If issue persists after checklist:
 
 1. **Run diagnostic:** `node scripts/diagnose-test-transactions.js`
 2. **Collect logs:** `vercel logs > logs.txt`
-3. **Check Networks dashboard** for webhook delivery logs
+3. **Check Secure-Processor dashboard** for webhook delivery logs
 4. **Verify DATABASE_URL** matches Neon Console
-5. **Share evidence:** logs.txt + Networks screenshots + DATABASE_URL (masked)
+5. **Share evidence:** logs.txt + Secure-Processor screenshots + DATABASE_URL (masked)
 
 ---
 
@@ -167,9 +167,9 @@ If issue persists after checklist:
 ```
 User Completes Payment
          ↓
-Networks Processes Payment
-         ↓
-Networks Sends Webhook to: https://www.yum-mi.com/api/webhooks/secure-processor
+Secure-Processor Processes Payment
+↓
+Secure-Processor Sends Webhook to: https://www.yum-mi.com/api/webhooks/secure-processor
          ↓
 Webhook Handler Receives POST Request
          ↓
@@ -185,7 +185,7 @@ Saves Transaction to Database ← **This is where it should appear**
          ↓
 Sends Receipt Email
          ↓
-Returns 200 OK to Networks
+Returns 200 OK to Secure-Processor
 ```
 
 **If transaction missing:** One of the steps above failed. Check logs for which step.

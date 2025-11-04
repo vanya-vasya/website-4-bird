@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test Webhook Delivery Script
 # 
-# This script tests the Networks webhook endpoint with a mock payload
+# This script tests the Secure-Processor webhook endpoint with a mock payload
 # to verify the webhook handler is working correctly.
 #
 # Usage:
@@ -28,7 +28,7 @@ WEBHOOK_URL="https://www.yum-mi.com/api/webhooks/secure-processor"
 
 echo ""
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${CYAN}  Networks Webhook Delivery Test${NC}"
+echo -e "${CYAN}  Secure-Processor Webhook Delivery Test${NC}"
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
 echo ""
 

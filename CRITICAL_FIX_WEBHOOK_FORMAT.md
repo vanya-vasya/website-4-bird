@@ -10,7 +10,7 @@
 
 ### The Problem
 
-**Networks sends webhooks in a DIFFERENT format than the webhook handler expected!**
+**Secure-Processor sends webhooks in a DIFFERENT format than the webhook handler expected!**
 
 #### What the Handler Expected:
 ```json
@@ -25,7 +25,7 @@
 }
 ```
 
-#### What Networks Actually Sends:
+#### What Secure-Processor Actually Sends:
 ```json
 {
   "transaction": {
@@ -69,7 +69,7 @@ if (!checkout) {
 **After:**
 ```typescript
 if (body.transaction) {
-  // Format 1: Direct transaction webhook (what Networks actually sends)
+  // Format 1: Direct transaction webhook (what Secure-Processor actually sends)
   transaction = body.transaction;
   tracking_id = transaction.tracking_id;
   amount = transaction.amount;
@@ -83,7 +83,7 @@ if (body.transaction) {
 
 ### 2. Add "successful" Status
 
-Networks uses **"successful"** not "completed":
+Secure-Processor uses **"successful"** not "completed":
 
 ```typescript
 switch (status) {
@@ -96,7 +96,7 @@ switch (status) {
 ### 3. Extract clerkId from tracking_id
 
 **Problem:** 
-- Networks tracking_id: `"gen_user_344EICxxMgU6nNDHbBdUskRUPOG_1760465466306"`
+- Secure-Processor tracking_id: `"gen_user_344EICxxMgU6nNDHbBdUskRUPOG_1760465466306"`
 - Database clerkId: `"user_344EICxxMgU6nNDHbBdUskRUPOG"`
 
 **Solution:**
@@ -142,7 +142,7 @@ if (tracking_id.startsWith('gen_user_')) {
 
 ## 🧪 Test Results
 
-### Real Networks Webhook (from logs)
+### Real Secure-Processor Webhook (from logs)
 ```json
 {
   "transaction": {
@@ -245,7 +245,7 @@ After deployment completes, test payment should:
 
 ### What We Learned
 
-1. **Networks uses Direct Transaction API format**, not Hosted Payment Page format
+1. **Secure-Processor uses Direct Transaction API format**, not Hosted Payment Page format
 2. **Status is "successful"**, not "completed" 
 3. **tracking_id has prefix and suffix** that need to be stripped
 4. **Structured logging was essential** for discovering the issue

@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Networks sends webhooks in two possible formats:
+    // Secure-Processor sends webhooks in two possible formats:
     // Format 1 (Direct API): { "transaction": {...} }
     // Format 2 (HPP): { "checkout": {...} }
     
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     switch (status) {
       case 'completed':
       case 'success':
-      case 'successful': // Networks uses "successful" not "completed"
+      case 'successful': // Secure-Processor uses "successful" not "completed"
         console.log(`✅ Payment SUCCESSFUL for order ${tracking_id}`);
         console.log(`   Amount: ${amount} cents = ${(amount / 100).toFixed(2)} ${currency}`);
         

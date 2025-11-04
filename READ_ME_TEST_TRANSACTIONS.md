@@ -1,6 +1,6 @@
 # 🔍 Test Transactions Investigation - Quick Start
 
-**Issue:** Test transaction records missing from Neon Database after successful Networks payment  
+**Issue:** Test transaction records missing from Neon Database after successful Secure-Processor payment  
 **Status:** ✅ Investigation complete, tools ready, waiting for test
 
 ---
@@ -64,8 +64,8 @@ DATABASE_URL="postgresql://..." node scripts/diagnose-test-transactions.js
 
 ## 🎯 Most Common Issues
 
-### 1. Networks Not Sending Webhooks (60%)
-**Fix:** Configure webhook URL in Networks dashboard  
+### 1. Secure-Processor Not Sending Webhooks (60%)
+**Fix:** Configure webhook URL in Secure-Processor dashboard  
 **URL:** `https://www.yum-mi.com/api/webhooks/secure-processor`
 
 ### 2. User Not Found in Database (30%)
@@ -103,7 +103,7 @@ Three new log entries in webhook handler:
 **Before Testing:**
 - [ ] Changes deployed to Vercel
 - [ ] User signed in and in database
-- [ ] Networks webhook URL configured
+- [ ] Secure-Processor webhook URL configured
 - [ ] Log monitoring active
 
 **During Testing:**
@@ -149,9 +149,9 @@ vercel env pull .env.local
 ## 📞 Need Help?
 
 **If webhook not received:**
-- Check Networks dashboard webhook configuration
+- Check Secure-Processor dashboard webhook configuration
 - Verify URL: `https://www.yum-mi.com/api/webhooks/secure-processor`
-- Check Networks webhook delivery logs
+- Check Secure-Processor webhook delivery logs
 
 **If user not found (404):**
 - Sign in to app first

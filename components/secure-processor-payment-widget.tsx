@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Loader } from '@/components/loader';
 import { toast } from 'react-hot-toast';
 
-interface NetworkPaymentWidgetProps {
+interface SecureProcessorPaymentWidgetProps {
   amount: number;
   currency?: string;
   orderId: string;
@@ -30,7 +30,7 @@ interface PaymentResponse {
   message?: string;
 }
 
-export const NetworkPaymentWidget: React.FC<NetworkPaymentWidgetProps> = ({
+export const SecureProcessorPaymentWidget: React.FC<SecureProcessorPaymentWidgetProps> = ({
   amount,
   currency = 'USD',
   orderId,

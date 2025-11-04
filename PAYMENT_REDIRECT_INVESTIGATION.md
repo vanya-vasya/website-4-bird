@@ -199,28 +199,28 @@ If Secure-Processor is configured to redirect directly to `/dashboard` instead o
 sequenceDiagram
     participant User
     participant Frontend
-    participant NetworkxAPI
-    participant NetworkxHPP
+    participant SecureProcessorAPI
+    participant SecureProcessorHPP
     participant Webhook
     participant Database
     participant PaymentHistory
 
     User->>Frontend: Click "Pay"
-    Frontend->>NetworkxAPI: POST /api/payment/secure-processor
-    NetworkxAPI-->>Frontend: {redirect_url}
+    Frontend->>SecureProcessorAPI: POST /api/payment/secure-processor
+    SecureProcessorAPI-->>Frontend: {redirect_url}
     Frontend->>User: Redirect to Secure-Processor HPP
-    User->>NetworkxHPP: Enter card details
-    NetworkxHPP->>NetworkxHPP: Process payment
+    User->>SecureProcessorHPP: Enter card details
+    SecureProcessorHPP->>SecureProcessorHPP: Process payment
     
-    Note over NetworkxHPP,Webhook: ⚠️ RACE CONDITION ZONE ⚠️
+    Note over SecureProcessorHPP,Webhook: ⚠️ RACE CONDITION ZONE ⚠️
     
     par Webhook and Redirect (ASYNC)
-        NetworkxHPP->>Webhook: POST /api/webhooks/secure-processor
+        SecureProcessorHPP->>Webhook: POST /api/webhooks/secure-processor
         Webhook->>Database: Write transaction
         Webhook->>Database: Update user balance
-        Webhook-->>NetworkxHPP: 200 OK
+        Webhook-->>SecureProcessorHPP: 200 OK
     and User Redirect
-        NetworkxHPP->>User: Redirect to ???
+        SecureProcessorHPP->>User: Redirect to ???
         User->>PaymentHistory: Navigate to history
         PaymentHistory->>Database: Fetch transactions
         Database-->>PaymentHistory: Empty or incomplete?
