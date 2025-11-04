@@ -12,7 +12,7 @@
 const https = require('https');
 
 // Configuration
-const API_URL = 'https://checkout.networxpay.com/ctp/api/checkouts';
+const API_URL = 'https://checkout.secure-processor.com/ctp/api/checkouts';
 const SHOP_ID = process.env.SECURE_PROCESSOR_SHOP_ID || '29959';
 const SECRET_KEY = process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
 const TEST_MODE = true;

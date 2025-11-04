@@ -27,12 +27,12 @@ const requiredVars = [
   {
     name: 'SECURE_PROCESSOR_API_URL',
     description: 'Secure-ProcessorPay API base URL',
-    example: 'https://checkout.networxpay.com',
-    validator: (val) => val === 'https://checkout.networxpay.com',
-    errorMessage: 'API URL must be https://checkout.networxpay.com',
+    example: 'https://checkout.secure-processor.com',
+    validator: (val) => val === 'https://checkout.secure-processor.com',
+    errorMessage: 'API URL must be https://checkout.secure-processor.com',
     warning: (val) => {
-      if (val === 'https://gateway.networxpay.com') {
-        return '⚠️  WARNING: You are using gateway.networxpay.com which may not work. Use checkout.networxpay.com instead.';
+      if (val === 'https://gateway.secure-processor.com') {
+        return '⚠️  WARNING: You are using gateway.secure-processor.com which may not work. Use checkout.secure-processor.com instead.';
       }
       return null;
     }
@@ -52,9 +52,9 @@ const optionalVars = [
   {
     name: 'NEXT_PUBLIC_SECURE_PROCESSOR_WIDGET_URL',
     description: 'Public-facing widget URL',
-    example: 'https://checkout.networxpay.com',
-    validator: (val) => !val || val === 'https://checkout.networxpay.com',
-    errorMessage: 'If set, must be https://checkout.networxpay.com'
+    example: 'https://checkout.secure-processor.com',
+    validator: (val) => !val || val === 'https://checkout.secure-processor.com',
+    errorMessage: 'If set, must be https://checkout.secure-processor.com'
   }
 ];
 
@@ -217,11 +217,11 @@ function validateEnvironment() {
   const apiUrl = process.env.SECURE_PROCESSOR_API_URL;
   const mistakes = [];
 
-  if (apiUrl === 'https://gateway.networxpay.com') {
+  if (apiUrl === 'https://gateway.secure-processor.com') {
     mistakes.push({
       issue: 'Wrong API URL',
       current: apiUrl,
-      correct: 'https://checkout.networxpay.com',
+      correct: 'https://checkout.secure-processor.com',
       severity: 'ERROR'
     });
   }
