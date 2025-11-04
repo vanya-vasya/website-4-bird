@@ -13,7 +13,7 @@ const https = require('https');
 const config = {
   shopId: process.env.SECURE_PROCESSOR_SHOP_ID || '29959',
   secretKey: process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950',
-  apiUrl: process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com',
+  apiUrl: process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.networxpay.com',
   returnUrl: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success',
   notificationUrl: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor',
   testMode: true
@@ -53,7 +53,7 @@ function makeRequest(requestData) {
     const postData = JSON.stringify(requestData);
 
     const options = {
-      hostname: 'checkout.secure-processorpay.com',
+      hostname: 'checkout.networxpay.com',
       port: 443,
       path: '/ctp/api/checkouts',
       method: 'POST',
@@ -173,8 +173,8 @@ async function runTestCase(testCase) {
       },
       {
         name: 'redirect_url is valid',
-        pass: response.body.checkout?.redirect_url?.startsWith('https://checkout.secure-processorpay.com'),
-        expected: 'starts with https://checkout.secure-processorpay.com',
+        pass: response.body.checkout?.redirect_url?.startsWith('https://checkout.networxpay.com'),
+        expected: 'starts with https://checkout.networxpay.com',
         actual: response.body.checkout?.redirect_url
       },
       {

@@ -141,7 +141,7 @@ async function runDiagnostics() {
     // Check Secure-Processor configuration
     const secureProcessorShopId = process.env.SECURE_PROCESSOR_SHOP_ID || '29959';
     const secureProcessorSecretKey = process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
-    const secureProcessorApiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
+    const secureProcessorApiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.networxpay.com';
     const secureProcessorTestMode = process.env.SECURE_PROCESSOR_TEST_MODE || 'false';
     
     log.info('Secure-Processor Configuration:');

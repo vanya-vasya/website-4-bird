@@ -43,9 +43,9 @@ export async function POST(request: NextRequest) {
     // Secure-Processor Pay API credentials and configuration
     const shopId = process.env.SECURE_PROCESSOR_SHOP_ID || '29959';
     const secretKey = process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
-    // Use checkout.secure-processorpay.com - verified working endpoint
+    // Use checkout.networxpay.com - verified working endpoint
     // Remove /ctp/api/checkouts if it's already in the env variable (avoid duplication)
-    let apiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
+    let apiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.networxpay.com';
     apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip trailing path if present
     // Force correct URLs (override old env variables)
     // Production URLs using custom domain yum-mi.com
@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
 
     const shopId = process.env.SECURE_PROCESSOR_SHOP_ID || '29959';
     const secretKey = process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
-    const apiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com'; // API URL
+    const apiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.networxpay.com'; // API URL
 
     // Send request to Secure-Processor HPP API for status check
     const secureProcessorResponse = await fetch(`${apiUrl}/ctp/api/checkouts/${token}`, {
