@@ -41,17 +41,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Secure-Processor Pay API credentials and configuration
-    const shopId = process.env.SECURE-PROCESSOR_SHOP_ID || '29959';
-    const secretKey = process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
+    const shopId = process.env.SECURE_PROCESSOR_SHOP_ID || '29959';
+    const secretKey = process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
     // Use checkout.secure-processorpay.com - verified working endpoint
     // Remove /ctp/api/checkouts if it's already in the env variable (avoid duplication)
-    let apiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
+    let apiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
     apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip trailing path if present
     // Force correct URLs (override old env variables)
     // Production URLs using custom domain yum-mi.com
     const returnUrl = 'https://www.yum-mi.com/dashboard';
     const notificationUrl = 'https://www.yum-mi.com/api/webhooks/secure-processor';
-    const testMode = process.env.SECURE-PROCESSOR_TEST_MODE === 'true'; // Use test mode based on env variable
+    const testMode = process.env.SECURE_PROCESSOR_TEST_MODE === 'true'; // Use test mode based on env variable
     
     console.log('Environment variables:', {
       shopId: shopId ? 'SET' : 'MISSING',
@@ -95,13 +95,13 @@ export async function POST(request: NextRequest) {
     // Make API call to Secure-Processor Pay
     // The 'test' parameter in requestData controls sandbox/production mode
     // Secure-ProcessorPay will return a real token, but the transaction will be test/production based on the 'test' flag
-    const secure-processorApiUrl = `${apiUrl}/ctp/api/checkouts`;
-    console.log('Making request to:', secure-processorApiUrl);
+    const secureProcessorApiUrl = `${apiUrl}/ctp/api/checkouts`;
+    console.log('Making request to:', secureProcessorApiUrl);
     console.log(`Mode: ${testMode ? '🧪 SANDBOX (test cards)' : '💳 PRODUCTION (real cards)'}`);
     console.log('Using Secure-Processor Pay API v2 with correct endpoint');
 
     try {
-      const secure-processorResponse = await fetch(secure-processorApiUrl, {
+      const secureProcessorResponse = await fetch(secureProcessorApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,39 +112,39 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(requestData),
       });
 
-      if (!secure-processorResponse.ok) {
-        const errorData = await secure-processorResponse.text();
+      if (!secureProcessorResponse.ok) {
+        const errorData = await secureProcessorResponse.text();
         console.error('Secure-Processor API Error Response:', errorData);
         return NextResponse.json(
           { 
             error: 'Failed to create payment token',
-            details: `API returned ${secure-processorResponse.status}: ${errorData}`
+            details: `API returned ${secureProcessorResponse.status}: ${errorData}`
           },
           { status: 400 }
         );
       }
 
-      const secure-processorResult = await secure-processorResponse.json();
-      console.log('Secure-Processor API Success Response:', JSON.stringify(secure-processorResult, null, 2));
+      const secureProcessorResult = await secureProcessorResponse.json();
+      console.log('Secure-Processor API Success Response:', JSON.stringify(secureProcessorResult, null, 2));
 
       // Check for successful response with token and redirect_url
-      if (secure-processorResult.checkout && secure-processorResult.checkout.token && secure-processorResult.checkout.redirect_url) {
+      if (secureProcessorResult.checkout && secureProcessorResult.checkout.token && secureProcessorResult.checkout.redirect_url) {
         console.log('✅ Payment checkout created successfully');
-        console.log('Token:', secure-processorResult.checkout.token);
-        console.log('Redirect URL:', secure-processorResult.checkout.redirect_url);
+        console.log('Token:', secureProcessorResult.checkout.token);
+        console.log('Redirect URL:', secureProcessorResult.checkout.redirect_url);
         
         return NextResponse.json({
           success: true,
-          token: secure-processorResult.checkout.token,
-          redirect_url: secure-processorResult.checkout.redirect_url, // Use redirect_url (not payment_url)
-          checkout_id: secure-processorResult.checkout.token,
+          token: secureProcessorResult.checkout.token,
+          redirect_url: secureProcessorResult.checkout.redirect_url, // Use redirect_url (not payment_url)
+          checkout_id: secureProcessorResult.checkout.token,
         });
       } else {
-        console.error('❌ Secure-Processor API returned unsuccessful response:', secure-processorResult);
+        console.error('❌ Secure-Processor API returned unsuccessful response:', secureProcessorResult);
         return NextResponse.json(
           { 
             error: 'Payment checkout creation failed',
-            details: secure-processorResult.error || secure-processorResult.message || 'Unknown error'
+            details: secureProcessorResult.error || secureProcessorResult.message || 'Unknown error'
           },
           { status: 400 }
         );
@@ -187,12 +187,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const shopId = process.env.SECURE-PROCESSOR_SHOP_ID || '29959';
-    const secretKey = process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
-    const apiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com'; // API URL
+    const shopId = process.env.SECURE_PROCESSOR_SHOP_ID || '29959';
+    const secretKey = process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
+    const apiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com'; // API URL
 
     // Send request to Secure-Processor HPP API for status check
-    const secure-processorResponse = await fetch(`${apiUrl}/ctp/api/checkouts/${token}`, {
+    const secureProcessorResponse = await fetch(`${apiUrl}/ctp/api/checkouts/${token}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -201,20 +201,20 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const secure-processorResult = await secure-processorResponse.json();
+    const secureProcessorResult = await secureProcessorResponse.json();
 
-    if (!secure-processorResponse.ok) {
-      console.error('Secure-Processor HPP Status API Error:', secure-processorResult);
+    if (!secureProcessorResponse.ok) {
+      console.error('Secure-Processor HPP Status API Error:', secureProcessorResult);
       return NextResponse.json(
-        { error: 'Failed to check payment status', details: secure-processorResult },
+        { error: 'Failed to check payment status', details: secureProcessorResult },
         { status: 400 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      status: secure-processorResult.status,
-      transaction: secure-processorResult,
+      status: secureProcessorResult.status,
+      transaction: secureProcessorResult,
     });
 
   } catch (error) {

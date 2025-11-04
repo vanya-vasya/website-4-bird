@@ -10,14 +10,14 @@
 // Required environment variables
 const requiredVars = [
   {
-    name: 'SECURE-PROCESSOR_SHOP_ID',
+    name: 'SECURE_PROCESSOR_SHOP_ID',
     description: 'Your Secure-ProcessorPay Shop ID',
     example: '29959',
     validator: (val) => val && val.length > 0,
     errorMessage: 'Shop ID must not be empty'
   },
   {
-    name: 'SECURE-PROCESSOR_SECRET_KEY',
+    name: 'SECURE_PROCESSOR_SECRET_KEY',
     description: 'Your Secure-ProcessorPay Secret Key',
     example: 'dbfb6f4e977f49880a6ce3c939f1e7be...',
     validator: (val) => val && val.length >= 32,
@@ -25,7 +25,7 @@ const requiredVars = [
     sensitive: true
   },
   {
-    name: 'SECURE-PROCESSOR_API_URL',
+    name: 'SECURE_PROCESSOR_API_URL',
     description: 'Secure-ProcessorPay API base URL',
     example: 'https://checkout.secure-processorpay.com',
     validator: (val) => val === 'https://checkout.secure-processorpay.com',
@@ -38,7 +38,7 @@ const requiredVars = [
     }
   },
   {
-    name: 'SECURE-PROCESSOR_TEST_MODE',
+    name: 'SECURE_PROCESSOR_TEST_MODE',
     description: 'Enable test mode (true/false)',
     example: 'true',
     validator: (val) => val === 'true' || val === 'false',
@@ -50,7 +50,7 @@ const requiredVars = [
 // Optional but recommended
 const optionalVars = [
   {
-    name: 'NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL',
+    name: 'NEXT_PUBLIC_SECURE_PROCESSOR_WIDGET_URL',
     description: 'Public-facing widget URL',
     example: 'https://checkout.secure-processorpay.com',
     validator: (val) => !val || val === 'https://checkout.secure-processorpay.com',
@@ -214,7 +214,7 @@ function validateEnvironment() {
   console.log('║                    COMMON MISTAKES CHECK                          ║');
   console.log('╚═══════════════════════════════════════════════════════════════════╝\n');
 
-  const apiUrl = process.env.SECURE-PROCESSOR_API_URL;
+  const apiUrl = process.env.SECURE_PROCESSOR_API_URL;
   const mistakes = [];
 
   if (apiUrl === 'https://gateway.secure-processorpay.com') {
@@ -235,7 +235,7 @@ function validateEnvironment() {
     });
   }
 
-  const testMode = process.env.SECURE-PROCESSOR_TEST_MODE;
+  const testMode = process.env.SECURE_PROCESSOR_TEST_MODE;
   if (testMode && testMode !== 'true' && testMode !== 'false') {
     mistakes.push({
       issue: 'Invalid test mode value',

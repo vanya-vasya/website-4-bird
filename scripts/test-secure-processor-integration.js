@@ -11,9 +11,9 @@ const https = require('https');
 
 // Configuration (from environment variables)
 const config = {
-  shopId: process.env.SECURE-PROCESSOR_SHOP_ID || '29959',
-  secretKey: process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950',
-  apiUrl: process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com',
+  shopId: process.env.SECURE_PROCESSOR_SHOP_ID || '29959',
+  secretKey: process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950',
+  apiUrl: process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com',
   returnUrl: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success',
   notificationUrl: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor',
   testMode: true
