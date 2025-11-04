@@ -8,9 +8,9 @@
 
 ```bash
 # 1. Check if webhook endpoint is live
-curl https://www.yum-mi.com/api/webhooks/networx
+curl https://www.yum-mi.com/api/webhooks/secure-processor
 
-# Expected: {"message":"Networx webhook endpoint is active","timestamp":"2025-10-14T..."}
+# Expected: {"message":"Secure-Processor webhook endpoint is active","timestamp":"2025-10-14T..."}
 # If 404 or error: deployment issue or wrong URL
 
 # 2. Monitor logs in real-time
@@ -30,7 +30,7 @@ npx prisma studio
 
 ### Issue #1: Networks Not Sending Webhooks
 **Check:** Login to Networks dashboard → Webhooks section  
-**Verify:** URL is `https://www.yum-mi.com/api/webhooks/networx`  
+**Verify:** URL is `https://www.yum-mi.com/api/webhooks/secure-processor`  
 **Fix:** Update webhook URL in Networks dashboard  
 
 ### Issue #2: User Doesn't Exist in Database
@@ -52,7 +52,7 @@ npx prisma studio
 - [ ] Monitoring Vercel logs (`vercel logs --follow`)
 - [ ] Networks dashboard shows webhook URL is configured
 - [ ] Test payment triggered with test card: 4200 0000 0000 0000
-- [ ] Webhook received (see log: "📥 Networx HPP Webhook Received")
+- [ ] Webhook received (see log: "📥 Secure-Processor HPP Webhook Received")
 - [ ] [WEBHOOK-ENV] logged (shows environment and test mode)
 - [ ] [WEBHOOK-DATA] logged (shows payment details)
 - [ ] User found (no "❌ User not found" error)
@@ -66,7 +66,7 @@ npx prisma studio
 
 ```bash
 # Webhook received
-vercel logs | grep "Networx HPP Webhook Received"
+vercel logs | grep "Secure-Processor HPP Webhook Received"
 
 # Environment info
 vercel logs | grep "WEBHOOK-ENV"
@@ -110,7 +110,7 @@ cat .env.local | grep DATABASE_URL
 
 ### Fix 3: Networks Webhook Not Configured
 1. Networks Dashboard → API Settings or Webhooks
-2. Set webhook URL: `https://www.yum-mi.com/api/webhooks/networx`
+2. Set webhook URL: `https://www.yum-mi.com/api/webhooks/secure-processor`
 3. Enable webhooks for test transactions
 4. Save and test
 
@@ -120,7 +120,7 @@ cat .env.local | grep DATABASE_URL
 
 ```bash
 # Test webhook with curl
-curl -X POST https://www.yum-mi.com/api/webhooks/networx \
+curl -X POST https://www.yum-mi.com/api/webhooks/secure-processor \
   -H "Content-Type: application/json" \
   -d '{
     "checkout": {
@@ -169,7 +169,7 @@ User Completes Payment
          ↓
 Networks Processes Payment
          ↓
-Networks Sends Webhook to: https://www.yum-mi.com/api/webhooks/networx
+Networks Sends Webhook to: https://www.yum-mi.com/api/webhooks/secure-processor
          ↓
 Webhook Handler Receives POST Request
          ↓

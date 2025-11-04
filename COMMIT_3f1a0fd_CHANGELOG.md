@@ -1,8 +1,8 @@
-# Changelog for Commit 3f1a0fd - NetworxPay Payment Integration
+# Changelog for Commit 3f1a0fd - Secure-ProcessorPay Payment Integration
 
 **Commit:** `3f1a0fd297f074fe49c5e0114b5b70bd848e4835`  
 **Date:** October 9, 2025  
-**Branch:** `feature/networx-payment-final` (merged into main)  
+**Branch:** `feature/secure-processor-payment-final` (merged into main)  
 **Author:** vanya-vasya  
 **Pull Request:** #10
 
@@ -10,7 +10,7 @@
 
 ## 📋 Overview
 
-This commit represents a **major merge** of the NetworxPay payment integration feature, containing critical fixes for payment processing, improved user experience, comprehensive documentation, and automated testing scripts.
+This commit represents a **major merge** of the Secure-ProcessorPay payment integration feature, containing critical fixes for payment processing, improved user experience, comprehensive documentation, and automated testing scripts.
 
 **Impact:** HIGH - Critical bug fixes blocking all payments  
 **Total Changes:** 33 files changed, +4307 insertions, -616 deletions
@@ -21,7 +21,7 @@ This commit represents a **major merge** of the NetworxPay payment integration f
 
 ### 1. **Amount Format Bug (CRITICAL)**
 **Problem:** Payment amounts were being sent as floats instead of integers  
-**Impact:** NetworxPay API rejected requests due to invalid amount format
+**Impact:** Secure-ProcessorPay API rejected requests due to invalid amount format
 
 **Fix:**
 ```typescript
@@ -33,7 +33,7 @@ const amountInCents = Math.round(amount * 100);  // 238 ✅
 amount: amountInCents
 ```
 
-**Location:** `app/api/payment/networx/route.ts:64`
+**Location:** `app/api/payment/secure-processor/route.ts:64`
 
 ---
 
@@ -43,22 +43,22 @@ amount: amountInCents
 
 **Before:**
 ```
-https://checkout.networxpay.com/ctp/api/checkouts/ctp/api/checkouts ❌
+https://checkout.secure-processorpay.com/ctp/api/checkouts/ctp/api/checkouts ❌
 ```
 
 **After:**
 ```
-https://checkout.networxpay.com/ctp/api/checkouts ✅
+https://checkout.secure-processorpay.com/ctp/api/checkouts ✅
 ```
 
 **Fix:** Added defensive programming to strip duplicate paths:
 ```typescript
-let apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
+let apiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
 apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip if present
-const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
+const secure-processorApiUrl = `${apiUrl}/ctp/api/checkouts`;
 ```
 
-**Location:** `app/api/payment/networx/route.ts:112`
+**Location:** `app/api/payment/secure-processor/route.ts:112`
 
 ---
 
@@ -68,10 +68,10 @@ const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
 **Fix:**
 ```typescript
 // BEFORE: Wrong endpoint
-const networxApiUrl = `${apiUrl}/api/v1/payment/init`;  // ❌
+const secure-processorApiUrl = `${apiUrl}/api/v1/payment/init`;  // ❌
 
 // AFTER: Correct CTP endpoint
-const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;  // ✅
+const secure-processorApiUrl = `${apiUrl}/ctp/api/checkouts`;  // ✅
 ```
 
 ---
@@ -98,7 +98,7 @@ if (data.success && data.token && paymentUrl) {
 - Reduced user friction
 - Better conversion rates
 
-**Location:** `components/networx-payment-widget.tsx:77-88`
+**Location:** `components/secure-processor-payment-widget.tsx:77-88`
 
 ---
 
@@ -106,7 +106,7 @@ if (data.success && data.token && paymentUrl) {
 
 ### Core Payment Logic
 
-#### `/app/api/payment/networx/route.ts`
+#### `/app/api/payment/secure-processor/route.ts`
 - ✅ Fixed amount conversion to integer with `Math.round()`
 - ✅ Fixed API endpoint duplication issue
 - ✅ Updated to correct CTP API endpoint
@@ -114,13 +114,13 @@ if (data.success && data.token && paymentUrl) {
 - ✅ Added comprehensive logging for debugging
 - ✅ Improved error handling
 
-#### `/app/api/webhooks/networx/route.ts`
+#### `/app/api/webhooks/secure-processor/route.ts`
 - ✅ Enhanced webhook processing
 - ✅ Improved signature validation
 - ✅ Better error handling and logging
 - **Changes:** +120 insertions, -120 deletions (refactored)
 
-#### `/components/networx-payment-widget.tsx`
+#### `/components/secure-processor-payment-widget.tsx`
 - ✅ Support for both `redirect_url` (new) and `payment_url` (legacy)
 - ✅ Immediate redirect without modal
 - ✅ Improved error handling
@@ -155,7 +155,7 @@ if (data.success && data.token && paymentUrl) {
 
 ### Core Documentation
 
-#### 1. `NETWORX_FIXES_SUMMARY.md` (+418 lines)
+#### 1. `SECURE-PROCESSOR_FIXES_SUMMARY.md` (+418 lines)
 Comprehensive summary of all issues fixed and changes made:
 - Critical bugs identified and fixed
 - API request/response format
@@ -163,7 +163,7 @@ Comprehensive summary of all issues fixed and changes made:
 - Success criteria
 - Support information
 
-#### 2. `NETWORX_ENDPOINT_DUPLICATION_FIX.md` (+303 lines)
+#### 2. `SECURE-PROCESSOR_ENDPOINT_DUPLICATION_FIX.md` (+303 lines)
 Detailed documentation of the endpoint duplication bug:
 - Problem description with examples
 - Root cause analysis
@@ -171,7 +171,7 @@ Detailed documentation of the endpoint duplication bug:
 - Testing procedures
 - Lessons learned
 
-#### 3. `NETWORX_INTEGRATION_SUMMARY.md` (+521 lines)
+#### 3. `SECURE-PROCESSOR_INTEGRATION_SUMMARY.md` (+521 lines)
 Complete integration overview:
 - Project overview
 - Architecture diagram
@@ -180,7 +180,7 @@ Complete integration overview:
 - Environment configuration
 - Deployment guide
 
-#### 4. `NETWORX_INTEGRATION_VALIDATION.md` (+391 lines)
+#### 4. `SECURE-PROCESSOR_INTEGRATION_VALIDATION.md` (+391 lines)
 Validation checklist and configuration guide:
 - Issues fixed documentation
 - Configuration requirements
@@ -188,21 +188,21 @@ Validation checklist and configuration guide:
 - Error handling scenarios
 - Monitoring recommendations
 
-#### 5. `NETWORX_PAYMENT_VALIDATION.md` (+352 lines)
+#### 5. `SECURE-PROCESSOR_PAYMENT_VALIDATION.md` (+352 lines)
 Payment validation and testing procedures:
 - Payment flow validation
 - Test scenarios
 - Common issues and solutions
 - Production readiness checklist
 
-#### 6. `NETWORX_TEST_MODE_FIX.md` (+411 lines)
+#### 6. `SECURE-PROCESSOR_TEST_MODE_FIX.md` (+411 lines)
 Test mode configuration and troubleshooting:
 - Test mode setup
 - Test cards
 - Common test mode issues
 - Sandbox testing guide
 
-#### 7. `NETWORX_TESTING_GUIDE.md` (+461 lines)
+#### 7. `SECURE-PROCESSOR_TESTING_GUIDE.md` (+461 lines)
 Comprehensive testing guide:
 - Test scripts usage
 - Manual testing flows
@@ -211,7 +211,7 @@ Comprehensive testing guide:
 - Troubleshooting guide
 - Production checklist
 
-#### 8. `NETWORX_ENV_CONFIGURATION.md` (+163 lines)
+#### 8. `SECURE-PROCESSOR_ENV_CONFIGURATION.md` (+163 lines)
 Environment variables setup guide:
 - Required environment variables
 - Local development setup
@@ -228,7 +228,7 @@ Quick reference for server restart after env changes
 
 ## 🔧 New Test Scripts (3 Files)
 
-### 1. `/scripts/test-networx-integration.js` (+301 lines)
+### 1. `/scripts/test-secure-processor-integration.js` (+301 lines)
 Automated API integration test:
 - ✅ Tests multiple currencies (EUR, USD, GBP)
 - ✅ Validates API endpoint
@@ -239,10 +239,10 @@ Automated API integration test:
 
 **Usage:**
 ```bash
-node scripts/test-networx-integration.js
+node scripts/test-secure-processor-integration.js
 ```
 
-### 2. `/scripts/validate-networx-env.js` (+294 lines)
+### 2. `/scripts/validate-secure-processor-env.js` (+294 lines)
 Environment variables validation:
 - ✅ Validates all required variables
 - ✅ Checks for common mistakes
@@ -252,10 +252,10 @@ Environment variables validation:
 
 **Usage:**
 ```bash
-node scripts/validate-networx-env.js
+node scripts/validate-secure-processor-env.js
 ```
 
-### 3. `/scripts/test-networx-payment.js` (+152 lines)
+### 3. `/scripts/test-secure-processor-payment.js` (+152 lines)
 Payment flow testing script:
 - ✅ Tests complete payment flow
 - ✅ Validates user journey
@@ -328,14 +328,14 @@ Payment flow testing script:
 ## 🚀 Deployment Checklist
 
 ### Environment Configuration
-- [ ] Set `NETWORX_SHOP_ID` in Vercel
-- [ ] Set `NETWORX_SECRET_KEY` in Vercel
-- [ ] Set `NETWORX_API_URL` in Vercel
-- [ ] Set `NETWORX_TEST_MODE=true` for testing
+- [ ] Set `SECURE-PROCESSOR_SHOP_ID` in Vercel
+- [ ] Set `SECURE-PROCESSOR_SECRET_KEY` in Vercel
+- [ ] Set `SECURE-PROCESSOR_API_URL` in Vercel
+- [ ] Set `SECURE-PROCESSOR_TEST_MODE=true` for testing
 
 ### Pre-Deployment Testing
-- [ ] Run `node scripts/validate-networx-env.js`
-- [ ] Run `node scripts/test-networx-integration.js`
+- [ ] Run `node scripts/validate-secure-processor-env.js`
+- [ ] Run `node scripts/test-secure-processor-integration.js`
 - [ ] Test payment flow in sandbox mode
 - [ ] Verify webhook receipt
 - [ ] Test all currencies (EUR, USD, GBP)
@@ -371,8 +371,8 @@ Payment flow testing script:
 
 - [GitHub Commit](https://github.com/vanya-vasya/website-3/commit/3f1a0fd297f074fe49c5e0114b5b70bd848e4835)
 - [Pull Request #10](https://github.com/vanya-vasya/website-3/pull/10)
-- NetworxPay Documentation: https://docs.networxpay.com
-- NetworxPay Support: support@networxpay.com
+- Secure-ProcessorPay Documentation: https://docs.secure-processorpay.com
+- Secure-ProcessorPay Support: support@secure-processorpay.com
 
 ---
 
@@ -381,12 +381,12 @@ Payment flow testing script:
 ### If You Encounter Issues
 
 1. **Check Documentation:**
-   - Review `NETWORX_TESTING_GUIDE.md` for troubleshooting
-   - Check `NETWORX_ENV_CONFIGURATION.md` for setup issues
+   - Review `SECURE-PROCESSOR_TESTING_GUIDE.md` for troubleshooting
+   - Check `SECURE-PROCESSOR_ENV_CONFIGURATION.md` for setup issues
 
 2. **Run Validation:**
    ```bash
-   node scripts/validate-networx-env.js
+   node scripts/validate-secure-processor-env.js
    ```
 
 3. **Check Logs:**
@@ -394,8 +394,8 @@ Payment flow testing script:
    - Look for [info] and [error] prefixed messages
 
 4. **Contact Support:**
-   - NetworxPay support: support@networxpay.com
-   - Internal documentation in `/NETWORX_*.md` files
+   - Secure-ProcessorPay support: support@secure-processorpay.com
+   - Internal documentation in `/SECURE-PROCESSOR_*.md` files
 
 ### Next Immediate Steps
 
@@ -409,7 +409,7 @@ Payment flow testing script:
 
 ## ✨ Conclusion
 
-This commit represents a **complete overhaul** of the NetworxPay payment integration with:
+This commit represents a **complete overhaul** of the Secure-ProcessorPay payment integration with:
 
 - **3 critical bugs fixed** (amount format, endpoint duplication, wrong endpoint)
 - **Improved user experience** (direct redirect, no extra modals)
@@ -427,6 +427,7 @@ This commit represents a **complete overhaul** of the NetworxPay payment integra
 **Generated:** $(date)  
 **Repository:** https://github.com/vanya-vasya/website-3  
 **Local Branch:** Detached HEAD at 3f1a0fd
+
 
 
 

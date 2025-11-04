@@ -36,7 +36,7 @@ const PaymentSuccessPage = () => {
 
       try {
         const queryParam = token ? `token=${token}` : `orderId=${orderId}`;
-        const response = await fetch(`/api/payment/networx?${queryParam}`);
+        const response = await fetch(`/api/payment/secure-processor?${queryParam}`);
         const data = await response.json();
 
         if (data.success && data.transaction) {

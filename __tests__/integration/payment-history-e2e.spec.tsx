@@ -9,7 +9,7 @@
  */
 
 import { NextRequest } from 'next/server';
-import { POST } from '@/app/api/webhooks/networx/route';
+import { POST } from '@/app/api/webhooks/secure-processor/route';
 import prismadb from '@/lib/prismadb';
 import { fetchPaymentHistory } from '@/lib/api-limit';
 
@@ -72,7 +72,7 @@ describe('Payment History - Complete E2E Flow', () => {
 
   describe('Step 1: Payment Completion → Webhook → Database Write', () => {
     it('should persist transaction from successful payment webhook', async () => {
-      // ARRANGE: User completes payment on Networx
+      // ARRANGE: User completes payment on Secure-Processor
       const webhookPayload = {
         checkout: {
           token: 'e2e_test_token_success',
@@ -91,12 +91,12 @@ describe('Payment History - Complete E2E Flow', () => {
             payment_method_type: 'credit_card',
             message: 'Payment successful',
             paid_at: '2025-10-10T12:00:00.000Z',
-            receipt_url: 'https://networxpay.com/receipt/e2e123',
+            receipt_url: 'https://secure-processorpay.com/receipt/e2e123',
           },
         },
       };
 
-      const request = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+      const request = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
         method: 'POST',
         body: JSON.stringify(webhookPayload),
       });
@@ -226,7 +226,7 @@ describe('Payment History - Complete E2E Flow', () => {
           payment_method_type: 'credit_card',
           message: 'Payment successful',
           paid_at: new Date('2025-10-10T12:00:00.000Z'),
-          receipt_url: 'https://networxpay.com/receipt/abc123',
+          receipt_url: 'https://secure-processorpay.com/receipt/abc123',
         },
       });
 
@@ -270,12 +270,12 @@ describe('Payment History - Complete E2E Flow', () => {
             payment_method_type: 'credit_card',
             message: 'Payment successful',
             paid_at: '2025-10-10T15:30:00.000Z',
-            receipt_url: 'https://networxpay.com/receipt/full_flow',
+            receipt_url: 'https://secure-processorpay.com/receipt/full_flow',
           },
         },
       };
 
-      const request = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+      const request = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
         method: 'POST',
         body: JSON.stringify(webhookPayload),
       });
@@ -341,7 +341,7 @@ describe('Payment History - Complete E2E Flow', () => {
           },
         };
 
-        const request = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+        const request = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
           method: 'POST',
           body: JSON.stringify(webhookPayload),
         });

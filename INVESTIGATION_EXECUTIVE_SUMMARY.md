@@ -11,7 +11,7 @@
 
 ## 🔍 Problem Statement
 
-After completing a successful payment via Networx payment gateway, users experience:
+After completing a successful payment via Secure-Processor payment gateway, users experience:
 
 1. **Redirect Issue**: App redirects to `/dashboard` instead of `/payment/success`
 2. **Navigation Issue**: "Payment History" link disappears from header
@@ -23,17 +23,17 @@ After completing a successful payment via Networx payment gateway, users experie
 
 ## ⚠️ Root Cause Identified
 
-### **Primary Issue: Networx Configuration Mismatch** (90% Confidence)
+### **Primary Issue: Secure-Processor Configuration Mismatch** (90% Confidence)
 
 **Evidence**:
-- Code hardcodes return URL as: `/payment/success` (line 51, `app/api/payment/networx/route.ts`)
+- Code hardcodes return URL as: `/payment/success` (line 51, `app/api/payment/secure-processor/route.ts`)
 - User reports redirect to: `/dashboard`
-- This indicates **Networx merchant dashboard has a different return URL configured**
+- This indicates **Secure-Processor merchant dashboard has a different return URL configured**
 
 **Why This Happens**:
 Most payment gateways allow merchants to configure default return URLs in their dashboard. These dashboard settings **override** API request parameters.
 
-**Location**: Networx Merchant Dashboard → Settings → API Configuration → Hosted Payment Page
+**Location**: Secure-Processor Merchant Dashboard → Settings → API Configuration → Hosted Payment Page
 
 **Expected Dashboard Setting**:
 ```
@@ -95,7 +95,7 @@ User thinks payment failed
 - ✅ Transaction record creation
 - ✅ Receipt email generation and sending
 
-**File**: `app/api/webhooks/networx/route.ts` (lines 86-230)
+**File**: `app/api/webhooks/secure-processor/route.ts` (lines 86-230)
 
 **Conclusion**: Database write logic is correct and complete
 
@@ -123,12 +123,12 @@ T+2.5s: Webhook arrives (delayed)
 
 ## 🎯 Recommended Actions (Priority Order)
 
-### 1. ⚠️ URGENT: Verify Networx Dashboard Configuration
+### 1. ⚠️ URGENT: Verify Secure-Processor Dashboard Configuration
 
-**Action**: Log into Networx merchant dashboard and update return URLs
+**Action**: Log into Secure-Processor merchant dashboard and update return URLs
 
 **Steps**:
-1. Navigate to: https://merchant.networxpay.com
+1. Navigate to: https://merchant.secure-processorpay.com
 2. Go to: Settings → API Configuration → Hosted Payment Page
 3. Update these fields:
    - Success Return URL: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success`
@@ -145,12 +145,12 @@ T+2.5s: Webhook arrives (delayed)
 
 ### 2. 🟡 HIGH: Verify Webhook Configuration
 
-**Action**: Ensure Networx sends webhooks to correct endpoint
+**Action**: Ensure Secure-Processor sends webhooks to correct endpoint
 
 **Steps**:
-1. In Networx dashboard, go to: Settings → Webhooks
+1. In Secure-Processor dashboard, go to: Settings → Webhooks
 2. Verify these settings:
-   - Webhook URL: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx`
+   - Webhook URL: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor`
    - Status: ACTIVE ✅
    - Events enabled: `payment.completed`, `payment.success`, `payment.failed`
 3. Check webhook logs for recent deliveries
@@ -169,7 +169,7 @@ T+2.5s: Webhook arrives (delayed)
 **Steps**:
 1. Initiate payment from staging/production
 2. Use test card: `4111 1111 1111 1111`, Exp: `12/25`, CVV: `123`
-3. Complete payment on Networx HPP
+3. Complete payment on Secure-Processor HPP
 4. **OBSERVE**: Where does browser redirect?
 5. Check if transaction appears in Payment History
 6. Verify user balance updated
@@ -188,7 +188,7 @@ T+2.5s: Webhook arrives (delayed)
 **Steps**:
 1. Open Vercel Dashboard → Logs
 2. Filter by timeframe (last 7 days)
-3. Search for: `"Networx HPP Webhook Received"`
+3. Search for: `"Secure-Processor HPP Webhook Received"`
 4. Check for errors: `"Database error"` or `"User not found"`
 5. Compare timestamps: webhook receipt vs page loads
 6. Calculate average webhook delay
@@ -235,7 +235,7 @@ useEffect(() => {
 ### Configuration Gap ⚠️
 - ⚠️ Hardcoded return URL: `/payment/success`
 - ⚠️ User-reported redirect: `/dashboard`
-- ⚠️ Mismatch indicates Networx dashboard override
+- ⚠️ Mismatch indicates Secure-Processor dashboard override
 
 ### Webhook Timing ⚠️
 - ⚠️ Webhook may arrive 1-5 seconds after redirect
@@ -304,7 +304,7 @@ After implementing fixes, verify:
 ## 🔄 Next Steps
 
 ### Immediate (Today)
-1. Access Networx merchant dashboard
+1. Access Secure-Processor merchant dashboard
 2. Verify and update return URL configuration
 3. Test payment with test card
 4. Verify redirect destination
@@ -327,7 +327,7 @@ After implementing fixes, verify:
 
 If issue persists after configuration fix:
 
-1. **Networx Support**: support@networxpay.com
+1. **Secure-Processor Support**: support@secure-processorpay.com
    - Provide: Shop ID, webhook URL, recent transaction IDs
    - Ask: Verify return URL configuration, webhook delivery logs
 
@@ -368,7 +368,7 @@ If issue persists after configuration fix:
 
 ## ✅ Conclusion
 
-**Root Cause**: Networx merchant dashboard return URL misconfiguration (90% confidence)
+**Root Cause**: Secure-Processor merchant dashboard return URL misconfiguration (90% confidence)
 
 **Fix Complexity**: Low - Configuration change, no code modifications required
 
@@ -387,13 +387,13 @@ If issue persists after configuration fix:
 - **Configuration Points Identified**: 8
 - **Root Causes Found**: 1 primary, 1 secondary (race condition)
 - **Code Issues Found**: 0 (all logic correct)
-- **Configuration Issues Found**: 1 (Networx dashboard)
+- **Configuration Issues Found**: 1 (Secure-Processor dashboard)
 - **Recommended Fixes**: 5 (1 urgent, 1 high priority, 3 optional)
 
 ---
 
 **Investigation Status**: ✅ COMPLETE  
-**Action Required**: Verify and update Networx dashboard configuration  
+**Action Required**: Verify and update Secure-Processor dashboard configuration  
 **Code Changes Required**: None (all fixes are configuration-based)  
 **Estimated Resolution Time**: 15 minutes (config update + testing)
 

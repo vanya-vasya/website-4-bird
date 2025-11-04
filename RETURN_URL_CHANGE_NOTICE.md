@@ -4,7 +4,7 @@
 
 ### What Changed
 
-**File**: `app/api/payment/networx/route.ts` (line 54)
+**File**: `app/api/payment/secure-processor/route.ts` (line 54)
 
 **Before**:
 ```typescript
@@ -13,7 +13,7 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 
 **After**:
 ```typescript
-const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx';
+const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor';
 ```
 
 ---
@@ -23,12 +23,12 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 ### User Experience Impact
 
 **What This Means**:
-After completing a payment on Networx, users will be redirected to `/api/webhooks/networx` instead of `/payment/success`.
+After completing a payment on Secure-Processor, users will be redirected to `/api/webhooks/secure-processor` instead of `/payment/success`.
 
 **What Users Will See**:
 ```json
 {
-  "message": "Networx webhook endpoint is active",
+  "message": "Secure-Processor webhook endpoint is active",
   "timestamp": "2025-10-10T14:30:00.000Z"
 }
 ```
@@ -48,17 +48,17 @@ Instead of:
 ```
 1. User initiates payment
    ↓
-2. Redirected to Networx payment page
+2. Redirected to Secure-Processor payment page
    ↓
 3. User enters card details and pays
    ↓
-4. Networx processes payment
+4. Secure-Processor processes payment
    ↓
-5. User browser redirected to: /api/webhooks/networx ⚠️
+5. User browser redirected to: /api/webhooks/secure-processor ⚠️
    ↓
 6. User sees JSON response (not user-friendly)
    ↓
-7. Webhook notification sent to: /api/webhooks/networx (separate request)
+7. Webhook notification sent to: /api/webhooks/secure-processor (separate request)
    ↓
 8. Transaction saved to database ✅
    ↓
@@ -70,7 +70,7 @@ Instead of:
 ## 🎯 Why This Change Might Have Been Requested
 
 ### Possible Reason #1: Simplify Configuration
-If Networx merchant dashboard already has return URL set to `/api/webhooks/networx`, this change makes the code match the dashboard configuration.
+If Secure-Processor merchant dashboard already has return URL set to `/api/webhooks/secure-processor`, this change makes the code match the dashboard configuration.
 
 ### Possible Reason #2: Testing/Debugging
 Using the webhook endpoint as return URL makes it easier to see webhook responses during testing.
@@ -84,13 +84,13 @@ Your application might handle success state differently (e.g., polling for statu
 
 ### Option A: Hybrid Webhook Handler
 
-Modify `/api/webhooks/networx/route.ts` to handle BOTH:
+Modify `/api/webhooks/secure-processor/route.ts` to handle BOTH:
 - GET requests (browser redirect) → Redirect to success page
 - POST requests (webhook) → Process payment notification
 
 **Implementation**:
 ```typescript
-// app/api/webhooks/networx/route.ts
+// app/api/webhooks/secure-processor/route.ts
 
 export async function GET(request: NextRequest) {
   // Extract token from query params
@@ -121,12 +121,12 @@ export async function POST(request: NextRequest) {
 **Configuration**:
 ```typescript
 const returnUrl = 'https://website-3.../payment/success';      // User redirect
-const notificationUrl = 'https://website-3.../api/webhooks/networx';  // Webhook
+const notificationUrl = 'https://website-3.../api/webhooks/secure-processor';  // Webhook
 ```
 
-**Networx Dashboard**:
+**Secure-Processor Dashboard**:
 - Success Return URL: `/payment/success`
-- Webhook Notification URL: `/api/webhooks/networx`
+- Webhook Notification URL: `/api/webhooks/secure-processor`
 
 **Result**:
 - Clean separation of concerns
@@ -141,7 +141,7 @@ Keep current change but add loading/redirect logic:
 
 **Frontend**:
 ```typescript
-// When user lands on /api/webhooks/networx after payment
+// When user lands on /api/webhooks/secure-processor after payment
 // Immediately redirect to dashboard with polling
 
 useEffect(() => {
@@ -169,14 +169,14 @@ useEffect(() => {
 
 - [ ] **Initiate test payment**
   - Use test card: 4111 1111 1111 1111
-  - Complete payment on Networx
+  - Complete payment on Secure-Processor
 
 - [ ] **Verify redirect behavior**
-  - After payment, browser should redirect to `/api/webhooks/networx`
+  - After payment, browser should redirect to `/api/webhooks/secure-processor`
   - Observe what user sees (JSON response)
 
 - [ ] **Check webhook processing**
-  - Verify webhook POST still arrives at `/api/webhooks/networx`
+  - Verify webhook POST still arrives at `/api/webhooks/secure-processor`
   - Check database for transaction record
   - Verify user balance updated
 
@@ -192,13 +192,13 @@ useEffect(() => {
 If you need to revert to the user-friendly success page:
 
 ```bash
-# In app/api/payment/networx/route.ts, line 54:
+# In app/api/payment/secure-processor/route.ts, line 54:
 const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success';
 ```
 
 Then commit and deploy:
 ```bash
-git add app/api/payment/networx/route.ts
+git add app/api/payment/secure-processor/route.ts
 git commit -m "Revert: Use /payment/success as return URL for better UX"
 git push
 ```
@@ -209,19 +209,19 @@ git push
 
 | Setting | Old Value | New Value | Impact |
 |---------|-----------|-----------|--------|
-| Return URL (Code) | `/payment/success` | `/api/webhooks/networx` | Users see JSON |
+| Return URL (Code) | `/payment/success` | `/api/webhooks/secure-processor` | Users see JSON |
 | Return URL (Dashboard) | ??? | Should match code | Need to verify |
-| Notification URL | `/api/webhooks/networx` | `/api/webhooks/networx` | Unchanged ✅ |
-| Webhook POST | `/api/webhooks/networx` | `/api/webhooks/networx` | Unchanged ✅ |
+| Notification URL | `/api/webhooks/secure-processor` | `/api/webhooks/secure-processor` | Unchanged ✅ |
+| Webhook POST | `/api/webhooks/secure-processor` | `/api/webhooks/secure-processor` | Unchanged ✅ |
 
 ---
 
 ## 🎯 Next Steps
 
-1. **Update Networx Dashboard** (if not already done):
-   - Log into https://merchant.networxpay.com
+1. **Update Secure-Processor Dashboard** (if not already done):
+   - Log into https://merchant.secure-processorpay.com
    - Go to: Settings → API Configuration → HPP
-   - Set Success Return URL: `/api/webhooks/networx`
+   - Set Success Return URL: `/api/webhooks/secure-processor`
    - Save changes
 
 2. **Test Payment Flow**:
@@ -252,7 +252,7 @@ If users report confusion or issues after payment:
 ---
 
 **Change Date**: October 10, 2025  
-**Reason**: Per user request to match Networx dashboard configuration  
+**Reason**: Per user request to match Secure-Processor dashboard configuration  
 **Risk Level**: Medium (impacts user experience)  
 **Reversibility**: High (single line change)
 

@@ -45,7 +45,7 @@ http://localhost:3000/dashboard/billing/payment-history
 ## 🧪 Run Integration Tests
 
 ```bash
-npm test networx-webhook-database-write
+npm test secure-processor-webhook-database-write
 ```
 
 **Expected:** All 6 tests pass
@@ -63,7 +63,7 @@ npm test networx-webhook-database-write
 ### Server Logs (Terminal)
 ```
 ═══════════════════════════════════════════════════════
-📥 Networx HPP Webhook Received
+📥 Secure-Processor HPP Webhook Received
 ═══════════════════════════════════════════════════════
 ✅ Payment SUCCESSFUL for order user_2abc123xyz
    📝 Extracted tokens: 100
@@ -159,7 +159,7 @@ node scripts/test-webhook-manually.js <actual_clerkId> 2380 100
 1. **Check server logs** - Most issues show error messages
 2. **Review root cause doc** - `PAYMENT_HISTORY_ROOT_CAUSE_ANALYSIS.md`
 3. **Check webhook payload** - Verify structure matches expected format
-4. **Verify environment** - DATABASE_URL, NETWORX keys configured
+4. **Verify environment** - DATABASE_URL, SECURE-PROCESSOR keys configured
 
 ---
 

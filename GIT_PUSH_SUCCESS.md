@@ -46,7 +46,7 @@ To https://github.com/vanya-vasya/website-3.git
 ### Files Included
 
 #### 1. Core Fix
-- ✅ **`app/api/webhooks/networx/route.ts`** (+149 lines, -8 lines)
+- ✅ **`app/api/webhooks/secure-processor/route.ts`** (+149 lines, -8 lines)
   - Implemented database write logic
   - Added idempotency check
   - Added user validation
@@ -54,7 +54,7 @@ To https://github.com/vanya-vasya/website-3.git
   - Added receipt email generation
 
 #### 2. Integration Tests
-- ✅ **`__tests__/integration/networx-webhook-database-write.spec.tsx`** (+370 lines, NEW)
+- ✅ **`__tests__/integration/secure-processor-webhook-database-write.spec.tsx`** (+370 lines, NEW)
   - 6 comprehensive test cases
   - Tests success scenarios
   - Tests error handling
@@ -64,7 +64,7 @@ To https://github.com/vanya-vasya/website-3.git
 #### 3. Testing Utilities
 - ✅ **`scripts/test-webhook-manually.js`** (+103 lines, NEW)
   - Manual webhook testing script
-  - Simulates Networx webhook POST
+  - Simulates Secure-Processor webhook POST
   - Configurable parameters
 
 #### 4. Documentation
@@ -98,7 +98,7 @@ To https://github.com/vanya-vasya/website-3.git
 
 ### Commit Message
 ```
-Fix: Implement database write in Networx webhook handler for Payment History
+Fix: Implement database write in Secure-Processor webhook handler for Payment History
 
 CRITICAL FIX: Successful transactions now appear in Payment History
 
@@ -115,8 +115,8 @@ Solution:
 - Added comprehensive error handling and logging
 
 Changes:
-- Modified: app/api/webhooks/networx/route.ts (+135 lines)
-- New: __tests__/integration/networx-webhook-database-write.spec.tsx (+350 lines)
+- Modified: app/api/webhooks/secure-processor/route.ts (+135 lines)
+- New: __tests__/integration/secure-processor-webhook-database-write.spec.tsx (+350 lines)
 - New: scripts/test-webhook-manually.js (+100 lines)
 - New Documentation (4 files, +2000 lines)
 
@@ -129,11 +129,11 @@ Impact:
 - Idempotency protection: ✅ NEW
 
 Testing:
-- Run: npm test networx-webhook-database-write
+- Run: npm test secure-processor-webhook-database-write
 - Manual: node scripts/test-webhook-manually.js userId amount tokens
 
-Reference: Based on Networx Webhooks API documentation
-Link: https://docs.networxpay.com/en/using_api/webhooks/
+Reference: Based on Secure-Processor Webhooks API documentation
+Link: https://docs.secure-processorpay.com/en/using_api/webhooks/
 ```
 
 ### Commit Hash
@@ -153,14 +153,14 @@ https://github.com/vanya-vasya/website-3/pull/new/feature/fix-payment-history-da
 
 **Suggested PR Title:**
 ```
-Fix: Implement database write in Networx webhook handler for Payment History
+Fix: Implement database write in Secure-Processor webhook handler for Payment History
 ```
 
 **Suggested PR Description:**
 ```
 ## 🔴 Critical Bug Fix
 
-Fixes issue where successful Networx payments completed but never appeared in Payment History.
+Fixes issue where successful Secure-Processor payments completed but never appeared in Payment History.
 
 ## Root Cause
 The webhook handler received payment notifications but only logged them with a TODO comment - database write logic was never implemented.
@@ -173,14 +173,14 @@ The webhook handler received payment notifications but only logged them with a T
 - ✅ Comprehensive error handling
 
 ## Changes
-- Modified: `app/api/webhooks/networx/route.ts` (+135 lines)
+- Modified: `app/api/webhooks/secure-processor/route.ts` (+135 lines)
 - New: Integration tests with 6 test cases
 - New: Manual testing script
 - New: 4 comprehensive documentation files
 
 ## Testing
 ```bash
-npm test networx-webhook-database-write
+npm test secure-processor-webhook-database-write
 node scripts/test-webhook-manually.js userId amount tokens
 ```
 
@@ -199,7 +199,7 @@ node scripts/test-webhook-manually.js userId amount tokens
 ### 2. Run Tests Locally
 ```bash
 cd /Users/vladi/Documents/Projects/webapps/yum-mi
-npm test networx-webhook-database-write
+npm test secure-processor-webhook-database-write
 ```
 
 ### 3. Manual Test

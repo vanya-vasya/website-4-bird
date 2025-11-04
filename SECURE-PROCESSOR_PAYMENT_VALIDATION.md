@@ -1,4 +1,4 @@
-# Networx Payment Integration - Validation Report
+# Secure-Processor Payment Integration - Validation Report
 
 ## Date: October 9, 2025
 ## Status: ✅ FIXED AND VALIDATED
@@ -18,7 +18,7 @@
 
 **Fix Applied:**
 ```typescript
-// In /app/api/payment/networx/route.ts
+// In /app/api/payment/secure-processor/route.ts
 const amountRounded = Math.round(amount * 100) / 100; // Round to 2 decimals: 2.38
 const amountInCents = Math.round(amountRounded * 100); // Convert to cents: 238
 ```
@@ -28,7 +28,7 @@ const amountInCents = Math.round(amountRounded * 100); // Convert to cents: 238
 ---
 
 ### 2. ✅ API Endpoint (ALREADY CORRECT)
-**Endpoint:** `https://checkout.networxpay.com/ctp/api/checkouts`
+**Endpoint:** `https://checkout.secure-processorpay.com/ctp/api/checkouts`
 **Status:** Already correctly configured in the code
 
 ---
@@ -39,14 +39,14 @@ const amountInCents = Math.round(amountRounded * 100); // Convert to cents: 238
 
 **Fix Applied:**
 ```typescript
-// In /components/networx-payment-widget.tsx
+// In /components/secure-processor-payment-widget.tsx
 // Removed state updates before redirect
 if (data.success && data.redirect_url) {
   window.location.href = data.redirect_url; // Immediate redirect
 }
 ```
 
-**Result:** ✅ User is now redirected immediately to Networx payment page
+**Result:** ✅ User is now redirected immediately to Secure-Processor payment page
 
 ---
 
@@ -54,7 +54,7 @@ if (data.success && data.redirect_url) {
 
 ### API Endpoint
 ```
-POST https://checkout.networxpay.com/ctp/api/checkouts
+POST https://checkout.secure-processorpay.com/ctp/api/checkouts
 ```
 
 ### Request Headers
@@ -84,7 +84,7 @@ POST https://checkout.networxpay.com/ctp/api/checkouts
     },
     "settings": {
       "return_url": "https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success",
-      "notification_url": "https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx"
+      "notification_url": "https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor"
     }
   }
 }
@@ -95,7 +95,7 @@ POST https://checkout.networxpay.com/ctp/api/checkouts
 {
   "checkout": {
     "token": "15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8",
-    "redirect_url": "https://checkout.networxpay.com/widget/hpp.html?token=15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8"
+    "redirect_url": "https://checkout.secure-processorpay.com/widget/hpp.html?token=15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8"
   }
 }
 ```
@@ -105,7 +105,7 @@ POST https://checkout.networxpay.com/ctp/api/checkouts
 {
   "success": true,
   "token": "15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8",
-  "redirect_url": "https://checkout.networxpay.com/widget/hpp.html?token=...",
+  "redirect_url": "https://checkout.secure-processorpay.com/widget/hpp.html?token=...",
   "checkout_id": "15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8"
 }
 ```
@@ -116,15 +116,15 @@ POST https://checkout.networxpay.com/ctp/api/checkouts
 
 ### Required Variables
 ```bash
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=true  # Set to "false" for production
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=true  # Set to "false" for production
 ```
 
 ### Test Mode
-- `NETWORX_TEST_MODE=true` - Sandbox mode (test cards only)
-- `NETWORX_TEST_MODE=false` - Production mode (real cards)
+- `SECURE-PROCESSOR_TEST_MODE=true` - Sandbox mode (test cards only)
+- `SECURE-PROCESSOR_TEST_MODE=false` - Production mode (real cards)
 
 ---
 
@@ -142,7 +142,7 @@ NETWORX_TEST_MODE=true  # Set to "false" for production
 8. Click "Create Payment Token"
 
 **Expected Behavior:**
-- ✅ User is redirected to Networx payment page immediately
+- ✅ User is redirected to Secure-Processor payment page immediately
 - ✅ Amount is correct (e.g., 10 tokens = 2.38 EUR = 238 cents)
 - ✅ No intermediate "Payment token created successfully" modal
 
@@ -155,9 +155,9 @@ Amount conversion: 2.380952380952381 EUR -> 2.38 (rounded) -> 238 cents
 
 ### 3. Test Payment Success Flow
 
-1. Complete payment on Networx page
+1. Complete payment on Secure-Processor page
 2. Verify redirect to `/payment/success`
-3. Check webhook received at `/api/webhooks/networx`
+3. Check webhook received at `/api/webhooks/secure-processor`
 4. Verify token balance updated in database
 
 ### 4. Test Payment Failure Flow
@@ -172,12 +172,12 @@ Amount conversion: 2.380952380952381 EUR -> 2.38 (rounded) -> 238 cents
 
 ### Webhook URL
 ```
-https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
 ```
 
 ### Webhook Handler Location
 ```
-/app/api/webhooks/networx/route.ts
+/app/api/webhooks/secure-processor/route.ts
 ```
 
 ### Expected Webhook Payload
@@ -207,7 +207,7 @@ https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/net
 | USD      | 1.133616      | $2.70              |
 | CHF      | 0.94          | CHF 2.24           |
 
-**Note:** All amounts are converted to integer cents before sending to Networx.
+**Note:** All amounts are converted to integer cents before sending to Secure-Processor.
 
 ---
 
@@ -220,7 +220,7 @@ https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/net
 
 ### Server-Side Errors
 - Missing amount/orderId: Return 400 with error message
-- Networx API error: Log error and return details to client
+- Secure-Processor API error: Log error and return details to client
 - Network error: Return 500 with connection error
 
 ---
@@ -232,7 +232,7 @@ https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/net
 - Credentials stored in environment variables
 
 ### 2. Webhook Signature Verification
-- All webhooks verified using Networx public key
+- All webhooks verified using Secure-Processor public key
 - Invalid signatures rejected
 
 ### 3. HTTPS Only
@@ -253,12 +253,12 @@ https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/net
 ```
 ✅ Payment checkout created successfully
 Token: 15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8
-Redirect URL: https://checkout.networxpay.com/widget/hpp.html?token=...
+Redirect URL: https://checkout.secure-processorpay.com/widget/hpp.html?token=...
 ```
 
 **Error:**
 ```
-❌ Networx API returned unsuccessful response: { error: "..." }
+❌ Secure-Processor API returned unsuccessful response: { error: "..." }
 ```
 
 ### What to Monitor
@@ -272,12 +272,12 @@ Redirect URL: https://checkout.networxpay.com/widget/hpp.html?token=...
 
 ## Files Modified
 
-1. `/app/api/payment/networx/route.ts`
+1. `/app/api/payment/secure-processor/route.ts`
    - Fixed amount conversion with proper rounding
    - Updated response to use `redirect_url`
    - Added detailed logging
 
-2. `/components/networx-payment-widget.tsx`
+2. `/components/secure-processor-payment-widget.tsx`
    - Removed intermediate modal
    - Direct redirect to payment page
    - Cleaner error handling
@@ -306,7 +306,7 @@ Redirect URL: https://checkout.networxpay.com/widget/hpp.html?token=...
 ## Next Steps
 
 1. **Test in Sandbox:**
-   - Use test cards from Networx documentation
+   - Use test cards from Secure-Processor documentation
    - Verify all payment flows
    - Test error scenarios
 
@@ -317,7 +317,7 @@ Redirect URL: https://checkout.networxpay.com/widget/hpp.html?token=...
    - Confirm database updates
 
 3. **Production Deployment:**
-   - Update `NETWORX_TEST_MODE=false`
+   - Update `SECURE-PROCESSOR_TEST_MODE=false`
    - Update return/notification URLs to production domain
    - Test with small real transaction
    - Monitor logs closely
@@ -331,11 +331,11 @@ Redirect URL: https://checkout.networxpay.com/widget/hpp.html?token=...
 
 ## Support and Documentation
 
-- **Networx Pay Docs:** https://docs.networxpay.com/
+- **Secure-Processor Pay Docs:** https://docs.secure-processorpay.com/
 - **API Version:** 2
 - **Integration Type:** Hosted Payment Page (HPP)
 - **Authentication:** HTTP Basic
-- **Test Cards:** Available in Networx documentation
+- **Test Cards:** Available in Secure-Processor documentation
 
 ---
 

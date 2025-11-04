@@ -1,27 +1,27 @@
-# Networx API Endpoint Fix - "This route doesn't exist"
+# Secure-Processor API Endpoint Fix - "This route doesn't exist"
 
 ## 🔍 Problem Analysis
 
 ### Error Log (Second Attempt)
 ```
-Making request to: https://gateway.networxpay.com/ctp/api/checkouts
+Making request to: https://gateway.secure-processorpay.com/ctp/api/checkouts
 Error: {"response":{"message":"This route doesn't exist"}}
 ```
 
 ### What Happened
 
 **Attempt 1 (Original):**
-- URL: `https://checkout.networxpay.com/ctp/api/checkouts`
+- URL: `https://checkout.secure-processorpay.com/ctp/api/checkouts`
 - Error: `"Access denied"`
 - Root Cause: Test mode mismatch (`testMode = false` but sent `test: true`)
 
 **Attempt 2 (After First Fix):**
-- URL: `https://gateway.networxpay.com/ctp/api/checkouts`
+- URL: `https://gateway.secure-processorpay.com/ctp/api/checkouts`
 - Error: `"This route doesn't exist"`
 - Root Cause: Wrong API host! Gateway doesn't have this route
 
 **Attempt 3 (Current Fix):**
-- URL: `https://checkout.networxpay.com/ctp/api/checkouts`
+- URL: `https://checkout.secure-processorpay.com/ctp/api/checkouts`
 - Status: ✅ Should work (correct host + fixed test mode)
 
 ---
@@ -34,8 +34,8 @@ Error: {"response":{"message":"This route doesn't exist"}}
    - Fixed: ✅ Now using `testMode` variable consistently
    
 2. **Introduced Problem:** Wrong API host
-   - Changed to: `gateway.networxpay.com` (doesn't support `/ctp/api/checkouts`)
-   - Fixed: ✅ Reverted to `checkout.networxpay.com`
+   - Changed to: `gateway.secure-processorpay.com` (doesn't support `/ctp/api/checkouts`)
+   - Fixed: ✅ Reverted to `checkout.secure-processorpay.com`
 
 ---
 
@@ -43,16 +43,16 @@ Error: {"response":{"message":"This route doesn't exist"}}
 
 ### Code Changes
 
-**File:** `app/api/payment/networx/route.ts`
+**File:** `app/api/payment/secure-processor/route.ts`
 
 ```typescript
 // CORRECT CONFIGURATION ✅
-const apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
-const testMode = process.env.NETWORX_TEST_MODE === 'true';
+const apiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
+const testMode = process.env.SECURE-PROCESSOR_TEST_MODE === 'true';
 
 // Request endpoint
-const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
-// Results in: https://checkout.networxpay.com/ctp/api/checkouts ✅
+const secure-processorApiUrl = `${apiUrl}/ctp/api/checkouts`;
+// Results in: https://checkout.secure-processorpay.com/ctp/api/checkouts ✅
 
 // Test mode now consistent
 checkout: {
@@ -64,10 +64,10 @@ checkout: {
 ### Documentation Updates
 
 All documentation files updated to reflect correct endpoint:
-- ✅ `NETWORX_ENV_SETUP.md`
-- ✅ `NETWORX_ACCESS_DENIED_FIX.md`
-- ✅ `NETWORX_DEPLOYMENT_GUIDE.md`
-- ✅ `NETWORX_SETUP_LOCALHOST.md`
+- ✅ `SECURE-PROCESSOR_ENV_SETUP.md`
+- ✅ `SECURE-PROCESSOR_ACCESS_DENIED_FIX.md`
+- ✅ `SECURE-PROCESSOR_DEPLOYMENT_GUIDE.md`
+- ✅ `SECURE-PROCESSOR_SETUP_LOCALHOST.md`
 
 ---
 
@@ -75,7 +75,7 @@ All documentation files updated to reflect correct endpoint:
 
 ### Expected Request
 ```javascript
-URL: https://checkout.networxpay.com/ctp/api/checkouts
+URL: https://checkout.secure-processorpay.com/ctp/api/checkouts
 Method: POST
 Headers: {
   'Authorization': 'Basic ...',
@@ -84,7 +84,7 @@ Headers: {
 }
 Body: {
   checkout: {
-    test: false,  // Now controlled by NETWORX_TEST_MODE env var
+    test: false,  // Now controlled by SECURE-PROCESSOR_TEST_MODE env var
     transaction_type: "payment",
     order: { ... },
     customer: { ... },
@@ -98,7 +98,7 @@ Body: {
 {
   "checkout": {
     "token": "abc123...",
-    "redirect_url": "https://checkout.networxpay.com/ctp/pay/abc123...",
+    "redirect_url": "https://checkout.secure-processorpay.com/ctp/pay/abc123...",
     "status": "pending"
   }
 }
@@ -108,35 +108,35 @@ Body: {
 
 ## 🎯 Key Learnings
 
-### Networx API Architecture
+### Secure-Processor API Architecture
 
 **Two different hosts with different purposes:**
 
-1. **checkout.networxpay.com** ✅
+1. **checkout.secure-processorpay.com** ✅
    - Purpose: Hosted Payment Page (HPP) API
    - Endpoints: `/ctp/api/checkouts`
    - Use for: Creating payment sessions
 
-2. **gateway.networxpay.com** ❌
+2. **gateway.secure-processorpay.com** ❌
    - Purpose: Different API (possibly direct gateway)
    - Does NOT support: `/ctp/api/checkouts` route
-   - Use for: Unknown (need Networx docs)
+   - Use for: Unknown (need Secure-Processor docs)
 
 ### Correct Configuration
 
 ```bash
 # For Hosted Payment Page Integration
-NETWORX_API_URL=https://checkout.networxpay.com
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
 
 # Widget URL (same host)
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
 ```
 
 ---
 
 ## 🚀 Deployment Checklist
 
-- [x] Reverted API URL to `checkout.networxpay.com`
+- [x] Reverted API URL to `checkout.secure-processorpay.com`
 - [x] Fixed test mode consistency
 - [x] Synced all URLs to website-3
 - [x] Updated all documentation
@@ -153,18 +153,18 @@ NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
 
 ```bash
 # Server-side
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=false
-NETWORX_RETURN_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
-NETWORX_WEBHOOK_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=false
+SECURE-PROCESSOR_RETURN_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
+SECURE-PROCESSOR_WEBHOOK_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
 
 # Client-side
-NEXT_PUBLIC_NETWORX_SHOP_ID=29959
-NEXT_PUBLIC_NETWORX_TEST_MODE=false
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
-NETWORX_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+...
+NEXT_PUBLIC_SECURE-PROCESSOR_SHOP_ID=29959
+NEXT_PUBLIC_SECURE-PROCESSOR_TEST_MODE=false
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+...
 ```
 
 ---

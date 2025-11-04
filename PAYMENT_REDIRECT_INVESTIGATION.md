@@ -12,7 +12,7 @@
 ### Finding #1: **Return URL Mismatch** (CRITICAL)
 
 **Evidence:**
-- **File**: `app/api/payment/networx/route.ts:51`
+- **File**: `app/api/payment/secure-processor/route.ts:51`
 - **Hardcoded Return URL**: 
   ```typescript
   const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success';
@@ -21,13 +21,13 @@
 **Problem**: 
 The user reports being redirected to `/dashboard` instead of `/payment/success`. This indicates **one of two scenarios**:
 
-#### Scenario A: Networx Dashboard Configuration Override
+#### Scenario A: Secure-Processor Dashboard Configuration Override
 **Likelihood**: ⚠️ **HIGH**
 
-Networx payment gateway providers typically allow merchants to configure return URLs in their merchant dashboard/portal. This configuration **overrides** the return_url sent in API requests.
+Secure-Processor payment gateway providers typically allow merchants to configure return URLs in their merchant dashboard/portal. This configuration **overrides** the return_url sent in API requests.
 
 **What to check**:
-1. Log into Networx merchant dashboard at: https://merchant.networxpay.com
+1. Log into Secure-Processor merchant dashboard at: https://merchant.secure-processorpay.com
 2. Navigate to: **Settings** → **API Configuration** → **Hosted Payment Page**
 3. Look for fields like:
    - "Success Return URL"
@@ -103,7 +103,7 @@ The Payment History link should **ALWAYS** be visible in:
 
 **Status**: ✅ **IMPLEMENTED CORRECTLY**
 
-**File**: `app/api/webhooks/networx/route.ts:86-230`
+**File**: `app/api/webhooks/secure-processor/route.ts:86-230`
 
 **Database Write Logic**:
 ```typescript
@@ -143,18 +143,18 @@ case 'success':
 
 **Critical Issue**: ⚠️ **WEBHOOK MAY NOT BE CALLED**
 
-If Networx is configured to redirect directly to `/dashboard` instead of `/payment/success`, it's possible that:
+If Secure-Processor is configured to redirect directly to `/dashboard` instead of `/payment/success`, it's possible that:
 1. The webhook notification is **delayed**
 2. The webhook notification is **never sent**
-3. The webhook URL is **misconfigured** in Networx dashboard
+3. The webhook URL is **misconfigured** in Secure-Processor dashboard
 
 **Webhook URL Configuration**:
-- **Hardcoded in code**: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx`
-- **File**: `app/api/payment/networx/route.ts:52`
+- **Hardcoded in code**: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor`
+- **File**: `app/api/payment/secure-processor/route.ts:52`
 
-**What to check in Networx Dashboard**:
+**What to check in Secure-Processor Dashboard**:
 1. Navigate to: **Settings** → **API Configuration** → **Webhooks**
-2. Verify "Notification URL" field contains: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx`
+2. Verify "Notification URL" field contains: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor`
 3. Check webhook event types include: `payment.completed`, `payment.success`
 4. Verify webhook is **enabled** and **active**
 
@@ -166,25 +166,25 @@ If Networx is configured to redirect directly to `/dashboard` instead of `/payme
 
 **Sequence**:
 ```
-1. User completes payment on Networx HPP (3-5 seconds)
-2. Networx processes payment (1-3 seconds)
+1. User completes payment on Secure-Processor HPP (3-5 seconds)
+2. Secure-Processor processes payment (1-3 seconds)
 3. ⚠️ RACE CONDITION STARTS HERE ⚠️
    
    Option A (Correct Flow):
-   3a. Networx sends webhook to /api/webhooks/networx (0-2 seconds)
+   3a. Secure-Processor sends webhook to /api/webhooks/secure-processor (0-2 seconds)
    3b. Webhook handler writes transaction to DB (0.5-1 second)
-   3c. Networx redirects user to /payment/success (instant)
+   3c. Secure-Processor redirects user to /payment/success (instant)
    3d. User clicks "View Payment History" → sees transaction ✅
    
    Option B (Race Condition):
-   3a. Networx redirects user immediately (instant)
+   3a. Secure-Processor redirects user immediately (instant)
    3b. User lands on /payment/success (0.1 seconds)
    3c. User clicks "View Payment History" (0.5 seconds)
    3d. Payment History loads → NO TRANSACTION (webhook not received yet) ❌
    3e. Webhook arrives 2 seconds later → too late
 ```
 
-**Evidence from Networx Documentation**:
+**Evidence from Secure-Processor Documentation**:
 - Webhooks can be **delayed** by 1-30 seconds
 - Webhooks may be sent **after** user redirect
 - Webhooks can **fail** and retry (idempotency required ✅)
@@ -206,16 +206,16 @@ sequenceDiagram
     participant PaymentHistory
 
     User->>Frontend: Click "Pay"
-    Frontend->>NetworkxAPI: POST /api/payment/networx
+    Frontend->>NetworkxAPI: POST /api/payment/secure-processor
     NetworkxAPI-->>Frontend: {redirect_url}
-    Frontend->>User: Redirect to Networx HPP
+    Frontend->>User: Redirect to Secure-Processor HPP
     User->>NetworkxHPP: Enter card details
     NetworkxHPP->>NetworkxHPP: Process payment
     
     Note over NetworkxHPP,Webhook: ⚠️ RACE CONDITION ZONE ⚠️
     
     par Webhook and Redirect (ASYNC)
-        NetworkxHPP->>Webhook: POST /api/webhooks/networx
+        NetworkxHPP->>Webhook: POST /api/webhooks/secure-processor
         Webhook->>Database: Write transaction
         Webhook->>Database: Update user balance
         Webhook-->>NetworkxHPP: 200 OK
@@ -227,12 +227,12 @@ sequenceDiagram
     end
 ```
 
-### Suspected Issue Flow (Networx Dashboard Override)
+### Suspected Issue Flow (Secure-Processor Dashboard Override)
 
 ```
 User completes payment
          ↓
-Networx HPP redirects to: /dashboard (WRONG!)
+Secure-Processor HPP redirects to: /dashboard (WRONG!)
          ↓
 User sees dashboard WITHOUT Payment History link (CSS/mobile issue?)
          ↓
@@ -247,19 +247,19 @@ BUT user already left the flow, doesn't know to check
 
 ## 🔧 Configuration Verification Checklist
 
-### 1. Networx Merchant Dashboard Settings
+### 1. Secure-Processor Merchant Dashboard Settings
 
-**Login**: https://merchant.networxpay.com  
+**Login**: https://merchant.secure-processorpay.com  
 **Credentials**: Shop ID: `29959`
 
 #### Check these settings:
 
 - [ ] **Success Return URL**: Should be `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success`
 - [ ] **Cancel Return URL**: Should be `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/cancel`
-- [ ] **Webhook Notification URL**: Should be `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx`
+- [ ] **Webhook Notification URL**: Should be `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor`
 - [ ] **Webhook Events**: Ensure `payment.completed` and `payment.success` are enabled
 - [ ] **Webhook Active**: Toggle should be ON
-- [ ] **Test Mode**: Should match `NETWORX_TEST_MODE` env var
+- [ ] **Test Mode**: Should match `SECURE-PROCESSOR_TEST_MODE` env var
 
 ### 2. Environment Variables (Vercel Dashboard)
 
@@ -268,10 +268,10 @@ BUT user already left the flow, doesn't know to check
 
 #### Verify these variables:
 
-- [ ] `NETWORX_SHOP_ID`: `29959`
-- [ ] `NETWORX_SECRET_KEY`: `dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950`
-- [ ] `NETWORX_API_URL`: `https://checkout.networxpay.com`
-- [ ] `NETWORX_TEST_MODE`: `true` or `false` (should match Networx dashboard)
+- [ ] `SECURE-PROCESSOR_SHOP_ID`: `29959`
+- [ ] `SECURE-PROCESSOR_SECRET_KEY`: `dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950`
+- [ ] `SECURE-PROCESSOR_API_URL`: `https://checkout.secure-processorpay.com`
+- [ ] `SECURE-PROCESSOR_TEST_MODE`: `true` or `false` (should match Secure-Processor dashboard)
 - [ ] `DATABASE_URL`: Valid PostgreSQL connection string
 
 ### 3. Server Logs Investigation
@@ -282,7 +282,7 @@ BUT user already left the flow, doesn't know to check
 
 **Webhook Receipt**:
 ```
-"📥 Networx HPP Webhook Received"
+"📥 Secure-Processor HPP Webhook Received"
 "✅ Payment SUCCESSFUL for order"
 "✅ Transaction saved to database"
 ```
@@ -338,17 +338,17 @@ WHERE clerkId = 'user_<YOUR_TEST_USER_ID>';
 
 ## 🎯 Proposed Fixes (Conceptual - No Code Changes)
 
-### Fix #1: Verify Networx Dashboard Configuration ⚠️ **CRITICAL**
+### Fix #1: Verify Secure-Processor Dashboard Configuration ⚠️ **CRITICAL**
 
 **Priority**: 🔴 **URGENT**
 
 **Steps**:
-1. Contact Networx support or log into merchant dashboard
+1. Contact Secure-Processor support or log into merchant dashboard
 2. Navigate to API/HPP configuration section
 3. Update return URLs to match application configuration:
    - Success URL: `/payment/success`
    - Cancel URL: `/payment/cancel`
-4. Update webhook URL to: `/api/webhooks/networx`
+4. Update webhook URL to: `/api/webhooks/secure-processor`
 5. Enable webhook events: `payment.completed`, `payment.success`, `payment.failed`
 6. Save and test with a test payment
 
@@ -462,7 +462,7 @@ Add structured logging with correlation IDs to trace payment flow.
 
 **Logging Points**:
 1. Payment initiation: Log `tracking_id`, `amount`, `timestamp`
-2. Redirect to Networx: Log `redirect_url`, `token`
+2. Redirect to Secure-Processor: Log `redirect_url`, `token`
 3. Webhook receipt: Log `tracking_id`, `status`, `webhook_received_at`
 4. Database write: Log `transaction_id`, `user_balance_updated`
 5. Payment History fetch: Log `userId`, `transaction_count`, `fetch_timestamp`
@@ -479,7 +479,7 @@ Add structured logging with correlation IDs to trace payment flow.
 ### Test Case: Successful Payment with Transaction Logging
 
 **Prerequisites**:
-- Access to Networx test environment
+- Access to Secure-Processor test environment
 - Test card: `4111 1111 1111 1111`
 - Valid user account
 
@@ -489,7 +489,7 @@ Add structured logging with correlation IDs to trace payment flow.
 3. Select package (e.g., 100 tokens)
 4. Enter test email: `test@example.com`
 5. Click "Create Payment Token"
-6. Redirected to Networx HPP
+6. Redirected to Secure-Processor HPP
 7. Enter test card details: `4111 1111 1111 1111`, Exp: `12/25`, CVV: `123`
 8. Click "Pay"
 9. **OBSERVE**: Where does the app redirect?
@@ -519,7 +519,7 @@ Add structured logging with correlation IDs to trace payment flow.
 
 ### Edge Case #2: Webhook Fails with 500 Error
 **Impact**: Payment successful but no database entry  
-**Current Handling**: Networx retries webhook (3 attempts)  
+**Current Handling**: Secure-Processor retries webhook (3 attempts)  
 **Mitigation**: Idempotency check already implemented ✅
 
 ### Edge Case #3: User Closes Browser Before Redirect
@@ -528,7 +528,7 @@ Add structured logging with correlation IDs to trace payment flow.
 
 ### Edge Case #4: Database Write Fails (Constraint Violation)
 **Impact**: Transaction not saved, user balance not updated  
-**Current Handling**: Webhook returns 500, Networx retries  
+**Current Handling**: Webhook returns 500, Secure-Processor retries  
 **Mitigation**: Add better error logging and alerts
 
 ### Edge Case #5: Multiple Users Making Simultaneous Payments
@@ -546,7 +546,7 @@ Add structured logging with correlation IDs to trace payment flow.
 
 ```
 # Search for webhook receipt
-"Networx HPP Webhook Received"
+"Secure-Processor HPP Webhook Received"
 
 # Search for successful payments
 "Payment SUCCESSFUL for order"
@@ -580,7 +580,7 @@ Event: "load_payment_history_data"
 
 ## 🎯 Next Steps (Priority Order)
 
-1. **CRITICAL**: Verify Networx merchant dashboard return URL configuration
+1. **CRITICAL**: Verify Secure-Processor merchant dashboard return URL configuration
    - Expected fix time: 5 minutes
    - Expected result: Users redirected to `/payment/success`
 
@@ -612,11 +612,11 @@ Event: "load_payment_history_data"
 ### Production Environment Variables (Vercel)
 
 ```bash
-# Networx Configuration
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=false
+# Secure-Processor Configuration
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=false
 
 # Application URLs
 NEXT_PUBLIC_APP_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app
@@ -632,10 +632,10 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
 CLERK_SECRET_KEY=sk_...
 ```
 
-### Expected Networx Dashboard Settings
+### Expected Secure-Processor Dashboard Settings
 
 ```
-Merchant Dashboard: https://merchant.networxpay.com
+Merchant Dashboard: https://merchant.secure-processorpay.com
 Shop ID: 29959
 
 API Configuration → Hosted Payment Page:
@@ -645,7 +645,7 @@ API Configuration → Hosted Payment Page:
   ✓ Error Return URL: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/error
 
 API Configuration → Webhooks:
-  ✓ Webhook URL: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+  ✓ Webhook URL: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
   ✓ Events: payment.completed, payment.success, payment.failed, payment.refunded
   ✓ Webhook Status: ACTIVE
   ✓ Signature Verification: ENABLED (using SECRET_KEY)
@@ -657,20 +657,20 @@ API Configuration → Webhooks:
 
 ### Most Likely Root Cause
 
-**Networx merchant dashboard has a different return URL configured** that overrides the `return_url` parameter sent in API requests. This is causing users to be redirected to `/dashboard` instead of `/payment/success`.
+**Secure-Processor merchant dashboard has a different return URL configured** that overrides the `return_url` parameter sent in API requests. This is causing users to be redirected to `/dashboard` instead of `/payment/success`.
 
 ### Evidence Weight
 
 | Issue | Likelihood | Impact | Urgency |
 |-------|-----------|--------|---------|
-| Networx dashboard return URL mismatch | 🔴 **VERY HIGH (90%)** | 🔴 **CRITICAL** | 🔴 **URGENT** |
+| Secure-Processor dashboard return URL mismatch | 🔴 **VERY HIGH (90%)** | 🔴 **CRITICAL** | 🔴 **URGENT** |
 | Webhook timing race condition | 🟡 **MEDIUM (40%)** | 🟡 **MEDIUM** | 🟡 **MEDIUM** |
 | Payment History link CSS/visibility issue | 🟢 **LOW (15%)** | 🟢 **LOW** | 🟢 **LOW** |
 | Database write failure | 🟢 **VERY LOW (5%)** | 🔴 **CRITICAL** | 🟡 **MEDIUM** |
 
 ### Immediate Actions Required
 
-1. ✅ **Verify Networx dashboard configuration** (5 minutes)
+1. ✅ **Verify Secure-Processor dashboard configuration** (5 minutes)
 2. ✅ **Check production logs for webhook receipt** (10 minutes)
 3. ✅ **Run database query to check existing transactions** (5 minutes)
 4. ✅ **Test payment flow with test card** (15 minutes)
@@ -678,7 +678,7 @@ API Configuration → Webhooks:
 ### No Code Changes Required (Yet)
 
 **All issues can potentially be resolved through**:
-- Configuration updates in Networx dashboard
+- Configuration updates in Secure-Processor dashboard
 - Environment variable verification
 - Log analysis
 
@@ -691,13 +691,13 @@ API Configuration → Webhooks:
 
 ## 📞 Support and Resources
 
-**Networx Support**:
-- Email: support@networxpay.com
-- Documentation: https://docs.networxpay.com
-- Merchant Dashboard: https://merchant.networxpay.com
+**Secure-Processor Support**:
+- Email: support@secure-processorpay.com
+- Documentation: https://docs.secure-processorpay.com
+- Merchant Dashboard: https://merchant.secure-processorpay.com
 
 **Internal Resources**:
-- Webhook endpoint test: `curl https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx`
+- Webhook endpoint test: `curl https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor`
 - Payment History: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/dashboard/billing/payment-history`
 - Vercel Dashboard: https://vercel.com/vladis-projects-8c520e18/website-3
 

@@ -8,15 +8,15 @@
 
 ## 🎯 Problem
 
-Successful Networx payments complete but **never appear in Payment History**.
+Successful Secure-Processor payments complete but **never appear in Payment History**.
 
 ---
 
 ## 🔍 Root Cause
 
-**File:** `app/api/webhooks/networx/route.ts` (Lines 89-96)
+**File:** `app/api/webhooks/secure-processor/route.ts` (Lines 89-96)
 
-The webhook handler received payment notifications from Networx but only logged them. It **never wrote transactions to the database**.
+The webhook handler received payment notifications from Secure-Processor but only logged them. It **never wrote transactions to the database**.
 
 ```typescript
 // BEFORE (BROKEN):
@@ -27,7 +27,7 @@ case 'completed':
   break;
 ```
 
-Result: Networx got 200 OK, but no database record created.
+Result: Secure-Processor got 200 OK, but no database record created.
 
 ---
 
@@ -83,8 +83,8 @@ case 'success':
 
 | File | Purpose | Lines Changed |
 |------|---------|---------------|
-| `app/api/webhooks/networx/route.ts` | Main fix - database writes | +135 |
-| `__tests__/integration/networx-webhook-database-write.spec.tsx` | Integration tests | +300 (new) |
+| `app/api/webhooks/secure-processor/route.ts` | Main fix - database writes | +135 |
+| `__tests__/integration/secure-processor-webhook-database-write.spec.tsx` | Integration tests | +300 (new) |
 | `scripts/test-webhook-manually.js` | Manual testing script | +100 (new) |
 | `PAYMENT_HISTORY_ROOT_CAUSE_ANALYSIS.md` | Detailed analysis | +800 (new) |
 
@@ -94,7 +94,7 @@ case 'success':
 
 ### Automated Tests
 ```bash
-npm test networx-webhook-database-write
+npm test secure-processor-webhook-database-write
 ```
 
 **Coverage:**
@@ -132,8 +132,8 @@ http://localhost:3000/dashboard/billing/payment-history
 - [ ] Deploy to Vercel
 - [ ] Verify environment variables:
   - `DATABASE_URL`
-  - `NETWORX_SHOP_ID`
-  - `NETWORX_SECRET_KEY`
+  - `SECURE-PROCESSOR_SHOP_ID`
+  - `SECURE-PROCESSOR_SECRET_KEY`
   - `OUTBOX_EMAIL`
 
 ### Post-Deployment
@@ -149,7 +149,7 @@ http://localhost:3000/dashboard/billing/payment-history
 
 | Step | Expected Result | Status |
 |------|----------------|--------|
-| User completes payment | Networx redirects to success page | ✅ |
+| User completes payment | Secure-Processor redirects to success page | ✅ |
 | Webhook arrives | Server logs show webhook received | ✅ |
 | Database write | Transaction record created | ✅ |
 | Balance update | User tokens increased | ✅ |
@@ -161,12 +161,12 @@ http://localhost:3000/dashboard/billing/payment-history
 ## 🐛 Additional Issues Found (Lower Priority)
 
 ### 1. Signature Verification Not Implemented
-**Issue:** Webhook uses HMAC SHA256, but Networx sends RSA SHA256 signature in `Content-Signature` header.  
+**Issue:** Webhook uses HMAC SHA256, but Secure-Processor sends RSA SHA256 signature in `Content-Signature` header.  
 **Risk:** Medium (webhooks work, but security gap)  
-**Fix:** Implement RSA verification using public key from Networx dashboard
+**Fix:** Implement RSA verification using public key from Secure-Processor dashboard
 
 ### 2. Two Webhook Endpoints
-**Issue:** `/api/webhooks/networx` (HPP) and `/api/webhooks/payment` (API) both exist  
+**Issue:** `/api/webhooks/secure-processor` (HPP) and `/api/webhooks/payment` (API) both exist  
 **Risk:** Low (both work now)  
 **Recommendation:** Document difference or consolidate
 
@@ -175,17 +175,17 @@ http://localhost:3000/dashboard/billing/payment-history
 ## 📚 Documentation
 
 - **Root Cause Analysis:** `PAYMENT_HISTORY_ROOT_CAUSE_ANALYSIS.md`
-- **Integration Tests:** `__tests__/integration/networx-webhook-database-write.spec.tsx`
+- **Integration Tests:** `__tests__/integration/secure-processor-webhook-database-write.spec.tsx`
 - **Manual Test Script:** `scripts/test-webhook-manually.js`
-- **Networx Docs:** https://docs.networxpay.com/en/using_api/webhooks/
+- **Secure-Processor Docs:** https://docs.secure-processorpay.com/en/using_api/webhooks/
 
 ---
 
 ## 🔗 Quick Links
 
 - **Payment History Page:** `/dashboard/billing/payment-history`
-- **Webhook Endpoint:** `/api/webhooks/networx`
-- **Webhook Handler:** `app/api/webhooks/networx/route.ts`
+- **Webhook Endpoint:** `/api/webhooks/secure-processor`
+- **Webhook Handler:** `app/api/webhooks/secure-processor/route.ts`
 - **Database Query Function:** `lib/api-limit.ts` → `fetchPaymentHistory()`
 
 ---

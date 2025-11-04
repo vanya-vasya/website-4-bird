@@ -26,20 +26,20 @@ https://www.yum-mi.com
 
 ## 🔧 Code Changes
 
-### File: `app/api/payment/networx/route.ts`
+### File: `app/api/payment/secure-processor/route.ts`
 
 **Lines 52-53**:
 
 **Before**:
 ```typescript
 const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/dashboard';
-const notificationUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx';
+const notificationUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor';
 ```
 
 **After**:
 ```typescript
 const returnUrl = 'https://www.yum-mi.com/dashboard';
-const notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx';
+const notificationUrl = 'https://www.yum-mi.com/api/webhooks/secure-processor';
 ```
 
 ---
@@ -49,19 +49,19 @@ const notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx';
 | Purpose | URL | Usage |
 |---------|-----|-------|
 | **Return URL** | `https://www.yum-mi.com/dashboard` | User redirect after payment |
-| **Webhook URL** | `https://www.yum-mi.com/api/webhooks/networx` | Server notification endpoint |
+| **Webhook URL** | `https://www.yum-mi.com/api/webhooks/secure-processor` | Server notification endpoint |
 
 ---
 
-## ⚠️ CRITICAL: Networx Dashboard Update Required
+## ⚠️ CRITICAL: Secure-Processor Dashboard Update Required
 
-### You MUST update Networx merchant portal configuration
+### You MUST update Secure-Processor merchant portal configuration
 
 **Steps**:
 
-1. **Log into Networx Dashboard**
+1. **Log into Secure-Processor Dashboard**
    ```
-   URL: https://merchant.networxpay.com
+   URL: https://merchant.secure-processorpay.com
    Shop ID: 29959
    ```
 
@@ -81,7 +81,7 @@ const notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx';
    ```
    Settings → Webhooks → Notification URL
    
-   Webhook URL: https://www.yum-mi.com/api/webhooks/networx
+   Webhook URL: https://www.yum-mi.com/api/webhooks/secure-processor
    Events: ✓ payment.completed
            ✓ payment.success
            ✓ payment.failed
@@ -137,25 +137,25 @@ TTL: Auto
   - Verify site loads correctly
   - Check SSL certificate is valid
 
-- [ ] **Update Networx Dashboard**
+- [ ] **Update Secure-Processor Dashboard**
   - Return URL updated to `yum-mi.com/dashboard`
-  - Webhook URL updated to `yum-mi.com/api/webhooks/networx`
+  - Webhook URL updated to `yum-mi.com/api/webhooks/secure-processor`
   - All URLs use HTTPS
   - Changes saved
 
 - [ ] **Test Payment Flow**
   - Complete test payment
   - Verify redirect to `yum-mi.com/dashboard`
-  - Check webhook arrives at `yum-mi.com/api/webhooks/networx`
+  - Check webhook arrives at `yum-mi.com/api/webhooks/secure-processor`
   - Confirm transaction saves to database
 
 - [ ] **Test Webhook Endpoint**
   ```bash
   # Verify endpoint is accessible
-  curl https://www.yum-mi.com/api/webhooks/networx
+  curl https://www.yum-mi.com/api/webhooks/secure-processor
   
   # Should return:
-  # {"message":"Networx webhook endpoint is active","timestamp":"..."}
+  # {"message":"Secure-Processor webhook endpoint is active","timestamp":"..."}
   ```
 
 - [ ] **Verify All Pages Load**
@@ -163,7 +163,7 @@ TTL: Auto
   - https://www.yum-mi.com/dashboard
   - https://www.yum-mi.com/dashboard/billing/payment-history
   - https://www.yum-mi.com/payment/success
-  - https://www.yum-mi.com/api/webhooks/networx (JSON response)
+  - https://www.yum-mi.com/api/webhooks/secure-processor (JSON response)
 
 ---
 
@@ -178,13 +178,13 @@ TTL: Auto
    ↓
 3️⃣ User clicks "Buy Tokens"
    ↓
-4️⃣ Redirected to Networx payment page
+4️⃣ Redirected to Secure-Processor payment page
    ↓
 5️⃣ User completes payment
    ↓
-6️⃣ Networx redirects to: www.yum-mi.com/dashboard ← CUSTOM DOMAIN
+6️⃣ Secure-Processor redirects to: www.yum-mi.com/dashboard ← CUSTOM DOMAIN
    ↓
-7️⃣ Webhook sent to: www.yum-mi.com/api/webhooks/networx ← CUSTOM DOMAIN
+7️⃣ Webhook sent to: www.yum-mi.com/api/webhooks/secure-processor ← CUSTOM DOMAIN
    ↓
 8️⃣ Transaction saved, balance updated
    ↓
@@ -209,7 +209,7 @@ TTL: Auto
 - [x] ✅ Documentation created
 
 ### Configuration Migration (TODO)
-- [ ] ⏳ Update Networx merchant dashboard URLs
+- [ ] ⏳ Update Secure-Processor merchant dashboard URLs
 - [ ] ⏳ Test payment with new URLs
 - [ ] ⏳ Verify webhook delivery
 - [ ] ⏳ Monitor first production transactions
@@ -230,16 +230,16 @@ TTL: Auto
 **Symptoms**: Transaction not appearing in Payment History
 
 **Causes**:
-- Networx webhook URL not updated
+- Secure-Processor webhook URL not updated
 - Firewall blocking requests
 - SSL certificate issues
 
 **Solution**:
-1. Verify Networx dashboard webhook URL is correct
+1. Verify Secure-Processor dashboard webhook URL is correct
 2. Check Vercel logs for incoming requests
 3. Test webhook endpoint manually:
    ```bash
-   curl https://www.yum-mi.com/api/webhooks/networx
+   curl https://www.yum-mi.com/api/webhooks/secure-processor
    ```
 
 ### Issue 2: User Redirected to Old URL
@@ -247,11 +247,11 @@ TTL: Auto
 **Symptoms**: User sees `website-3-gesry583g-vladis-projects-8c520e18.vercel.app` after payment
 
 **Causes**:
-- Networx dashboard return URL not updated
+- Secure-Processor dashboard return URL not updated
 - Browser cache
 
 **Solution**:
-1. Update Networx merchant dashboard return URL
+1. Update Secure-Processor merchant dashboard return URL
 2. Clear browser cache
 3. Test in incognito/private mode
 
@@ -375,10 +375,10 @@ If critical issues occur after migration:
    git push
    ```
 
-2. **Update Networx Dashboard**:
+2. **Update Secure-Processor Dashboard**:
    ```
    Return URL: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/dashboard
-   Webhook URL: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+   Webhook URL: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
    ```
 
 3. **Verify Old URLs Work**:
@@ -400,8 +400,8 @@ If critical issues occur after migration:
 - **Vercel Support**: support@vercel.com
 
 ### Payment Gateway Issues
-- **Networx Support**: support@networxpay.com
-- **Merchant Dashboard**: https://merchant.networxpay.com
+- **Secure-Processor Support**: support@secure-processorpay.com
+- **Merchant Dashboard**: https://merchant.secure-processorpay.com
 
 ### SSL/Certificate Issues
 - **Vercel SSL Support**: support@vercel.com
@@ -419,14 +419,14 @@ curl -I https://www.yum-mi.com
 # Should return: 200 OK with valid SSL
 
 # 2. Test webhook endpoint
-curl https://www.yum-mi.com/api/webhooks/networx
-# Should return: JSON with "Networx webhook endpoint is active"
+curl https://www.yum-mi.com/api/webhooks/secure-processor
+# Should return: JSON with "Secure-Processor webhook endpoint is active"
 
 # 3. Test dashboard
 curl -I https://www.yum-mi.com/dashboard
 # Should return: 200 OK (or 302 if auth required)
 
-# 4. Verify Networx can reach webhook
+# 4. Verify Secure-Processor can reach webhook
 # Complete a test payment and check Vercel logs
 ```
 
@@ -458,13 +458,13 @@ curl -I https://www.yum-mi.com/dashboard
 **Application URLs**:
 ```typescript
 returnUrl = 'https://www.yum-mi.com/dashboard'
-notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx'
+notificationUrl = 'https://www.yum-mi.com/api/webhooks/secure-processor'
 ```
 
-**Networx Dashboard** (Update Required):
+**Secure-Processor Dashboard** (Update Required):
 ```
 Success Return URL: https://www.yum-mi.com/dashboard
-Webhook URL: https://www.yum-mi.com/api/webhooks/networx
+Webhook URL: https://www.yum-mi.com/api/webhooks/secure-processor
 ```
 
 **Vercel Configuration**:
@@ -485,10 +485,10 @@ HTTPS: Enforced
 ✅ Professional appearance, better branding, improved SEO, user trust
 
 ### What You Need to Do
-⚠️ **CRITICAL**: Update Networx merchant dashboard URLs to match
+⚠️ **CRITICAL**: Update Secure-Processor merchant dashboard URLs to match
 
 ### When to Deploy
-✅ After updating Networx configuration and testing
+✅ After updating Secure-Processor configuration and testing
 
 ### Expected Result
 ✅ Seamless migration with no disruption to payment flow
@@ -497,6 +497,6 @@ HTTPS: Enforced
 
 **Migration Date**: October 10, 2025  
 **Domain**: www.yum-mi.com  
-**Status**: ✅ Code Ready → Update Networx → Deploy → Test  
+**Status**: ✅ Code Ready → Update Secure-Processor → Deploy → Test  
 **Confidence**: High (straightforward domain change)
 

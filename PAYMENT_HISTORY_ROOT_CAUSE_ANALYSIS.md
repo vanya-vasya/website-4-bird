@@ -9,7 +9,7 @@
 
 ## 📋 Executive Summary
 
-**Root Cause:** The Networx webhook handler (`/api/webhooks/networx/route.ts`) successfully receives and logs payment webhooks but **never writes transaction data to the database**.
+**Root Cause:** The Secure-Processor webhook handler (`/api/webhooks/secure-processor/route.ts`) successfully receives and logs payment webhooks but **never writes transaction data to the database**.
 
 **Impact:**
 - Users cannot see their payment history
@@ -25,11 +25,11 @@
 
 ### 1. Payment Initiation ✅ WORKING
 
-**File:** `/app/api/payment/networx/route.ts`
+**File:** `/app/api/payment/secure-processor/route.ts`
 
 ```typescript
 // Line 86: notification_url configured correctly
-notification_url: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx'
+notification_url: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor'
 ```
 
 **Status:** ✅ Webhook URL properly configured  
@@ -39,9 +39,9 @@ notification_url: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 
 ### 2. Webhook Receipt ✅ WORKING
 
-**File:** `/app/api/webhooks/networx/route.ts`
+**File:** `/app/api/webhooks/secure-processor/route.ts`
 
-**Webhook Structure (Networx HPP API v2):**
+**Webhook Structure (Secure-Processor HPP API v2):**
 ```json
 {
   "checkout": {
@@ -74,11 +74,11 @@ notification_url: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 
 ### 3. Webhook Processing ❌ **BROKEN (ROOT CAUSE)**
 
-**File:** `/app/api/webhooks/networx/route.ts` (Lines 87-96)
+**File:** `/app/api/webhooks/secure-processor/route.ts` (Lines 87-96)
 
 #### **BEFORE (BROKEN):**
 
-```typescript:app/api/webhooks/networx/route.ts
+```typescript:app/api/webhooks/secure-processor/route.ts
 case 'completed':
 case 'success':
   console.log(`✅ Payment SUCCESSFUL for order ${tracking_id}`);
@@ -100,15 +100,15 @@ case 'success':
 2. ❌ Never calls `prismadb.transaction.create()`
 3. ❌ Never updates user token balance
 4. ❌ Never sends receipt email
-5. ✅ Returns 200 OK to Networx (so retries stop)
+5. ✅ Returns 200 OK to Secure-Processor (so retries stop)
 
-**Result:** Networx receives acknowledgment, stops retrying, but transaction never saved to database.
+**Result:** Secure-Processor receives acknowledgment, stops retrying, but transaction never saved to database.
 
 ---
 
 #### **AFTER (FIXED):**
 
-```typescript:app/api/webhooks/networx/route.ts
+```typescript:app/api/webhooks/secure-processor/route.ts
 case 'completed':
 case 'success':
   console.log(`✅ Payment SUCCESSFUL for order ${tracking_id}`);
@@ -286,11 +286,11 @@ const PaymentHistoryPage = async () => {
 ### Issue #1: Signature Verification Not Implemented
 
 **Current Implementation:** HMAC SHA256 (incorrect)  
-**Networx Requirement:** RSA SHA256 with `Content-Signature` header
+**Secure-Processor Requirement:** RSA SHA256 with `Content-Signature` header
 
-Per [Networx documentation](https://docs.networxpay.com/en/using_api/webhooks/#verify-webhook-requests):
+Per [Secure-Processor documentation](https://docs.secure-processorpay.com/en/using_api/webhooks/#verify-webhook-requests):
 
-> The `Content-Signature` header contains the RSA digital signature of the request, that is generated with the shop RSA private key known only to the Networx Payment Gateway.
+> The `Content-Signature` header contains the RSA digital signature of the request, that is generated with the shop RSA private key known only to the Secure-Processor Payment Gateway.
 
 **Current Code (Lines 7-32):**
 ```typescript
@@ -307,7 +307,7 @@ function verifyWebhookSignature(data: Record<string, any>, signature: string, se
 **Recommendation:**
 - Implement RSA signature verification like `/api/webhooks/payment/route.ts`
 - Use `Content-Signature` header
-- Use public key from Networx dashboard
+- Use public key from Secure-Processor dashboard
 
 **Priority:** MEDIUM (webhooks currently work without verification, but security risk)
 
@@ -316,11 +316,11 @@ function verifyWebhookSignature(data: Record<string, any>, signature: string, se
 ### Issue #2: Two Webhook Endpoints (Potential Confusion)
 
 **Endpoints:**
-1. `/api/webhooks/networx` - HPP webhooks (NOW FIXED)
+1. `/api/webhooks/secure-processor` - HPP webhooks (NOW FIXED)
 2. `/api/webhooks/payment` - API webhooks with RSA verification
 
 **Current Usage:**
-- `notification_url` → `/api/webhooks/networx` (HPP)
+- `notification_url` → `/api/webhooks/secure-processor` (HPP)
 - Both endpoints now write to database
 
 **Recommendation:**
@@ -336,7 +336,7 @@ function verifyWebhookSignature(data: Record<string, any>, signature: string, se
 
 ### Integration Test Created
 
-**File:** `__tests__/integration/networx-webhook-database-write.spec.tsx`
+**File:** `__tests__/integration/secure-processor-webhook-database-write.spec.tsx`
 
 **Test Cases:**
 1. ✅ Successful webhook saves to database
@@ -348,7 +348,7 @@ function verifyWebhookSignature(data: Record<string, any>, signature: string, se
 
 **Run Tests:**
 ```bash
-npm test networx-webhook-database-write
+npm test secure-processor-webhook-database-write
 ```
 
 ---
@@ -357,16 +357,16 @@ npm test networx-webhook-database-write
 
 #### Pre-Test Setup
 - [ ] Ensure `DATABASE_URL` is configured
-- [ ] Ensure `NETWORX_SHOP_ID` and `NETWORX_SECRET_KEY` are set
+- [ ] Ensure `SECURE-PROCESSOR_SHOP_ID` and `SECURE-PROCESSOR_SECRET_KEY` are set
 - [ ] Ensure `OUTBOX_EMAIL` is configured for receipts
-- [ ] Set `NETWORX_TEST_MODE=true` for sandbox testing
+- [ ] Set `SECURE-PROCESSOR_TEST_MODE=true` for sandbox testing
 
 #### Test Flow
 1. [ ] **Create Payment**
    - Navigate to token purchase page
    - Select a token package
    - Click "Create Payment Token"
-   - Verify redirect to Networx HPP
+   - Verify redirect to Secure-Processor HPP
 
 2. [ ] **Complete Payment**
    - Use test card: `4200 0000 0000 0000` (CVV: any, Date: future)
@@ -374,7 +374,7 @@ npm test networx-webhook-database-write
    - Verify redirect to success page
 
 3. [ ] **Check Server Logs**
-   - [ ] Webhook received log: `📥 Networx HPP Webhook Received`
+   - [ ] Webhook received log: `📥 Secure-Processor HPP Webhook Received`
    - [ ] Payment successful log: `✅ Payment SUCCESSFUL`
    - [ ] Token extraction log: `📝 Extracted tokens: X`
    - [ ] Balance update log: `✅ Updated user balance: +X tokens`
@@ -415,9 +415,9 @@ npm test networx-webhook-database-write
 
 ## 🚨 Retry & Idempotency Handling
 
-### Networx Retry Schedule
+### Secure-Processor Retry Schedule
 
-According to [Networx documentation](https://docs.networxpay.com/en/using_api/webhooks/#retry-webhook-notification-schedule):
+According to [Secure-Processor documentation](https://docs.secure-processorpay.com/en/using_api/webhooks/#retry-webhook-notification-schedule):
 
 | Attempt | Delay After Previous |
 |---------|---------------------|
@@ -458,12 +458,12 @@ if (existingTransaction) {
 
 ### Environment Variables (Vercel)
 - [x] `DATABASE_URL` - PostgreSQL connection string
-- [x] `NETWORX_SHOP_ID` - Shop ID from Networx dashboard
-- [x] `NETWORX_SECRET_KEY` - Secret key from Networx dashboard
-- [x] `NETWORX_API_URL` - `https://checkout.networxpay.com`
-- [x] `NETWORX_TEST_MODE` - `true` for sandbox, `false` for production
+- [x] `SECURE-PROCESSOR_SHOP_ID` - Shop ID from Secure-Processor dashboard
+- [x] `SECURE-PROCESSOR_SECRET_KEY` - Secret key from Secure-Processor dashboard
+- [x] `SECURE-PROCESSOR_API_URL` - `https://checkout.secure-processorpay.com`
+- [x] `SECURE-PROCESSOR_TEST_MODE` - `true` for sandbox, `false` for production
 - [x] `OUTBOX_EMAIL` - Email address for sending receipts
-- [ ] `PUBLIC_KEY` - Networx public key (for RSA verification)
+- [ ] `PUBLIC_KEY` - Secure-Processor public key (for RSA verification)
 
 ### Code Deployment
 - [x] Updated webhook handler with database writes
@@ -490,7 +490,7 @@ if (existingTransaction) {
 ### Key Metrics to Monitor
 
 1. **Webhook Receipt Rate**
-   - Log: `📥 Networx HPP Webhook Received`
+   - Log: `📥 Secure-Processor HPP Webhook Received`
    - Alert: If no webhooks received for >24h after payment
 
 2. **Database Write Success Rate**
@@ -534,7 +534,7 @@ if (existingTransaction) {
 - [ ] Production payments verified
 
 ### Acceptance Criteria
-1. ✅ User makes payment on Networx HPP
+1. ✅ User makes payment on Secure-Processor HPP
 2. ✅ Webhook received within 30 seconds
 3. ✅ Transaction appears in database within 1 second
 4. ✅ User balance updates within 1 second
@@ -546,8 +546,8 @@ if (existingTransaction) {
 
 ## 📚 References
 
-- [Networx Webhooks Documentation](https://docs.networxpay.com/en/using_api/webhooks/)
-- Commit 3f1a0fd - NetworxPay Integration: `COMMIT_3f1a0fd_CHANGELOG.md`
+- [Secure-Processor Webhooks Documentation](https://docs.secure-processorpay.com/en/using_api/webhooks/)
+- Commit 3f1a0fd - Secure-ProcessorPay Integration: `COMMIT_3f1a0fd_CHANGELOG.md`
 - Database Schema: `prisma/schema.prisma`
 - Payment History UI: `app/(dashboard)/dashboard/billing/payment-history/page.tsx`
 
@@ -557,8 +557,8 @@ if (existingTransaction) {
 
 | File | Changes | Lines |
 |------|---------|-------|
-| `app/api/webhooks/networx/route.ts` | Added database write logic | +130 |
-| `__tests__/integration/networx-webhook-database-write.spec.tsx` | Created integration tests | +300 |
+| `app/api/webhooks/secure-processor/route.ts` | Added database write logic | +130 |
+| `__tests__/integration/secure-processor-webhook-database-write.spec.tsx` | Created integration tests | +300 |
 | `PAYMENT_HISTORY_ROOT_CAUSE_ANALYSIS.md` | This document | +800 |
 
 **Total Impact:** 3 files, ~1,230 lines added

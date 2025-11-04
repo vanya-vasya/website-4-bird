@@ -1,13 +1,13 @@
-# NetworxPay Integration Testing Guide
+# Secure-ProcessorPay Integration Testing Guide
 
 ## Overview
 
-This guide provides step-by-step instructions for testing the NetworxPay payment integration end-to-end.
+This guide provides step-by-step instructions for testing the Secure-ProcessorPay payment integration end-to-end.
 
 ## Prerequisites
 
-1. Environment variables configured (see `NETWORX_ENV_CONFIGURATION.md`)
-2. `NETWORX_TEST_MODE=true` set in environment
+1. Environment variables configured (see `SECURE-PROCESSOR_ENV_CONFIGURATION.md`)
+2. `SECURE-PROCESSOR_TEST_MODE=true` set in environment
 3. Application running locally or deployed to Vercel
 
 ## Test Scripts
@@ -17,7 +17,7 @@ This guide provides step-by-step instructions for testing the NetworxPay payment
 Validate all environment variables are correctly configured:
 
 ```bash
-node scripts/validate-networx-env.js
+node scripts/validate-secure-processor-env.js
 ```
 
 **Expected Output:**
@@ -27,10 +27,10 @@ node scripts/validate-networx-env.js
 
 ### 2. API Integration Test
 
-Test the NetworxPay API integration directly:
+Test the Secure-ProcessorPay API integration directly:
 
 ```bash
-node scripts/test-networx-integration.js
+node scripts/test-secure-processor-integration.js
 ```
 
 **What it tests:**
@@ -59,7 +59,7 @@ node scripts/test-networx-integration.js
 
 2. **Verify Redirect**
    - ✅ Should see "Redirecting to payment page..." toast
-   - ✅ Should be redirected to NetworxPay hosted page
+   - ✅ Should be redirected to Secure-ProcessorPay hosted page
    - ✅ No extra modal or confirmation screen
    - ⏱️ Redirect should happen within 500ms
 
@@ -201,7 +201,7 @@ Result: Insufficient funds
 ### Create Payment Checkout
 
 ```bash
-curl -X POST https://checkout.networxpay.com/ctp/api/checkouts \
+curl -X POST https://checkout.secure-processorpay.com/ctp/api/checkouts \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -H "X-API-Version: 2" \
@@ -221,7 +221,7 @@ curl -X POST https://checkout.networxpay.com/ctp/api/checkouts \
       },
       "settings": {
         "return_url": "https://your-domain.vercel.app/payment/success",
-        "notification_url": "https://your-domain.vercel.app/api/webhooks/networx"
+        "notification_url": "https://your-domain.vercel.app/api/webhooks/secure-processor"
       }
     }
   }'
@@ -232,7 +232,7 @@ curl -X POST https://checkout.networxpay.com/ctp/api/checkouts \
 {
   "checkout": {
     "token": "abc123...",
-    "redirect_url": "https://checkout.networxpay.com/widget/hpp.html?token=abc123..."
+    "redirect_url": "https://checkout.secure-processorpay.com/widget/hpp.html?token=abc123..."
   }
 }
 ```
@@ -240,7 +240,7 @@ curl -X POST https://checkout.networxpay.com/ctp/api/checkouts \
 ### Check Payment Status
 
 ```bash
-curl -X GET "https://checkout.networxpay.com/ctp/api/checkouts/{token}" \
+curl -X GET "https://checkout.secure-processorpay.com/ctp/api/checkouts/{token}" \
   -H "Accept: application/json" \
   -H "X-API-Version: 2" \
   -H "Authorization: Basic $(echo -n '29959:dbfb6f4e...' | base64)"
@@ -269,7 +269,7 @@ curl -X GET "https://checkout.networxpay.com/ctp/api/checkouts/{token}" \
    - Copy ngrok URL (e.g., `https://abc123.ngrok.io`)
    - Update webhook URL in code to:
      ```typescript
-     const notificationUrl = 'https://abc123.ngrok.io/api/webhooks/networx';
+     const notificationUrl = 'https://abc123.ngrok.io/api/webhooks/secure-processor';
      ```
 
 5. **Make Test Payment**
@@ -281,7 +281,7 @@ curl -X GET "https://checkout.networxpay.com/ctp/api/checkouts/{token}" \
 Send a test webhook request:
 
 ```bash
-curl -X POST http://localhost:3000/api/webhooks/networx \
+curl -X POST http://localhost:3000/api/webhooks/secure-processor \
   -H "Content-Type: application/json" \
   -d '{
     "transaction_id": "txn_123",
@@ -306,7 +306,7 @@ curl -X POST http://localhost:3000/api/webhooks/networx \
    - Alert if success rate drops below 95%
 
 2. **API Response Times**
-   - Monitor `/api/payment/networx` response times
+   - Monitor `/api/payment/secure-processor` response times
    - Alert if P95 > 3 seconds
 
 3. **Webhook Delivery**
@@ -339,17 +339,17 @@ console.log({
 
 **Check:**
 1. Environment variables are set correctly
-2. API endpoint is `checkout.networxpay.com`
+2. API endpoint is `checkout.secure-processorpay.com`
 3. Amount is integer (cents)
 4. Shop ID and Secret Key are valid
 
 **Debug:**
 ```bash
 # Check environment variables
-node scripts/validate-networx-env.js
+node scripts/validate-secure-processor-env.js
 
 # Test API directly
-node scripts/test-networx-integration.js
+node scripts/test-secure-processor-integration.js
 
 # Check server logs
 # Look for errors in API route handler
@@ -365,10 +365,10 @@ node scripts/test-networx-integration.js
 **Debug:**
 ```bash
 # Test webhook endpoint
-curl http://localhost:3000/api/webhooks/networx
+curl http://localhost:3000/api/webhooks/secure-processor
 
 # Expected response:
-# { "message": "Networx webhook endpoint is active", "timestamp": "..." }
+# { "message": "Secure-Processor webhook endpoint is active", "timestamp": "..." }
 ```
 
 ### Issue: "Invalid signature"
@@ -391,7 +391,7 @@ console.log('Actual signature:', signature);
 Before deploying to production:
 
 ### Configuration
-- [ ] `NETWORX_TEST_MODE=false` in Vercel
+- [ ] `SECURE-PROCESSOR_TEST_MODE=false` in Vercel
 - [ ] Production credentials configured
 - [ ] Return URL updated to production domain
 - [ ] Webhook URL updated to production domain
@@ -431,12 +431,12 @@ Before deploying to production:
 
 1. **Run Validation**
    ```bash
-   node scripts/validate-networx-env.js
+   node scripts/validate-secure-processor-env.js
    ```
 
 2. **Run Integration Tests**
    ```bash
-   node scripts/test-networx-integration.js
+   node scripts/test-secure-processor-integration.js
    ```
 
 3. **Manual Testing**

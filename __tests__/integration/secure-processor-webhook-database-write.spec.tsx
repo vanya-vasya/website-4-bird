@@ -1,7 +1,7 @@
 /**
- * Integration Test: Networx Webhook Database Write
+ * Integration Test: Secure-Processor Webhook Database Write
  * 
- * Purpose: Verify that successful payment webhooks from Networx are properly
+ * Purpose: Verify that successful payment webhooks from Secure-Processor are properly
  * stored in the database and appear in Payment History.
  * 
  * Tests:
@@ -12,7 +12,7 @@
  */
 
 import { NextRequest } from 'next/server';
-import { POST } from '@/app/api/webhooks/networx/route';
+import { POST } from '@/app/api/webhooks/secure-processor/route';
 import prismadb from '@/lib/prismadb';
 import { fetchPaymentHistory } from '@/lib/api-limit';
 
@@ -33,7 +33,7 @@ jest.mock('@/lib/receiptGeneration', () => ({
   generatePdfReceipt: jest.fn().mockResolvedValue(Buffer.from('fake-pdf')),
 }));
 
-describe('Networx Webhook Database Write Integration Test', () => {
+describe('Secure-Processor Webhook Database Write Integration Test', () => {
   const testUserId = 'test_user_123';
   
   beforeAll(async () => {
@@ -76,7 +76,7 @@ describe('Networx Webhook Database Write Integration Test', () => {
   });
 
   it('should save successful payment webhook to database', async () => {
-    // Arrange: Mock Networx HPP webhook payload (successful payment)
+    // Arrange: Mock Secure-Processor HPP webhook payload (successful payment)
     const webhookPayload = {
       checkout: {
         token: 'test_token_abc123xyz',
@@ -95,12 +95,12 @@ describe('Networx Webhook Database Write Integration Test', () => {
           payment_method_type: 'credit_card',
           message: 'Payment successful',
           paid_at: '2025-10-10T12:00:00.000Z',
-          receipt_url: 'https://networxpay.com/receipt/test123',
+          receipt_url: 'https://secure-processorpay.com/receipt/test123',
         },
       },
     };
 
-    const request = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+    const request = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(webhookPayload),
@@ -130,7 +130,7 @@ describe('Networx Webhook Database Write Integration Test', () => {
       type: 'payment',
       payment_method_type: 'credit_card',
       message: 'Payment successful',
-      receipt_url: 'https://networxpay.com/receipt/test123',
+      receipt_url: 'https://secure-processorpay.com/receipt/test123',
     });
     expect(transactions[0].paid_at).toBeInstanceOf(Date);
 
@@ -168,7 +168,7 @@ describe('Networx Webhook Database Write Integration Test', () => {
       },
     };
 
-    const request = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+    const request = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
       method: 'POST',
       body: JSON.stringify(webhookPayload),
     });
@@ -209,7 +209,7 @@ describe('Networx Webhook Database Write Integration Test', () => {
       },
     };
 
-    const request = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+    const request = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
       method: 'POST',
       body: JSON.stringify(webhookPayload),
     });
@@ -242,7 +242,7 @@ describe('Networx Webhook Database Write Integration Test', () => {
       },
     };
 
-    const request = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+    const request = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
       method: 'POST',
       body: JSON.stringify(webhookPayload),
     });
@@ -275,12 +275,12 @@ describe('Networx Webhook Database Write Integration Test', () => {
       },
     };
 
-    const request1 = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+    const request1 = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
       method: 'POST',
       body: JSON.stringify(webhookPayload),
     });
 
-    const request2 = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+    const request2 = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
       method: 'POST',
       body: JSON.stringify(webhookPayload),
     });
@@ -338,7 +338,7 @@ describe('Networx Webhook Database Write Integration Test', () => {
         },
       };
 
-      const request = new NextRequest('http://localhost:3000/api/webhooks/networx', {
+      const request = new NextRequest('http://localhost:3000/api/webhooks/secure-processor', {
         method: 'POST',
         body: JSON.stringify(payload),
       });

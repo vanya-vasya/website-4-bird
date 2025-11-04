@@ -2,7 +2,7 @@
 
 ## 🎯 TL;DR - Most Likely Problem
 
-**Your Networx merchant dashboard is configured to redirect to `/dashboard` instead of `/payment/success`.**
+**Your Secure-Processor merchant dashboard is configured to redirect to `/dashboard` instead of `/payment/success`.**
 
 This single configuration issue is causing:
 - Users don't see success confirmation page
@@ -13,9 +13,9 @@ This single configuration issue is causing:
 
 ## 🚀 5-Minute Fix
 
-### Step 1: Log into Networx Dashboard
+### Step 1: Log into Secure-Processor Dashboard
 ```
-URL: https://merchant.networxpay.com
+URL: https://merchant.secure-processorpay.com
 Shop ID: 29959
 ```
 
@@ -70,7 +70,7 @@ LIMIT 5;
 ### Check Vercel Logs
 ```bash
 # In Vercel Dashboard → Logs, search for:
-"Networx HPP Webhook Received"
+"Secure-Processor HPP Webhook Received"
 "Transaction saved to database"
 "Payment SUCCESSFUL"
 ```
@@ -79,9 +79,9 @@ LIMIT 5;
 ```bash
 # Vercel Dashboard → Settings → Environment Variables
 # Verify these exist:
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://checkout.networxpay.com
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
 DATABASE_URL=postgresql://...
 ```
 
@@ -110,8 +110,8 @@ DATABASE_URL=postgresql://...
 **Possible Causes:**
 
 1. **Webhook Not Configured**
-   - Check Networx dashboard → Webhooks
-   - Webhook URL should be: `https://website-3.../api/webhooks/networx`
+   - Check Secure-Processor dashboard → Webhooks
+   - Webhook URL should be: `https://website-3.../api/webhooks/secure-processor`
    - Status should be: ACTIVE ✅
 
 2. **Webhook Timing (Race Condition)**
@@ -129,7 +129,7 @@ DATABASE_URL=postgresql://...
    - If errors found, check database connection and user exists
 
 4. **Test Mode Mismatch**
-   - Verify `NETWORX_TEST_MODE` env var matches Networx dashboard
+   - Verify `SECURE-PROCESSOR_TEST_MODE` env var matches Secure-Processor dashboard
    - Both should be `true` (testing) or `false` (production)
 
 ---
@@ -139,7 +139,7 @@ DATABASE_URL=postgresql://...
 ### 1. Check Redirect URL (Most Important)
 ```bash
 # During payment, watch browser URL bar:
-# After clicking "Pay" on Networx HPP, you should be redirected to:
+# After clicking "Pay" on Secure-Processor HPP, you should be redirected to:
 
 ✅ CORRECT: https://website-3.../payment/success?token=abc123
 ❌ WRONG:   https://website-3.../dashboard
@@ -151,7 +151,7 @@ DATABASE_URL=postgresql://...
 # Vercel Dashboard → Logs → Filter by "webhook"
 
 Expected logs:
-[timestamp] 📥 Networx HPP Webhook Received
+[timestamp] 📥 Secure-Processor HPP Webhook Received
 [timestamp] ✅ Payment SUCCESSFUL for order user_xyz
 [timestamp] ✅ Updated user balance: +100 tokens
 [timestamp] ✅ Transaction saved to database: txn_abc123
@@ -181,7 +181,7 @@ WHERE clerkId = 'your_clerk_id';
 ```
 Is redirect URL correct (/payment/success)?
 │
-├─→ NO → FIX: Update Networx dashboard return URL (Step 1-4 above)
+├─→ NO → FIX: Update Secure-Processor dashboard return URL (Step 1-4 above)
 │
 └─→ YES
     │
@@ -207,7 +207,7 @@ Is redirect URL correct (/payment/success)?
 
 Run through this checklist in order:
 
-- [ ] **Login to Networx Dashboard**
+- [ ] **Login to Secure-Processor Dashboard**
 - [ ] **Check "Success Return URL" setting**
       - If wrong → Update and save
       - If correct → Continue to next step
@@ -246,14 +246,14 @@ If issue persists after following this guide:
 
 1. Check Vercel logs for specific error messages
 2. Verify all environment variables are set correctly
-3. Contact Networx support: support@networxpay.com
-4. Check Networx documentation: https://docs.networxpay.com
+3. Contact Secure-Processor support: support@secure-processorpay.com
+4. Check Secure-Processor documentation: https://docs.secure-processorpay.com
 
 **Log Files to Share**:
 - Vercel webhook logs (sanitize sensitive data)
 - Database query results (transaction table)
 - Browser DevTools console errors
-- Screenshot of Networx dashboard settings
+- Screenshot of Secure-Processor dashboard settings
 
 ---
 

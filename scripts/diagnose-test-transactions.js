@@ -52,15 +52,15 @@ const log = {
 const ENV_VARS = {
   server: [
     { key: 'DATABASE_URL', required: true, sensitive: true },
-    { key: 'NETWORX_SHOP_ID', required: true, sensitive: false },
-    { key: 'NETWORX_SECRET_KEY', required: true, sensitive: true },
-    { key: 'NETWORX_API_URL', required: true, sensitive: false },
-    { key: 'NETWORX_TEST_MODE', required: true, sensitive: false },
+    { key: 'SECURE-PROCESSOR_SHOP_ID', required: true, sensitive: false },
+    { key: 'SECURE-PROCESSOR_SECRET_KEY', required: true, sensitive: true },
+    { key: 'SECURE-PROCESSOR_API_URL', required: true, sensitive: false },
+    { key: 'SECURE-PROCESSOR_TEST_MODE', required: true, sensitive: false },
   ],
   client: [
-    { key: 'NEXT_PUBLIC_NETWORX_SHOP_ID', required: false, sensitive: false },
-    { key: 'NEXT_PUBLIC_NETWORX_TEST_MODE', required: false, sensitive: false },
-    { key: 'NEXT_PUBLIC_NETWORX_WIDGET_URL', required: false, sensitive: false },
+    { key: 'NEXT_PUBLIC_SECURE-PROCESSOR_SHOP_ID', required: false, sensitive: false },
+    { key: 'NEXT_PUBLIC_SECURE-PROCESSOR_TEST_MODE', required: false, sensitive: false },
+    { key: 'NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL', required: false, sensitive: false },
   ],
 };
 
@@ -139,31 +139,31 @@ async function runDiagnostics() {
     log.divider();
     
     // Check Networks configuration
-    const networxShopId = process.env.NETWORX_SHOP_ID || '29959';
-    const networxSecretKey = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
-    const networxApiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
-    const networxTestMode = process.env.NETWORX_TEST_MODE || 'false';
+    const secure-processorShopId = process.env.SECURE-PROCESSOR_SHOP_ID || '29959';
+    const secure-processorSecretKey = process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
+    const secure-processorApiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
+    const secure-processorTestMode = process.env.SECURE-PROCESSOR_TEST_MODE || 'false';
     
     log.info('Networks Configuration:');
-    log.data('Shop ID', networxShopId);
-    log.data('Secret Key', networxSecretKey ? `${networxSecretKey.slice(0, 10)}...${networxSecretKey.slice(-10)}` : 'MISSING');
-    log.data('API URL', networxApiUrl);
-    log.data('Test Mode', networxTestMode);
+    log.data('Shop ID', secure-processorShopId);
+    log.data('Secret Key', secure-processorSecretKey ? `${secure-processorSecretKey.slice(0, 10)}...${secure-processorSecretKey.slice(-10)}` : 'MISSING');
+    log.data('API URL', secure-processorApiUrl);
+    log.data('Test Mode', secure-processorTestMode);
     
     // Critical check: Test mode status
-    if (networxTestMode === 'true') {
-      log.warning('NETWORX_TEST_MODE is set to TRUE (test/sandbox mode)');
+    if (secure-processorTestMode === 'true') {
+      log.warning('SECURE-PROCESSOR_TEST_MODE is set to TRUE (test/sandbox mode)');
       log.info('Test mode transactions use test API keys and test payment methods');
       results.environment.issues.push('Running in TEST MODE - test transactions expected');
     } else {
-      log.success('NETWORX_TEST_MODE is set to FALSE (production mode)');
+      log.success('SECURE-PROCESSOR_TEST_MODE is set to FALSE (production mode)');
       log.info('Production mode transactions use real payment methods');
     }
     
     // Check webhook URL configuration
-    const webhookUrl = 'https://www.yum-mi.com/api/webhooks/networx'; // Hardcoded in code
+    const webhookUrl = 'https://www.yum-mi.com/api/webhooks/secure-processor'; // Hardcoded in code
     log.data('Webhook URL', webhookUrl);
-    log.info('Webhook URL is hardcoded in app/api/payment/networx/route.ts:53');
+    log.info('Webhook URL is hardcoded in app/api/payment/secure-processor/route.ts:53');
     
     log.divider();
     
@@ -300,9 +300,9 @@ async function runDiagnostics() {
   // ============================================================================
   log.section('3. Webhook Configuration Analysis');
   
-  log.info('Webhook Handler: app/api/webhooks/networx/route.ts');
-  log.data('Endpoint URL', 'https://www.yum-mi.com/api/webhooks/networx');
-  log.data('Configured in', 'app/api/payment/networx/route.ts:53 (hardcoded)');
+  log.info('Webhook Handler: app/api/webhooks/secure-processor/route.ts');
+  log.data('Endpoint URL', 'https://www.yum-mi.com/api/webhooks/secure-processor');
+  log.data('Configured in', 'app/api/payment/secure-processor/route.ts:53 (hardcoded)');
   
   log.divider();
   log.info('Webhook Processing Flow:');
@@ -326,7 +326,7 @@ async function runDiagnostics() {
   console.log('    • If duplicate transaction → Returns 200 but no DB write (idempotency)');
   
   // Check webhook signature validation
-  const secretKey = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
+  const secretKey = process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
   log.divider();
   log.info('Webhook Security:');
   log.data('Signature Validation', 'DISABLED in code (commented out)');
@@ -340,7 +340,7 @@ async function runDiagnostics() {
   // ============================================================================
   log.section('4. Test Mode vs Production Mode Analysis');
   
-  const testMode = process.env.NETWORX_TEST_MODE === 'true';
+  const testMode = process.env.SECURE-PROCESSOR_TEST_MODE === 'true';
   
   log.data('Current Mode', testMode ? 'TEST/SANDBOX' : 'PRODUCTION');
   
@@ -376,12 +376,12 @@ async function runDiagnostics() {
     {
       cause: 'Webhook not being delivered by Networks',
       check: 'Check Networks dashboard for webhook delivery logs',
-      fix: 'Verify webhook URL in Networks dashboard matches: https://www.yum-mi.com/api/webhooks/networx',
+      fix: 'Verify webhook URL in Networks dashboard matches: https://www.yum-mi.com/api/webhooks/secure-processor',
     },
     {
       cause: 'Webhook URL is incorrect or inaccessible',
-      check: 'Test webhook endpoint: curl https://www.yum-mi.com/api/webhooks/networx',
-      fix: 'Should return: {"message":"Networx webhook endpoint is active","timestamp":"..."}',
+      check: 'Test webhook endpoint: curl https://www.yum-mi.com/api/webhooks/secure-processor',
+      fix: 'Should return: {"message":"Secure-Processor webhook endpoint is active","timestamp":"..."}',
     },
     {
       cause: 'Webhook received but user not found in database',
@@ -405,7 +405,7 @@ async function runDiagnostics() {
     },
     {
       cause: 'Using separate test database not visible in production console',
-      check: 'Check if NETWORX_TEST_MODE uses different DATABASE_URL',
+      check: 'Check if SECURE-PROCESSOR_TEST_MODE uses different DATABASE_URL',
       fix: 'Code review shows SAME database for both modes - not the issue',
     },
     {
@@ -426,13 +426,13 @@ async function runDiagnostics() {
   // ============================================================================
   log.section('6. Recommended Structured Logging');
   
-  log.info('Add the following logs to app/api/webhooks/networx/route.ts:');
+  log.info('Add the following logs to app/api/webhooks/secure-processor/route.ts:');
   
   console.log(`
 ${colors.cyan}At line 42 (after receiving webhook):${colors.reset}
 console.log('🔍 [WEBHOOK-ENV]', {
   environment: process.env.NODE_ENV,
-  testMode: process.env.NETWORX_TEST_MODE,
+  testMode: process.env.SECURE-PROCESSOR_TEST_MODE,
   databaseUrl: process.env.DATABASE_URL ? 'SET' : 'MISSING',
   timestamp: new Date().toISOString(),
 });
@@ -479,7 +479,7 @@ console.log('🔍 [WEBHOOK-DB-WRITE]', {
     • Complete payment
   
   ${colors.yellow}Step 4: Verify webhook delivery${colors.reset}
-    • Check Vercel logs for "📥 Networx HPP Webhook Received"
+    • Check Vercel logs for "📥 Secure-Processor HPP Webhook Received"
     • Check for [WEBHOOK-ENV] log with environment details
     • Check for [WEBHOOK-DATA] log with payment details
     • Check for [WEBHOOK-DB-WRITE] log confirming DB write
@@ -493,7 +493,7 @@ console.log('🔍 [WEBHOOK-DB-WRITE]', {
   ${colors.yellow}Step 6: Check Networks dashboard${colors.reset}
     • Login to Networks merchant dashboard
     • Navigate to Webhooks section
-    • Verify webhook URL: https://www.yum-mi.com/api/webhooks/networx
+    • Verify webhook URL: https://www.yum-mi.com/api/webhooks/secure-processor
     • Check webhook delivery logs
     • Look for failed deliveries or wrong URLs
   `.trim());
@@ -547,7 +547,7 @@ console.log('🔍 [WEBHOOK-DB-WRITE]', {
   console.log(`
   ${colors.bright}${colors.red}1. Networks webhook not being delivered${colors.reset}
      ${colors.dim}• Check Networks dashboard for webhook delivery logs
-     • Verify webhook URL matches: https://www.yum-mi.com/api/webhooks/networx
+     • Verify webhook URL matches: https://www.yum-mi.com/api/webhooks/secure-processor
      • Test webhook endpoint accessibility
      ${colors.reset}
   

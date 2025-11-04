@@ -6,20 +6,20 @@
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 1. USER INITIATES PAYMENT                                          │
 │    └─> Click "Buy Tokens" button                                   │
-│    └─> /api/payment/networx creates checkout                       │
-│    └─> User redirected to Networx HPP                              │
+│    └─> /api/payment/secure-processor creates checkout                       │
+│    └─> User redirected to Secure-Processor HPP                              │
 └─────────────────────────────────────────────────────────────────────┘
                                 ↓
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 2. USER COMPLETES PAYMENT                                          │
-│    └─> Enter card details on Networx                               │
-│    └─> Networx processes payment                                   │
+│    └─> Enter card details on Secure-Processor                               │
+│    └─> Secure-Processor processes payment                                   │
 │    └─> Payment successful ✅                                        │
 └─────────────────────────────────────────────────────────────────────┘
                                 ↓
 ┌─────────────────────────────────────────────────────────────────────┐
-│ 3. NETWORX SENDS WEBHOOK                                           │
-│    POST /api/webhooks/networx                                      │
+│ 3. SECURE-PROCESSOR SENDS WEBHOOK                                           │
+│    POST /api/webhooks/secure-processor                                      │
 │    Body: {                                                         │
 │      "checkout": {                                                 │
 │        "status": "completed",                                      │
@@ -31,7 +31,7 @@
                                 ↓
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 4. WEBHOOK HANDLER (BROKEN) ❌                                      │
-│    /app/api/webhooks/networx/route.ts                             │
+│    /app/api/webhooks/secure-processor/route.ts                             │
 │                                                                     │
 │    ✅ Receives webhook                                              │
 │    ✅ Parses payload                                                │
@@ -39,7 +39,7 @@
 │    ❌ // TODO: Update database (NOT EXECUTED)                      │
 │    ✅ Returns 200 OK                                                │
 │                                                                     │
-│    Result: Networx happy, database empty ❌                        │
+│    Result: Secure-Processor happy, database empty ❌                        │
 └─────────────────────────────────────────────────────────────────────┘
                                 ↓
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -61,20 +61,20 @@
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 1. USER INITIATES PAYMENT                                          │
 │    └─> Click "Buy Tokens" button                                   │
-│    └─> /api/payment/networx creates checkout                       │
-│    └─> User redirected to Networx HPP                              │
+│    └─> /api/payment/secure-processor creates checkout                       │
+│    └─> User redirected to Secure-Processor HPP                              │
 └─────────────────────────────────────────────────────────────────────┘
                                 ↓
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 2. USER COMPLETES PAYMENT                                          │
-│    └─> Enter card details on Networx                               │
-│    └─> Networx processes payment                                   │
+│    └─> Enter card details on Secure-Processor                               │
+│    └─> Secure-Processor processes payment                                   │
 │    └─> Payment successful ✅                                        │
 └─────────────────────────────────────────────────────────────────────┘
                                 ↓
 ┌─────────────────────────────────────────────────────────────────────┐
-│ 3. NETWORX SENDS WEBHOOK                                           │
-│    POST /api/webhooks/networx                                      │
+│ 3. SECURE-PROCESSOR SENDS WEBHOOK                                           │
+│    POST /api/webhooks/secure-processor                                      │
 │    Body: {                                                         │
 │      "checkout": {                                                 │
 │        "status": "completed",                                      │
@@ -86,7 +86,7 @@
                                 ↓
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 4. WEBHOOK HANDLER (FIXED) ✅                                       │
-│    /app/api/webhooks/networx/route.ts                             │
+│    /app/api/webhooks/secure-processor/route.ts                             │
 │                                                                     │
 │    ✅ Receives webhook                                              │
 │    ✅ Parses payload                                                │
@@ -103,7 +103,7 @@
 │    ✅ Sends receipt email                                           │
 │    ✅ Returns 200 OK                                                │
 │                                                                     │
-│    Result: Networx happy, database populated ✅                    │
+│    Result: Secure-Processor happy, database populated ✅                    │
 └─────────────────────────────────────────────────────────────────────┘
                                 ↓
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -152,7 +152,7 @@
 ## 📊 Code Changes Summary
 
 ### Files Modified: 1
-**File:** `app/api/webhooks/networx/route.ts`
+**File:** `app/api/webhooks/secure-processor/route.ts`
 
 **Lines Changed:** +135 additions
 
@@ -187,14 +187,14 @@ await transporter.sendMail({ ... });
 
 ### Files Created: 3
 
-1. **Integration Test** (`__tests__/integration/networx-webhook-database-write.spec.tsx`)
+1. **Integration Test** (`__tests__/integration/secure-processor-webhook-database-write.spec.tsx`)
    - 6 test cases covering all scenarios
    - Tests database writes, balance updates, error handling
    - Tests idempotency protection
 
 2. **Manual Test Script** (`scripts/test-webhook-manually.js`)
    - Quick local testing
-   - Simulates Networx webhook
+   - Simulates Secure-Processor webhook
    - Usage: `node scripts/test-webhook-manually.js userId amount tokens`
 
 3. **Documentation** (3 markdown files)
@@ -209,7 +209,7 @@ await transporter.sendMail({ ... });
 ### 1. Before Deployment (Local)
 ```bash
 # Run tests
-npm test networx-webhook-database-write
+npm test secure-processor-webhook-database-write
 
 # Manual test
 node scripts/test-webhook-manually.js user_test 2380 100

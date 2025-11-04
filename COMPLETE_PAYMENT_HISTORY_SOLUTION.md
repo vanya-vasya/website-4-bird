@@ -38,7 +38,7 @@
 **Files Changed:** 7 files, +1,834 lines
 
 #### Core Implementation
-✅ **`app/api/webhooks/networx/route.ts`** (+141 lines)
+✅ **`app/api/webhooks/secure-processor/route.ts`** (+141 lines)
 - Implemented database write logic
 - Added idempotency check (prevents duplicates)
 - Added user validation
@@ -47,7 +47,7 @@
 - Comprehensive error handling
 
 #### Testing Infrastructure
-✅ **`__tests__/integration/networx-webhook-database-write.spec.tsx`** (+370 lines)
+✅ **`__tests__/integration/secure-processor-webhook-database-write.spec.tsx`** (+370 lines)
 - 6 comprehensive test cases
 - Tests successful webhooks → database writes
 - Tests error scenarios (404, 400, 500)
@@ -56,7 +56,7 @@
 
 ✅ **`scripts/test-webhook-manually.js`** (+103 lines)
 - Manual testing utility
-- Simulates Networx webhook
+- Simulates Secure-Processor webhook
 - Usage: `node scripts/test-webhook-manually.js userId amount tokens`
 
 #### Documentation
@@ -129,7 +129,7 @@ case 'completed':
   break;
 ```
 
-**Result:** Webhook received, logged, returned 200 OK to Networx, but **no database write** = empty Payment History
+**Result:** Webhook received, logged, returned 200 OK to Secure-Processor, but **no database write** = empty Payment History
 
 ---
 
@@ -242,7 +242,7 @@ case 'success':
 npm test
 
 # Specific test suites
-npm test networx-webhook-database-write
+npm test secure-processor-webhook-database-write
 npm test payment-history-header-link
 npm test payment-history-e2e
 ```
@@ -284,7 +284,7 @@ Create PR: https://github.com/vanya-vasya/website-3/pull/new/feature/fix-payment
 **Commit #1: Core Fix**
 ```
 commit 81c216c
-Fix: Implement database write in Networx webhook handler for Payment History
+Fix: Implement database write in Secure-Processor webhook handler for Payment History
 
 7 files changed, 1834 insertions(+), 8 deletions(-)
 ```
@@ -341,7 +341,7 @@ vercel --prod
 
 1. **Always verify end-to-end flow** - A 200 OK doesn't mean database write happened
 2. **TODO comments can hide critical bugs** - Incomplete implementation was only logged
-3. **Idempotency is critical** - Webhooks retry up to 15 times per [Networx docs](https://docs.networxpay.com/en/using_api/webhooks/)
+3. **Idempotency is critical** - Webhooks retry up to 15 times per [Secure-Processor docs](https://docs.secure-processorpay.com/en/using_api/webhooks/)
 4. **Test the full flow** - Unit tests alone miss integration issues
 5. **Monitor database writes** - Log every critical database operation
 6. **UI links need testing** - Verify navigation works across desktop/mobile
@@ -367,8 +367,8 @@ vercel --prod
 
 ### Important URLs
 - **Payment History Page:** `/dashboard/billing/payment-history`
-- **Webhook Endpoint:** `/api/webhooks/networx`
-- **Webhook URL:** `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx`
+- **Webhook Endpoint:** `/api/webhooks/secure-processor`
+- **Webhook URL:** `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor`
 
 ### Test Commands
 ```bash
@@ -376,7 +376,7 @@ vercel --prod
 npm test
 
 # Run specific test suites
-npm test networx-webhook-database-write
+npm test secure-processor-webhook-database-write
 npm test payment-history-header-link
 npm test payment-history-e2e
 
@@ -388,7 +388,7 @@ npx prisma studio
 ```
 
 ### Key Files
-- Webhook Handler: `app/api/webhooks/networx/route.ts`
+- Webhook Handler: `app/api/webhooks/secure-processor/route.ts`
 - Payment History Page: `app/(dashboard)/dashboard/billing/payment-history/page.tsx`
 - Data Fetch Function: `lib/api-limit.ts` → `fetchPaymentHistory()`
 - Desktop Nav: `components/main-nav.tsx`

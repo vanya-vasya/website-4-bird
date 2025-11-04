@@ -55,7 +55,7 @@ export const NetworkPaymentWidget: React.FC<NetworkPaymentWidgetProps> = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/payment/networx', {
+      const response = await fetch('/api/payment/secure-processor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,11 +74,11 @@ export const NetworkPaymentWidget: React.FC<NetworkPaymentWidgetProps> = ({
       console.log('✅ Payment API Response:', data);
 
       if (data.success && data.redirect_url) {
-        // Immediately redirect to Networx payment page
+        // Immediately redirect to Secure-Processor payment page
         console.log('🔄 Redirecting to payment page:', data.redirect_url);
         toast.loading('Redirecting to payment...', { duration: 500 });
         
-        // Redirect to Networx hosted payment page
+        // Redirect to Secure-Processor hosted payment page
         window.location.href = data.redirect_url;
       } else {
         console.error('❌ Payment token creation failed:', data);
@@ -100,7 +100,7 @@ export const NetworkPaymentWidget: React.FC<NetworkPaymentWidgetProps> = ({
 
     toast('Redirecting to payment page...');
     
-    // Direct redirect to Networx Pay hosted payment page
+    // Direct redirect to Secure-Processor Pay hosted payment page
     // This is the official recommended approach
     window.location.href = paymentUrl;
   };
@@ -110,7 +110,7 @@ export const NetworkPaymentWidget: React.FC<NetworkPaymentWidgetProps> = ({
     if (!paymentToken) return;
 
     try {
-      const response = await fetch(`/api/payment/networx?token=${paymentToken}`);
+      const response = await fetch(`/api/payment/secure-processor?token=${paymentToken}`);
       const data = await response.json();
 
       if (data.success) {
@@ -143,7 +143,7 @@ export const NetworkPaymentWidget: React.FC<NetworkPaymentWidgetProps> = ({
   return (
     <Card className="w-full max-w-md mx-auto bg-white border-gray-200" style={{fontFamily: "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"}}>
       <CardHeader>
-        <CardTitle className="text-gray-900">Payment via Networx</CardTitle>
+        <CardTitle className="text-gray-900">Payment via Secure-Processor</CardTitle>
         <CardDescription className="text-gray-600">
           Amount to pay: {amount} {currency}
         </CardDescription>

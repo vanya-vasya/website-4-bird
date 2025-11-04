@@ -1,4 +1,4 @@
-# NetworxPay API Endpoint Duplication Fix
+# Secure-ProcessorPay API Endpoint Duplication Fix
 
 **Date:** 2025-10-09  
 **Priority:** 🔴 CRITICAL  
@@ -11,8 +11,8 @@
 API request was failing with **404 Not Found** because endpoint was duplicated:
 
 ```
-Expected: https://checkout.networxpay.com/ctp/api/checkouts
-Actual:   https://checkout.networxpay.com/ctp/api/checkouts/ctp/api/checkouts
+Expected: https://checkout.secure-processorpay.com/ctp/api/checkouts
+Actual:   https://checkout.secure-processorpay.com/ctp/api/checkouts/ctp/api/checkouts
                                         ^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^
                                         Duplicated!
 ```
@@ -21,11 +21,11 @@ Actual:   https://checkout.networxpay.com/ctp/api/checkouts/ctp/api/checkouts
 
 ```javascript
 2025-10-09T09:24:18.652Z [info] Making request to: 
-https://checkout.networxpay.com/ctp/api/checkouts/ctp/api/checkouts
+https://checkout.secure-processorpay.com/ctp/api/checkouts/ctp/api/checkouts
                                                   ^^^^^^^^^^^^^^^^^^ 
                                                   Extra path!
 
-2025-10-09T09:24:18.966Z [error] Networx API Error Response: 
+2025-10-09T09:24:18.966Z [error] Secure-Processor API Error Response: 
 {"status":"404","error":"Not Found"}
 ```
 
@@ -37,7 +37,7 @@ https://checkout.networxpay.com/ctp/api/checkouts/ctp/api/checkouts
 
 ```bash
 # Current Vercel environment variable (wrong format):
-NETWORX_API_URL=https://checkout.networxpay.com/ctp/api/checkouts
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com/ctp/api/checkouts
 ```
 
 The environment variable contained the **full path** including `/ctp/api/checkouts`.
@@ -45,15 +45,15 @@ The environment variable contained the **full path** including `/ctp/api/checkou
 ### Code Logic
 
 ```typescript
-// app/api/payment/networx/route.ts (OLD)
-const apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
-const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
+// app/api/payment/secure-processor/route.ts (OLD)
+const apiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
+const secure-processorApiUrl = `${apiUrl}/ctp/api/checkouts`;
 ```
 
 When combined:
 ```
-https://checkout.networxpay.com/ctp/api/checkouts + /ctp/api/checkouts
-= https://checkout.networxpay.com/ctp/api/checkouts/ctp/api/checkouts ❌
+https://checkout.secure-processorpay.com/ctp/api/checkouts + /ctp/api/checkouts
+= https://checkout.secure-processorpay.com/ctp/api/checkouts/ctp/api/checkouts ❌
 ```
 
 ---
@@ -65,26 +65,26 @@ https://checkout.networxpay.com/ctp/api/checkouts + /ctp/api/checkouts
 Added logic to strip `/ctp/api/checkouts` if it's already in the env variable:
 
 ```typescript
-// app/api/payment/networx/route.ts (NEW)
-let apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
+// app/api/payment/secure-processor/route.ts (NEW)
+let apiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
 apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip path if present
-const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
+const secure-processorApiUrl = `${apiUrl}/ctp/api/checkouts`;
 ```
 
 ### How It Works
 
-| Input (NETWORX_API_URL) | After .replace() | After adding path | Result |
+| Input (SECURE-PROCESSOR_API_URL) | After .replace() | After adding path | Result |
 |-------------------------|------------------|-------------------|---------|
-| `https://checkout.networxpay.com` | `https://checkout.networxpay.com` | `https://checkout.networxpay.com/ctp/api/checkouts` | ✅ |
-| `https://checkout.networxpay.com/ctp/api/checkouts` | `https://checkout.networxpay.com` | `https://checkout.networxpay.com/ctp/api/checkouts` | ✅ |
-| `https://checkout.networxpay.com/ctp/api/checkouts/` | `https://checkout.networxpay.com` | `https://checkout.networxpay.com/ctp/api/checkouts` | ✅ |
+| `https://checkout.secure-processorpay.com` | `https://checkout.secure-processorpay.com` | `https://checkout.secure-processorpay.com/ctp/api/checkouts` | ✅ |
+| `https://checkout.secure-processorpay.com/ctp/api/checkouts` | `https://checkout.secure-processorpay.com` | `https://checkout.secure-processorpay.com/ctp/api/checkouts` | ✅ |
+| `https://checkout.secure-processorpay.com/ctp/api/checkouts/` | `https://checkout.secure-processorpay.com` | `https://checkout.secure-processorpay.com/ctp/api/checkouts` | ✅ |
 
 ### Benefits
 
 **Defensive:** Works with both formats of environment variable
-- ✅ Base URL only: `https://checkout.networxpay.com`
-- ✅ Full path: `https://checkout.networxpay.com/ctp/api/checkouts`
-- ✅ With trailing slash: `https://checkout.networxpay.com/ctp/api/checkouts/`
+- ✅ Base URL only: `https://checkout.secure-processorpay.com`
+- ✅ Full path: `https://checkout.secure-processorpay.com/ctp/api/checkouts`
+- ✅ With trailing slash: `https://checkout.secure-processorpay.com/ctp/api/checkouts/`
 
 **No Breaking Changes:** Doesn't require immediate env variable update on Vercel
 
@@ -96,7 +96,7 @@ const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
 
 ```bash
 # Test payment request
-Request to: https://checkout.networxpay.com/ctp/api/checkouts/ctp/api/checkouts
+Request to: https://checkout.secure-processorpay.com/ctp/api/checkouts/ctp/api/checkouts
 Response: 404 Not Found ❌
 ```
 
@@ -104,27 +104,27 @@ Response: 404 Not Found ❌
 
 ```bash
 # Test payment request
-Request to: https://checkout.networxpay.com/ctp/api/checkouts
+Request to: https://checkout.secure-processorpay.com/ctp/api/checkouts
 Response: 200 OK with token ✅
 ```
 
 ### Verification Test
 
 ```javascript
-const test1 = 'https://checkout.networxpay.com/ctp/api/checkouts';
-const test2 = 'https://checkout.networxpay.com';
-const test3 = 'https://checkout.networxpay.com/ctp/api/checkouts/';
+const test1 = 'https://checkout.secure-processorpay.com/ctp/api/checkouts';
+const test2 = 'https://checkout.secure-processorpay.com';
+const test3 = 'https://checkout.secure-processorpay.com/ctp/api/checkouts/';
 
 const clean = (url) => url.replace(/\/ctp\/api\/checkouts\/?$/, '');
 
 console.log('Test 1:', clean(test1) + '/ctp/api/checkouts');
-// Result: https://checkout.networxpay.com/ctp/api/checkouts ✅
+// Result: https://checkout.secure-processorpay.com/ctp/api/checkouts ✅
 
 console.log('Test 2:', clean(test2) + '/ctp/api/checkouts');
-// Result: https://checkout.networxpay.com/ctp/api/checkouts ✅
+// Result: https://checkout.secure-processorpay.com/ctp/api/checkouts ✅
 
 console.log('Test 3:', clean(test3) + '/ctp/api/checkouts');
-// Result: https://checkout.networxpay.com/ctp/api/checkouts ✅
+// Result: https://checkout.secure-processorpay.com/ctp/api/checkouts ✅
 ```
 
 ---
@@ -144,17 +144,17 @@ Update on Vercel to use base URL only:
 
 ```bash
 # Current (works with fix):
-NETWORX_API_URL=https://checkout.networxpay.com/ctp/api/checkouts
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com/ctp/api/checkouts
 
 # Recommended (cleaner):
-NETWORX_API_URL=https://checkout.networxpay.com
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
 ```
 
 **Steps:**
 1. Go to Vercel Project Settings
 2. Navigate to Environment Variables
-3. Find `NETWORX_API_URL`
-4. Change value to: `https://checkout.networxpay.com`
+3. Find `SECURE-PROCESSOR_API_URL`
+4. Change value to: `https://checkout.secure-processorpay.com`
 5. Redeploy
 
 **Note:** This is optional since the code now handles both formats.
@@ -200,10 +200,10 @@ NETWORX_API_URL=https://checkout.networxpay.com
 
 ```bash
 # Commit 1: Initial fixes
-3566793 - fix: NetworxPay payment integration - amount format, API endpoint, and UX improvements
+3566793 - fix: Secure-ProcessorPay payment integration - amount format, API endpoint, and UX improvements
 
 # Commit 2: Test mode fix
-535c1d5 - fix: CRITICAL - NetworxPay test mode now calls real API instead of generating fake tokens
+535c1d5 - fix: CRITICAL - Secure-ProcessorPay test mode now calls real API instead of generating fake tokens
 
 # Commit 3: Endpoint duplication fix (THIS COMMIT)
 4132edc - fix: prevent API endpoint duplication when env variable contains full path
@@ -214,7 +214,7 @@ NETWORX_API_URL=https://checkout.networxpay.com
 ## 🚀 Deployment Status
 
 ### GitHub
-- ✅ Branch: `feature/networx-payment-integration-fixes`
+- ✅ Branch: `feature/secure-processor-payment-integration-fixes`
 - ✅ Commits pushed
 - ✅ Ready for PR
 
@@ -245,7 +245,7 @@ Payment integration is working when:
 1. **Check Logs**
    ```bash
    # Look for:
-   "Making request to: https://checkout.networxpay.com/ctp/api/checkouts"
+   "Making request to: https://checkout.secure-processorpay.com/ctp/api/checkouts"
    
    # Should NOT see:
    "Making request to: .../ctp/api/checkouts/ctp/api/checkouts"
@@ -254,9 +254,9 @@ Payment integration is working when:
 2. **Check Environment Variables**
    ```bash
    # Either format is OK now:
-   NETWORX_API_URL=https://checkout.networxpay.com
+   SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
    # OR
-   NETWORX_API_URL=https://checkout.networxpay.com/ctp/api/checkouts
+   SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com/ctp/api/checkouts
    ```
 
 3. **Check Response**

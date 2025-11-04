@@ -1,13 +1,13 @@
-# Networx Pay Integration Setup for localhost:3000
+# Secure-Processor Pay Integration Setup for localhost:3000
 
 ## Overview
-Complete setup guide for integrating Networx Pay payment system with your Next.js application running on localhost:3000.
+Complete setup guide for integrating Secure-Processor Pay payment system with your Next.js application running on localhost:3000.
 
 ## ✅ Current Implementation Status
 
 Your project already includes:
-- ✅ Payment API routes (`/api/payment/networx`)
-- ✅ Webhook handler (`/api/webhooks/networx`) 
+- ✅ Payment API routes (`/api/payment/secure-processor`)
+- ✅ Webhook handler (`/api/webhooks/secure-processor`) 
 - ✅ Payment widget component (`NetworkPaymentWidget`)
 - ✅ Success/Cancel result pages
 - ✅ HMAC SHA256 signature security
@@ -20,23 +20,23 @@ Your project already includes:
 Create a `.env.local` file in your project root:
 
 ```bash
-# Networx Pay Configuration
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+# Secure-Processor Pay Configuration
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
 
 # API Configuration  
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=true
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=true
 
 # localhost:3000 URLs
-NETWORX_RETURN_URL=http://localhost:3000/payment/success
-NETWORX_CANCEL_URL=http://localhost:3000/payment/cancel
-NETWORX_WEBHOOK_URL=http://localhost:3000/api/webhooks/networx
+SECURE-PROCESSOR_RETURN_URL=http://localhost:3000/payment/success
+SECURE-PROCESSOR_CANCEL_URL=http://localhost:3000/payment/cancel
+SECURE-PROCESSOR_WEBHOOK_URL=http://localhost:3000/api/webhooks/secure-processor
 
 # Client-side variables
-NEXT_PUBLIC_NETWORX_SHOP_ID=29959
-NEXT_PUBLIC_NETWORX_TEST_MODE=true
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
+NEXT_PUBLIC_SECURE-PROCESSOR_SHOP_ID=29959
+NEXT_PUBLIC_SECURE-PROCESSOR_TEST_MODE=true
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -63,17 +63,17 @@ Visit: http://localhost:3000/payment/test
 ## 📋 API Endpoints
 
 ### Payment Creation
-- **Endpoint**: `POST /api/payment/networx`
+- **Endpoint**: `POST /api/payment/secure-processor`
 - **Purpose**: Creates payment tokens and initiates payment process
 - **Security**: HMAC SHA256 signature verification
 
 ### Webhook Handler  
-- **Endpoint**: `POST /api/webhooks/networx`
-- **Purpose**: Processes payment notifications from Networx
+- **Endpoint**: `POST /api/webhooks/secure-processor`
+- **Purpose**: Processes payment notifications from Secure-Processor
 - **Security**: Webhook signature validation
 
 ### Payment Status Check
-- **Endpoint**: `GET /api/payment/networx?token={token}`
+- **Endpoint**: `GET /api/payment/secure-processor?token={token}`
 - **Purpose**: Checks current payment status
 
 ## 🎯 Result Pages
@@ -96,7 +96,7 @@ Visit: http://localhost:3000/payment/test
 ## 🔒 Security Implementation
 
 ### HMAC SHA256 Signatures
-All requests to/from Networx are secured with HMAC SHA256 signatures:
+All requests to/from Secure-Processor are secured with HMAC SHA256 signatures:
 
 ```javascript
 // Signature creation (in payment API)
@@ -139,14 +139,14 @@ function verifyWebhookSignature(data, signature, secretKey) {
 6. Use real bank card for testing (test mode enabled)
 
 ### 2. Webhook Testing
-Webhooks will be automatically called by Networx when payments complete. Check server logs to see webhook processing.
+Webhooks will be automatically called by Secure-Processor when payments complete. Check server logs to see webhook processing.
 
 ### 3. API Testing
 You can test the API directly:
 
 ```bash
 # Test payment creation
-curl -X POST http://localhost:3000/api/payment/networx \
+curl -X POST http://localhost:3000/api/payment/secure-processor \
   -H "Content-Type: application/json" \
   -d '{
     "amount": 10.00,
@@ -157,7 +157,7 @@ curl -X POST http://localhost:3000/api/payment/networx \
   }'
 
 # Test webhook endpoint status
-curl http://localhost:3000/api/webhooks/networx
+curl http://localhost:3000/api/webhooks/secure-processor
 ```
 
 ## ⚡ Component Usage
@@ -165,7 +165,7 @@ curl http://localhost:3000/api/webhooks/networx
 ### NetworkPaymentWidget Component
 
 ```jsx
-import { NetworkPaymentWidget } from '@/components/networx-payment-widget';
+import { NetworkPaymentWidget } from '@/components/secure-processor-payment-widget';
 
 function MyPaymentPage() {
   return (
@@ -194,15 +194,15 @@ function MyPaymentPage() {
 
 2. **Payment Window Not Opening**
    - Check browser popup settings
-   - Verify `NEXT_PUBLIC_NETWORX_WIDGET_URL` is set correctly
+   - Verify `NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL` is set correctly
 
 3. **Webhook Not Receiving Notifications**
-   - Ensure `NETWORX_WEBHOOK_URL` points to correct localhost URL
+   - Ensure `SECURE-PROCESSOR_WEBHOOK_URL` points to correct localhost URL
    - Check firewall settings for port 3001
    - Verify webhook endpoint is accessible externally (use ngrok for testing)
 
 4. **Signature Verification Failing**
-   - Verify `NETWORX_SECRET_KEY` matches exactly
+   - Verify `SECURE-PROCESSOR_SECRET_KEY` matches exactly
    - Check parameter sorting in signature creation
    - Ensure no extra whitespace in environment variables
 
@@ -218,12 +218,12 @@ npm install -g ngrok
 ngrok http 3001
 
 # Update webhook URL in .env.local
-NETWORX_WEBHOOK_URL=https://your-ngrok-url.ngrok.io/api/webhooks/networx
+SECURE-PROCESSOR_WEBHOOK_URL=https://your-ngrok-url.ngrok.io/api/webhooks/secure-processor
 ```
 
 ## 🎉 Ready to Use!
 
-Your Networx Pay integration is now fully configured and ready for use on localhost:3000. The system includes:
+Your Secure-Processor Pay integration is now fully configured and ready for use on localhost:3000. The system includes:
 
 - ✅ Complete payment processing
 - ✅ Secure signature verification  

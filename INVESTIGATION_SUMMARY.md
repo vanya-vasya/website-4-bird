@@ -54,15 +54,15 @@ Enhanced webhook handler with 3 key logging points:
 **IMPORTANT:** Test and production use the **SAME database**.
 
 - Both modes write to same Neon PostgreSQL instance
-- `NETWORX_TEST_MODE=true` controls Networks API behavior (test cards vs real cards)
+- `SECURE-PROCESSOR_TEST_MODE=true` controls Networks API behavior (test cards vs real cards)
 - Transactions from BOTH modes should appear in Neon Console
 - No separate "test database" - all in one place
 
 ### Webhook Configuration
 
-- **Endpoint:** `https://www.yum-mi.com/api/webhooks/networx`
-- **Configured in:** `app/api/payment/networx/route.ts:53` (hardcoded)
-- **Handler:** `app/api/webhooks/networx/route.ts`
+- **Endpoint:** `https://www.yum-mi.com/api/webhooks/secure-processor`
+- **Configured in:** `app/api/payment/secure-processor/route.ts:53` (hardcoded)
+- **Handler:** `app/api/webhooks/secure-processor/route.ts`
 - **Security:** No signature validation (reliant on token verification)
 
 ### Critical Dependencies
@@ -77,7 +77,7 @@ Enhanced webhook handler with 3 key logging points:
 
 ## 🛠️ Files Modified
 
-### 1. `app/api/webhooks/networx/route.ts`
+### 1. `app/api/webhooks/secure-processor/route.ts`
 **Changes:**
 - Added `[WEBHOOK-ENV]` logging at line 45
 - Added `[WEBHOOK-DATA]` logging at line 96  
@@ -121,9 +121,9 @@ git push
 ### Step 2: Verify Deployment
 ```bash
 # Check webhook endpoint
-curl https://www.yum-mi.com/api/webhooks/networx
+curl https://www.yum-mi.com/api/webhooks/secure-processor
 
-# Expected: {"message":"Networx webhook endpoint is active","timestamp":"..."}
+# Expected: {"message":"Secure-Processor webhook endpoint is active","timestamp":"..."}
 ```
 
 ### Step 3: Run Diagnostics
@@ -163,7 +163,7 @@ vercel logs --follow | grep "WEBHOOK"
 
 Look for this sequence:
 ```
-📥 Networx HPP Webhook Received          ← Webhook arrived
+📥 Secure-Processor HPP Webhook Received          ← Webhook arrived
 🔍 [WEBHOOK-ENV]                        ← Environment logged
 🔍 [WEBHOOK-DATA]                       ← Payment data logged
 ✅ Payment SUCCESSFUL                    ← Status validated
@@ -184,7 +184,7 @@ Look for this sequence:
 
 **Check:**
 1. Networks dashboard → Webhooks/API Settings
-2. Verify URL: `https://www.yum-mi.com/api/webhooks/networx`
+2. Verify URL: `https://www.yum-mi.com/api/webhooks/secure-processor`
 3. Check webhook delivery logs in Networks dashboard
 
 **Fix:**
@@ -294,9 +294,9 @@ Diagnostic Tools
 ```
 Networks Payment Gateway
          ↓
-POST https://www.yum-mi.com/api/webhooks/networx
+POST https://www.yum-mi.com/api/webhooks/secure-processor
          ↓
-app/api/webhooks/networx/route.ts
+app/api/webhooks/secure-processor/route.ts
          ↓
 1. Log [WEBHOOK-ENV]
 2. Parse checkout data
@@ -382,7 +382,7 @@ CREATE TABLE "Transaction" (
 
 ## 📞 Support Resources
 
-- **Networks Docs:** https://docs.networxpay.com/
+- **Networks Docs:** https://docs.secure-processorpay.com/
 - **Neon Console:** https://console.neon.tech
 - **Vercel Dashboard:** https://vercel.com/dashboard
 - **Prisma Studio:** `npx prisma studio`

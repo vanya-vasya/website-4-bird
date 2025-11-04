@@ -1,4 +1,4 @@
-# NetworxPay Environment Configuration Guide
+# Secure-ProcessorPay Environment Configuration Guide
 
 ## Required Environment Variables
 
@@ -7,23 +7,23 @@
 Create a `.env.local` file in the project root with the following variables:
 
 ```bash
-# NetworxPay Payment Provider Configuration
+# Secure-ProcessorPay Payment Provider Configuration
 # ==========================================
 
-# Shop ID from NetworxPay dashboard
-NETWORX_SHOP_ID=29959
+# Shop ID from Secure-ProcessorPay dashboard
+SECURE-PROCESSOR_SHOP_ID=29959
 
-# Secret Key from NetworxPay dashboard (keep this secret!)
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+# Secret Key from Secure-ProcessorPay dashboard (keep this secret!)
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
 
-# NetworxPay API URL (use checkout.networxpay.com - NOT gateway.networxpay.com)
-NETWORX_API_URL=https://checkout.networxpay.com
+# Secure-ProcessorPay API URL (use checkout.secure-processorpay.com - NOT gateway.secure-processorpay.com)
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
 
 # Enable test mode (true for sandbox, false for production)
-NETWORX_TEST_MODE=true
+SECURE-PROCESSOR_TEST_MODE=true
 
 # Public-facing widget URL (optional, for reference)
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
 ```
 
 ### Vercel Deployment
@@ -32,11 +32,11 @@ Add the following environment variables in Vercel Project Settings > Environment
 
 | Variable | Value | Environment |
 |----------|-------|-------------|
-| `NETWORX_SHOP_ID` | `29959` | Production, Preview, Development |
-| `NETWORX_SECRET_KEY` | `dbfb6f4e977f49880a6ce3c939f1e7be...` | Production, Preview, Development |
-| `NETWORX_API_URL` | `https://checkout.networxpay.com` | Production, Preview, Development |
-| `NETWORX_TEST_MODE` | `true` (for testing) or `false` (for production) | Select appropriate environment |
-| `NEXT_PUBLIC_NETWORX_WIDGET_URL` | `https://checkout.networxpay.com` | Production, Preview, Development |
+| `SECURE-PROCESSOR_SHOP_ID` | `29959` | Production, Preview, Development |
+| `SECURE-PROCESSOR_SECRET_KEY` | `dbfb6f4e977f49880a6ce3c939f1e7be...` | Production, Preview, Development |
+| `SECURE-PROCESSOR_API_URL` | `https://checkout.secure-processorpay.com` | Production, Preview, Development |
+| `SECURE-PROCESSOR_TEST_MODE` | `true` (for testing) or `false` (for production) | Select appropriate environment |
+| `NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL` | `https://checkout.secure-processorpay.com` | Production, Preview, Development |
 
 ## Important Configuration Notes
 
@@ -48,9 +48,9 @@ Add the following environment variables in Vercel Project Settings > Environment
 
 ### 2. API Endpoint
 - **Must use the correct endpoint**
-- ❌ Wrong: `https://gateway.networxpay.com/ctp/api/checkouts`
-- ❌ Wrong: `https://checkout.networxpay.com/api/v1/payment/init`
-- ✅ Correct: `https://checkout.networxpay.com/ctp/api/checkouts`
+- ❌ Wrong: `https://gateway.secure-processorpay.com/ctp/api/checkouts`
+- ❌ Wrong: `https://checkout.secure-processorpay.com/api/v1/payment/init`
+- ✅ Correct: `https://checkout.secure-processorpay.com/ctp/api/checkouts`
 
 ### 3. Authentication
 - **Use HTTP Basic authentication**
@@ -62,23 +62,23 @@ Add the following environment variables in Vercel Project Settings > Environment
   - `Authorization: Basic ...`
 
 ### 4. Callback URLs
-These are hardcoded in the API route (`app/api/payment/networx/route.ts`):
+These are hardcoded in the API route (`app/api/payment/secure-processor/route.ts`):
 - Return URL: `https://your-domain.vercel.app/payment/success`
-- Webhook URL: `https://your-domain.vercel.app/api/webhooks/networx`
+- Webhook URL: `https://your-domain.vercel.app/api/webhooks/secure-processor`
 
 **Update these URLs** to match your Vercel deployment domain.
 
 ### 5. Test Mode
-- Set `NETWORX_TEST_MODE=true` for sandbox testing
-- Use test cards from NetworxPay documentation
-- Set `NETWORX_TEST_MODE=false` for production
+- Set `SECURE-PROCESSOR_TEST_MODE=true` for sandbox testing
+- Use test cards from Secure-ProcessorPay documentation
+- Set `SECURE-PROCESSOR_TEST_MODE=false` for production
 
 ## Validation
 
 Run the validation script to check your environment variables:
 
 ```bash
-node scripts/validate-networx-env.js
+node scripts/validate-secure-processor-env.js
 ```
 
 Expected output if everything is correct:
@@ -91,7 +91,7 @@ Expected output if everything is correct:
 Run the integration test to verify the configuration:
 
 ```bash
-node scripts/test-networx-integration.js
+node scripts/test-secure-processor-integration.js
 ```
 
 This will:
@@ -111,12 +111,12 @@ This will:
 **Fix:** Updated to use `/ctp/api/checkouts`
 
 ### Issue 3: "Access Denied"
-**Cause:** Using wrong API URL (`gateway.networxpay.com`)  
-**Fix:** Use `checkout.networxpay.com`
+**Cause:** Using wrong API URL (`gateway.secure-processorpay.com`)  
+**Fix:** Use `checkout.secure-processorpay.com`
 
 ### Issue 4: "Invalid signature" (Webhooks)
 **Cause:** Secret key mismatch  
-**Fix:** Ensure `NETWORX_SECRET_KEY` is correct in environment variables
+**Fix:** Ensure `SECURE-PROCESSOR_SECRET_KEY` is correct in environment variables
 
 ## Security Best Practices
 
@@ -132,7 +132,7 @@ This will:
 Before deploying to production:
 
 - [ ] All environment variables set in Vercel
-- [ ] `NETWORX_TEST_MODE=false` in production
+- [ ] `SECURE-PROCESSOR_TEST_MODE=false` in production
 - [ ] Return URL updated to production domain
 - [ ] Webhook URL updated to production domain
 - [ ] Test with small real amount (0.01 EUR)
@@ -143,9 +143,9 @@ Before deploying to production:
 
 ## Support
 
-**NetworxPay Support:**
-- Email: support@networxpay.com
-- Documentation: https://docs.networxpay.com
+**Secure-ProcessorPay Support:**
+- Email: support@secure-processorpay.com
+- Documentation: https://docs.secure-processorpay.com
 
 **Current Configuration Status:**
 - ✅ Amount formatting fixed (integer cents)

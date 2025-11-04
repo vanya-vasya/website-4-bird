@@ -40,7 +40,7 @@
 ### Evidence from Logs
 
 ```
-2025-10-14T18:11:49.765Z [info] 📥 Networx HPP Webhook Received
+2025-10-14T18:11:49.765Z [info] 📥 Secure-Processor HPP Webhook Received
 2025-10-14T18:11:49.765Z [info] {
   "transaction": {
     "uid": "63744914-9b9c-41ea-bbe8-18ceb9b55b56",
@@ -186,7 +186,7 @@ vercel logs --follow | grep "WEBHOOK"
 
 **Expected logs:**
 ```
-📥 Networx HPP Webhook Received
+📥 Secure-Processor HPP Webhook Received
 📋 Webhook Format: Direct Transaction API  ← NEW
 🔍 [WEBHOOK-ENV]
 🔍 [WEBHOOK-DATA]
@@ -212,13 +212,13 @@ npx prisma studio
 ## 📝 Files Modified
 
 ### Commit 1: `7e1b45b` - Add Logging
-- app/api/webhooks/networx/route.ts (added structured logging)
+- app/api/webhooks/secure-processor/route.ts (added structured logging)
 - scripts/diagnose-test-transactions.js (new)
 - scripts/test-webhook-delivery.sh (new)
 - Documentation files (new)
 
 ### Commit 2: `4d01867` - Fix Webhook Format
-- app/api/webhooks/networx/route.ts (critical fix)
+- app/api/webhooks/secure-processor/route.ts (critical fix)
   - Support both webhook formats
   - Add "successful" status
   - Extract clerkId from tracking_id
@@ -229,7 +229,7 @@ npx prisma studio
 
 After deployment completes, test payment should:
 
-1. ✅ Webhook received (log: "📥 Networx HPP Webhook Received")
+1. ✅ Webhook received (log: "📥 Secure-Processor HPP Webhook Received")
 2. ✅ Format detected (log: "📋 Webhook Format: Direct Transaction API")
 3. ✅ Environment logged (log: "[WEBHOOK-ENV]")
 4. ✅ Data logged (log: "[WEBHOOK-DATA]")

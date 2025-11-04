@@ -17,7 +17,7 @@
    ├─→ Frontend loads payment modal
    │   └─→ NetworkxPaymentWidget component
    │
-   └─→ POST /api/payment/networx
+   └─→ POST /api/payment/secure-processor
        Request: {
          amount: 299,
          currency: "EUR",
@@ -29,15 +29,15 @@
        Response: {
          success: true,
          token: "abc123...",
-         redirect_url: "https://checkout.networxpay.com/widget/hpp.html?token=abc123"
+         redirect_url: "https://checkout.secure-processorpay.com/widget/hpp.html?token=abc123"
        }
 
 ═══════════════════════════════════════════════════════════════════════════
 
-2. REDIRECT TO NETWORX HOSTED PAYMENT PAGE
+2. REDIRECT TO SECURE-PROCESSOR HOSTED PAYMENT PAGE
    Frontend → window.location.href = redirect_url
    │
-   User sees Networx payment form
+   User sees Secure-Processor payment form
    ├─→ Enter card: 4111 1111 1111 1111
    ├─→ Enter expiry: 12/25
    ├─→ Enter CVV: 123
@@ -45,8 +45,8 @@
 
 ═══════════════════════════════════════════════════════════════════════════
 
-3. NETWORX PROCESSES PAYMENT
-   Networx Backend
+3. SECURE-PROCESSOR PROCESSES PAYMENT
+   Secure-Processor Backend
    │
    ├─→ Validate card details
    ├─→ Authorize payment
@@ -56,7 +56,7 @@
 ═══════════════════════════════════════════════════════════════════════════
 
 4. WEBHOOK SENT (Should happen FIRST)
-   Networx → POST /api/webhooks/networx
+   Secure-Processor → POST /api/webhooks/secure-processor
    
    Webhook Payload: {
      "checkout": {
@@ -100,18 +100,18 @@
    │      }
    └─→ ✅ Send receipt email
    
-   Response to Networx: { status: "ok" } (200)
+   Response to Secure-Processor: { status: "ok" } (200)
 
 ═══════════════════════════════════════════════════════════════════════════
 
 5. USER REDIRECT (Should happen AFTER webhook)
-   Networx → Redirect browser to:
+   Secure-Processor → Redirect browser to:
    
    ✅ EXPECTED: https://website-3.../payment/success?token=abc123
    
    User lands on /payment/success page:
    │
-   ├─→ Page loads transaction data via fetch('/api/payment/networx?token=abc123')
+   ├─→ Page loads transaction data via fetch('/api/payment/secure-processor?token=abc123')
    ├─→ Displays success message
    ├─→ Shows transaction details
    └─→ Offers navigation buttons:
@@ -155,7 +155,7 @@
 └─────────────────────────────────────────────────────────────────────────┘
 
 1-3. [SAME AS EXPECTED FLOW]
-   User initiates payment → Networx processes → Payment successful
+   User initiates payment → Secure-Processor processes → Payment successful
 
 ═══════════════════════════════════════════════════════════════════════════
 
@@ -167,12 +167,12 @@
    
    Timeline:
    
-   T+0.0s: Payment completed on Networx
-   T+0.1s: ❌ Networx redirects user IMMEDIATELY
+   T+0.0s: Payment completed on Secure-Processor
+   T+0.1s: ❌ Secure-Processor redirects user IMMEDIATELY
            Redirect to: https://website-3.../dashboard (WRONG URL!)
            
            ⚠️ Problem: Redirect URL is /dashboard, not /payment/success
-           ⚠️ Root Cause: Networx merchant dashboard has different return_url
+           ⚠️ Root Cause: Secure-Processor merchant dashboard has different return_url
    
    T+0.2s: User lands on /dashboard
            │
@@ -186,7 +186,7 @@
            └─→ User sees dashboard page
    
    T+2.5s: ✅ Webhook FINALLY arrives (too late!)
-           Networx → POST /api/webhooks/networx
+           Secure-Processor → POST /api/webhooks/secure-processor
            │
            ├─→ ✅ Transaction written to database
            ├─→ ✅ User balance updated
@@ -213,7 +213,7 @@
    To verify this scenario, check logs:
    
    Log Entry 1: Webhook Received
-   [2025-10-10 14:30:02.500] 📥 Networx HPP Webhook Received
+   [2025-10-10 14:30:02.500] 📥 Secure-Processor HPP Webhook Received
    [2025-10-10 14:30:02.750] ✅ Transaction saved: txn_abc123
    
    Log Entry 2: User Page Load
@@ -235,12 +235,12 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│       WHERE DOES NETWORX DECIDE THE REDIRECT URL?                       │
+│       WHERE DOES SECURE-PROCESSOR DECIDE THE REDIRECT URL?                       │
 └─────────────────────────────────────────────────────────────────────────┘
 
 Scenario 1: API Request Parameter (Expected)
 ───────────────────────────────────────────────────────────────────────────
-Request to: POST https://checkout.networxpay.com/ctp/api/checkouts
+Request to: POST https://checkout.secure-processorpay.com/ctp/api/checkouts
 Body: {
   "checkout": {
     "settings": {
@@ -249,13 +249,13 @@ Body: {
   }
 }
 
-Expected behavior: Networx redirects to return_url after payment
-Status: ✅ CONFIGURED IN CODE (app/api/payment/networx/route.ts:51)
+Expected behavior: Secure-Processor redirects to return_url after payment
+Status: ✅ CONFIGURED IN CODE (app/api/payment/secure-processor/route.ts:51)
 
 
 Scenario 2: Merchant Dashboard Override (Suspected Issue)
 ───────────────────────────────────────────────────────────────────────────
-Networx Merchant Dashboard → Settings → API Config → HPP Settings:
+Secure-Processor Merchant Dashboard → Settings → API Config → HPP Settings:
 
 ┌────────────────────────────────────────────────────────────────┐
 │ Default Success Return URL:                                    │
@@ -267,19 +267,19 @@ Networx Merchant Dashboard → Settings → API Config → HPP Settings:
 └────────────────────────────────────────────────────────────────┘
 
 Expected behavior: Dashboard setting OVERRIDES API request parameter
-Status: ⚠️ NEEDS VERIFICATION (check Networx merchant portal)
+Status: ⚠️ NEEDS VERIFICATION (check Secure-Processor merchant portal)
 
 
 Scenario 3: Query Parameter on redirect_url (Possible)
 ───────────────────────────────────────────────────────────────────────────
-Networx returns: {
-  "redirect_url": "https://checkout.networxpay.com/widget/hpp.html?token=abc&return_url=/dashboard"
+Secure-Processor returns: {
+  "redirect_url": "https://checkout.secure-processorpay.com/widget/hpp.html?token=abc&return_url=/dashboard"
 }
 
-If Networx HPP widget accepts return_url as query parameter, this would
+If Secure-Processor HPP widget accepts return_url as query parameter, this would
 override the default. Unlikely but possible.
 
-Status: 🟢 UNLIKELY (not standard Networx behavior)
+Status: 🟢 UNLIKELY (not standard Secure-Processor behavior)
 ```
 
 ---
@@ -297,16 +297,16 @@ Expected: /payment/success
 Actual:   /dashboard
 
 Root Cause (90% confidence):
-├─→ Networx merchant dashboard "Default Return URL" = /dashboard
+├─→ Secure-Processor merchant dashboard "Default Return URL" = /dashboard
 ├─→ Dashboard setting has "Override API requests" enabled
 └─→ return_url parameter in API request is IGNORED
 
 Fix Location:
-├─→ Networx merchant dashboard (NOT code change)
+├─→ Secure-Processor merchant dashboard (NOT code change)
 └─→ Update "Default Success Return URL" to /payment/success
 
 Verification Method:
-└─→ Log into https://merchant.networxpay.com
+└─→ Log into https://merchant.secure-processorpay.com
     → Settings → API Configuration → Hosted Payment Page
 
 
@@ -343,15 +343,15 @@ Possible Root Causes:
 │   Timeline: User navigated at T+0.2s, webhook arrived at T+2.5s
 │   Result: Database query returns empty array
 │   
-├─→ Webhook not sent: Networx webhook configuration disabled
-│   Check: Networx dashboard → Webhooks → Status = "Active"?
+├─→ Webhook not sent: Secure-Processor webhook configuration disabled
+│   Check: Secure-Processor dashboard → Webhooks → Status = "Active"?
 │   
 ├─→ Webhook failed: Server returned 500 error
 │   Check: Vercel logs for webhook errors
 │   Search: "Database error" OR "User not found"
 │   
-├─→ Wrong webhook URL: Networx sending to old/incorrect endpoint
-│   Expected: /api/webhooks/networx
+├─→ Wrong webhook URL: Secure-Processor sending to old/incorrect endpoint
+│   Expected: /api/webhooks/secure-processor
 │   Actual: Maybe /api/webhooks/payment? (old endpoint)
 │   
 └─→ Database write succeeded but query filtering issue
@@ -366,7 +366,7 @@ Possible Root Causes:
 
 ### Test Case 1: Verify Redirect URL
 
-**Objective**: Confirm where Networx redirects after payment completion
+**Objective**: Confirm where Secure-Processor redirects after payment completion
 
 **Steps**:
 ```
@@ -378,7 +378,7 @@ Possible Root Causes:
 Expected: https://website-3.../payment/success?token=abc123
 Actual:   (Fill in observed URL)
 
-If actual ≠ expected → Networx dashboard misconfigured
+If actual ≠ expected → Secure-Processor dashboard misconfigured
 ```
 
 **Automation Script**:
@@ -392,7 +392,7 @@ npm run test:payment-redirect
 
 # If wrong:
 # ❌ Redirected to: /dashboard
-# ⚠️  Action: Update Networx merchant dashboard return URL
+# ⚠️  Action: Update Secure-Processor merchant dashboard return URL
 ```
 
 ---
@@ -525,7 +525,7 @@ curl -X GET 'https://website-3.../api/user/transactions' \
 
 ### Before Testing
 - [ ] Verify environment variables in Vercel dashboard
-- [ ] Check Networx test mode matches NETWORX_TEST_MODE env var
+- [ ] Check Secure-Processor test mode matches SECURE-PROCESSOR_TEST_MODE env var
 - [ ] Clear browser cache and cookies
 - [ ] Open browser DevTools (Network + Console tabs)
 - [ ] Prepare test card: 4111 1111 1111 1111
@@ -569,8 +569,8 @@ START: User reports missing transaction after payment
 │   │   └─→ Go to Q2
 │   │
 │   └─→ /dashboard or other URL ❌
-│       └─→ ROOT CAUSE: Networx dashboard return URL misconfigured
-│           FIX: Update Networx merchant dashboard settings
+│       └─→ ROOT CAUSE: Secure-Processor dashboard return URL misconfigured
+│           FIX: Update Secure-Processor merchant dashboard settings
 │           SKIP Q2-Q4 (other issues are irrelevant if user never sees success page)
 │
 ├─→ Q2: Is "Payment History" link visible on current page?
@@ -621,13 +621,13 @@ START: User reports missing transaction after payment
 │           │   │               FIX: Add better error logging
 │           │   │
 │           │   └─→ No log found ❌
-│           │       └─→ ROOT CAUSE: Webhook not sent by Networx
-│           │           FIX: Check Networx dashboard webhook config
+│           │       └─→ ROOT CAUSE: Webhook not sent by Secure-Processor
+│           │           FIX: Check Secure-Processor dashboard webhook config
 │           │               - Webhook URL correct?
 │           │               - Webhook events enabled?
 │           │               - Webhook active/enabled?
 │           │
-│           └─→ Check Networx webhook logs (if available)
+│           └─→ Check Secure-Processor webhook logs (if available)
 │               └─→ Webhook sent with 500 error response ❌
 │                   └─→ ROOT CAUSE: Server returned error
 │                       FIX: Check error logs, fix server code
@@ -653,7 +653,7 @@ START: User reports missing transaction after payment
                 └─→ Status is 'pending' or 'failed'? ❌
                     └─→ ROOT CAUSE: Transaction not marked as completed
                         FIX: Check webhook status mapping
-                            - Networx sends 'success' or 'completed'
+                            - Secure-Processor sends 'success' or 'completed'
                             - Webhook handler expects both ✅
 ```
 
@@ -709,9 +709,9 @@ START: User reports missing transaction after payment
 
 ### 1. ⚠️ CRITICAL: Wrong Redirect URL
 **Symptom**: User redirected to `/dashboard` instead of `/payment/success`  
-**Root Cause**: Networx merchant dashboard return URL misconfigured  
+**Root Cause**: Secure-Processor merchant dashboard return URL misconfigured  
 **Impact**: User never sees success confirmation page  
-**Fix**: Update Networx dashboard settings (no code change needed)  
+**Fix**: Update Secure-Processor dashboard settings (no code change needed)  
 **Verification**: Test payment and observe redirect destination  
 
 ### 2. ⚠️ MEDIUM: Payment History Link Not Visible
@@ -731,6 +731,6 @@ START: User reports missing transaction after payment
 ---
 
 **Report Status**: ✅ ANALYSIS COMPLETE  
-**Next Action**: Verify Networx dashboard configuration  
+**Next Action**: Verify Secure-Processor dashboard configuration  
 **Estimated Fix Time**: 5 minutes (configuration) + testing
 

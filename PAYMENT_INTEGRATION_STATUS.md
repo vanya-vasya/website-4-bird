@@ -1,8 +1,8 @@
-# ✅ Networx Pay Integration - WORKING!
+# ✅ Secure-Processor Pay Integration - WORKING!
 
 ## 🎉 Current Status: SUCCESSFUL INTEGRATION
 
-Your Networx Pay integration is now **fully functional** on localhost:3000!
+Your Secure-Processor Pay integration is now **fully functional** on localhost:3000!
 
 ### ✅ What's Working:
 
@@ -19,7 +19,7 @@ Your Networx Pay integration is now **fully functional** on localhost:3000!
 {
   "success": true,
   "token": "test_1755795417113_c88ozxffc",
-  "payment_url": "https://checkout.networxpay.com?token=test_1755795417113_c88ozxffc",
+  "payment_url": "https://checkout.secure-processorpay.com?token=test_1755795417113_c88ozxffc",
   "transaction_id": "txn_1755795417113_bzaly685l",
   "test_mode": true,
   "message": "Test payment token created successfully (development mode)"
@@ -43,16 +43,16 @@ Visit: **http://localhost:3000/payment/test**
 3. Click "Show Payment Widget"
 4. Enter email and create payment token ✅
 5. Payment token generates successfully ✅
-6. Click "Open Payment Window" (will open Networx checkout)
+6. Click "Open Payment Window" (will open Secure-Processor checkout)
 7. Complete test payment process
 
 ## 📋 Available Endpoints:
 
 | Endpoint | Purpose | Status |
 |----------|---------|---------|
-| `POST /api/payment/networx` | Create payment token | ✅ Working |
-| `GET /api/payment/networx` | Check payment status | ✅ Working |
-| `POST /api/webhooks/networx` | Handle payment notifications | ✅ Working |
+| `POST /api/payment/secure-processor` | Create payment token | ✅ Working |
+| `GET /api/payment/secure-processor` | Check payment status | ✅ Working |
+| `POST /api/webhooks/secure-processor` | Handle payment notifications | ✅ Working |
 | `/payment/success` | Success page | ✅ Working |
 | `/payment/cancel` | Cancel/Failed page | ✅ Working |
 | `/payment/test` | Testing interface | ✅ Working |
@@ -61,16 +61,16 @@ Visit: **http://localhost:3000/payment/test**
 
 ### Environment Variables (`.env.local`):
 ```bash
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://gateway.networxpay.com
-NETWORX_TEST_MODE=true
-NETWORX_RETURN_URL=http://localhost:3000/payment/success
-NETWORX_CANCEL_URL=http://localhost:3000/payment/cancel
-NETWORX_WEBHOOK_URL=http://localhost:3000/api/webhooks/networx
-NEXT_PUBLIC_NETWORX_SHOP_ID=29959
-NEXT_PUBLIC_NETWORX_TEST_MODE=true
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://gateway.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=true
+SECURE-PROCESSOR_RETURN_URL=http://localhost:3000/payment/success
+SECURE-PROCESSOR_CANCEL_URL=http://localhost:3000/payment/cancel
+SECURE-PROCESSOR_WEBHOOK_URL=http://localhost:3000/api/webhooks/secure-processor
+NEXT_PUBLIC_SECURE-PROCESSOR_SHOP_ID=29959
+NEXT_PUBLIC_SECURE-PROCESSOR_TEST_MODE=true
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -81,7 +81,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - ✅ Simulates successful payment flow
 - ✅ Maintains proper security signatures
 - ✅ Full integration testing capability
-- ✅ Real Networx checkout widget integration
+- ✅ Real Secure-Processor checkout widget integration
 
 ### Production Readiness:
 - ✅ HMAC SHA256 signature verification
@@ -92,7 +92,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## 🔄 Next Steps for Production:
 
-1. **API Endpoint Verification**: When ready for production, verify the exact Networx Pay API endpoints with their support team
+1. **API Endpoint Verification**: When ready for production, verify the exact Secure-Processor Pay API endpoints with their support team
 2. **Production Testing**: Test with real payment credentials
 3. **Webhook Configuration**: Ensure webhook URL is accessible from internet (use ngrok for testing)
 
@@ -114,7 +114,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ### Test Payment API Directly:
 ```bash
-curl -X POST http://localhost:3000/api/payment/networx \
+curl -X POST http://localhost:3000/api/payment/secure-processor \
   -H "Content-Type: application/json" \
   -d '{
     "amount": 10.00,
@@ -127,12 +127,12 @@ curl -X POST http://localhost:3000/api/payment/networx \
 
 ### Test Webhook Endpoint:
 ```bash
-curl http://localhost:3000/api/webhooks/networx
+curl http://localhost:3000/api/webhooks/secure-processor
 ```
 
 ## ✨ Integration is Complete and Ready!
 
-Your Networx Pay payment system is fully implemented and working on localhost:3000. The integration includes all required components:
+Your Secure-Processor Pay payment system is fully implemented and working on localhost:3000. The integration includes all required components:
 
 - ✅ Payment token creation
 - ✅ Security signatures
@@ -141,4 +141,4 @@ Your Networx Pay payment system is fully implemented and working on localhost:30
 - ✅ Error handling
 - ✅ Testing capabilities
 
-You can now process payments through the Networx Pay gateway! 🎉
+You can now process payments through the Secure-Processor Pay gateway! 🎉

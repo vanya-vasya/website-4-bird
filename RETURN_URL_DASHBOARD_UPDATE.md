@@ -11,12 +11,12 @@
 
 ### Return URL Changed
 
-**Previous**: `/api/webhooks/networx` (webhook endpoint)  
+**Previous**: `/api/webhooks/secure-processor` (webhook endpoint)  
 **Current**: `/dashboard` (main dashboard page)
 
 ### Code Change
 
-**File**: `app/api/payment/networx/route.ts` (line 52)
+**File**: `app/api/payment/secure-processor/route.ts` (line 52)
 
 ```typescript
 const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/dashboard';
@@ -27,13 +27,13 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 ## 🎯 Payment Flow After This Change
 
 ```
-1. User completes payment on Networx
+1. User completes payment on Secure-Processor
    ↓
 2. Payment processed successfully
    ↓
 3. User redirected to: /dashboard
    ↓
-4. Webhook sent to: /api/webhooks/networx (separate request)
+4. Webhook sent to: /api/webhooks/secure-processor (separate request)
    ↓
 5. Transaction saved to database
    ↓
@@ -57,7 +57,7 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 ### After Payment Completion
 
 **User Journey**:
-1. Payment completes on Networx → ✅ Success
+1. Payment completes on Secure-Processor → ✅ Success
 2. Redirected to `/dashboard` → User sees familiar interface
 3. Token balance updates (via webhook) → Within 1-3 seconds
 4. User can navigate to "Payment History" → See transaction details
@@ -100,14 +100,14 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 
 - [ ] **Complete test payment**
   - Use test card: 4111 1111 1111 1111
-  - Verify payment succeeds on Networx
+  - Verify payment succeeds on Secure-Processor
 
 - [ ] **Verify redirect**
   - After payment, browser should redirect to `/dashboard`
   - User sees main dashboard interface
 
 - [ ] **Check webhook processing**
-  - Verify webhook POST arrives at `/api/webhooks/networx`
+  - Verify webhook POST arrives at `/api/webhooks/secure-processor`
   - Check Vercel logs for "Transaction saved to database"
 
 - [ ] **Verify token balance update**
@@ -138,7 +138,7 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 **Cons**: No explicit confirmation page, slight balance delay  
 **UX**: ⭐⭐⭐⭐ Best for speed
 
-### Option 3: `/api/webhooks/networx` (Previous)
+### Option 3: `/api/webhooks/secure-processor` (Previous)
 **Pros**: Simple configuration, one URL for both  
 **Cons**: Shows JSON to users, poor UX  
 **UX**: ⭐ Not recommended
@@ -178,7 +178,7 @@ export default function DashboardPage() {
 }
 ```
 
-**Networx Configuration**:
+**Secure-Processor Configuration**:
 ```
 Return URL: https://website-3.../dashboard?payment_success=true
 ```
@@ -196,22 +196,22 @@ Return URL: https://website-3.../dashboard?payment_success=true
 | Setting | Value | Purpose |
 |---------|-------|---------|
 | **Return URL** | `/dashboard` | User redirect after payment |
-| **Notification URL** | `/api/webhooks/networx` | Server webhook for transaction processing |
+| **Notification URL** | `/api/webhooks/secure-processor` | Server webhook for transaction processing |
 | **Test Mode** | `true` (staging) / `false` (prod) | Payment environment |
 
 ### Environment Variables (Unchanged)
 ```bash
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=true  # or false for production
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=true  # or false for production
 ```
 
-### Networx Dashboard Configuration (Should Match)
+### Secure-Processor Dashboard Configuration (Should Match)
 ```
 Settings → API Configuration → Hosted Payment Page:
 - Success Return URL: https://website-3.../dashboard
-- Webhook URL: https://website-3.../api/webhooks/networx
+- Webhook URL: https://website-3.../api/webhooks/secure-processor
 - Events: payment.completed, payment.success, payment.failed
 ```
 
@@ -221,7 +221,7 @@ Settings → API Configuration → Hosted Payment Page:
 
 ### Successful Payment Flow
 
-1. **T+0.0s**: User completes payment on Networx
+1. **T+0.0s**: User completes payment on Secure-Processor
 2. **T+0.1s**: User redirected to `/dashboard`
 3. **T+0.2s**: Dashboard loads with current token balance
 4. **T+1.5s**: Webhook arrives at server
@@ -292,7 +292,7 @@ The webhook endpoint still validates:
 ## 🎓 Key Points
 
 1. **Return URL**: Users now land on `/dashboard` after payment ✅
-2. **Webhook URL**: Still `/api/webhooks/networx` for transaction processing ✅
+2. **Webhook URL**: Still `/api/webhooks/secure-processor` for transaction processing ✅
 3. **No Success Page**: Users skip intermediate confirmation screen
 4. **Balance Updates**: Happens automatically via webhook (1-3 second delay)
 5. **Payment History**: Available via header link for transaction details
@@ -302,7 +302,7 @@ The webhook endpoint still validates:
 
 ## 📝 Next Steps After This Change
 
-1. **Update Networx Dashboard** (if needed)
+1. **Update Secure-Processor Dashboard** (if needed)
    - Log into merchant portal
    - Set return URL to `/dashboard`
    - Save configuration

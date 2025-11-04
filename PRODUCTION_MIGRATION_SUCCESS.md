@@ -5,7 +5,7 @@
 **Date**: October 10, 2025  
 **Branch**: `production/migrate-to-yum-mi-domain`  
 **Commit**: `2e29e58`  
-**Status**: ✅ Code Updated → ⏳ Awaiting Networx Configuration
+**Status**: ✅ Code Updated → ⏳ Awaiting Secure-Processor Configuration
 
 ---
 
@@ -26,18 +26,18 @@
 
 ## 🔧 Code Changes Summary
 
-### File Modified: `app/api/payment/networx/route.ts`
+### File Modified: `app/api/payment/secure-processor/route.ts`
 
 **Lines 52-53 Changed**:
 
 ```typescript
 // BEFORE (Vercel deployment URL)
 const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/dashboard';
-const notificationUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx';
+const notificationUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor';
 
 // AFTER (Custom domain)
 const returnUrl = 'https://www.yum-mi.com/dashboard';
-const notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx';
+const notificationUrl = 'https://www.yum-mi.com/api/webhooks/secure-processor';
 ```
 
 ### Documentation Created
@@ -46,7 +46,7 @@ const notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx';
    - Comprehensive migration guide
    - Testing checklist
    - Troubleshooting guide
-   - Networx configuration steps
+   - Secure-Processor configuration steps
 
 2. **`FINAL_DASHBOARD_REDIRECT_SUMMARY.md`** (New)
    - Dashboard redirect implementation
@@ -65,7 +65,7 @@ const notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx';
 | Purpose | Old URL | New URL |
 |---------|---------|---------|
 | **Return URL** | `website-3...vercel.app/dashboard` | `www.yum-mi.com/dashboard` |
-| **Webhook URL** | `website-3...vercel.app/api/webhooks/networx` | `www.yum-mi.com/api/webhooks/networx` |
+| **Webhook URL** | `website-3...vercel.app/api/webhooks/secure-processor` | `www.yum-mi.com/api/webhooks/secure-processor` |
 
 ---
 
@@ -90,16 +90,16 @@ const notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx';
 
 ## ⚠️ CRITICAL: Next Steps Required
 
-### 🔴 STEP 1: Update Networx Dashboard (URGENT - Do This First!)
+### 🔴 STEP 1: Update Secure-Processor Dashboard (URGENT - Do This First!)
 
 **Why This Is Critical**:
-Your code now expects the custom domain, but Networx is still configured with the old Vercel URL. Payments will **NOT WORK** until you update Networx configuration.
+Your code now expects the custom domain, but Secure-Processor is still configured with the old Vercel URL. Payments will **NOT WORK** until you update Secure-Processor configuration.
 
 **Action Required**:
 
-1. **Log into Networx Merchant Portal**
+1. **Log into Secure-Processor Merchant Portal**
    ```
-   URL: https://merchant.networxpay.com
+   URL: https://merchant.secure-processorpay.com
    Shop ID: 29959
    Credentials: (Your merchant login)
    ```
@@ -123,7 +123,7 @@ Your code now expects the custom domain, but Networx is still configured with th
 
 5. **Update Webhook Configuration**:
    ```
-   Webhook URL: https://www.yum-mi.com/api/webhooks/networx
+   Webhook URL: https://www.yum-mi.com/api/webhooks/secure-processor
    
    Events (ensure enabled):
    ✓ payment.completed
@@ -153,8 +153,8 @@ curl -I https://www.yum-mi.com
 # Expected: 200 OK with valid SSL
 
 # 2. Verify webhook endpoint
-curl https://www.yum-mi.com/api/webhooks/networx
-# Expected: {"message":"Networx webhook endpoint is active","timestamp":"..."}
+curl https://www.yum-mi.com/api/webhooks/secure-processor
+# Expected: {"message":"Secure-Processor webhook endpoint is active","timestamp":"..."}
 
 # 3. Complete test payment
 # Use test card: 4111 1111 1111 1111
@@ -164,7 +164,7 @@ curl https://www.yum-mi.com/api/webhooks/networx
 # After payment, should land on: www.yum-mi.com/dashboard
 
 # 5. Check Vercel logs
-# Look for: "Networx HPP Webhook Received"
+# Look for: "Secure-Processor HPP Webhook Received"
 # Look for: "Transaction saved to database"
 
 # 6. Verify transaction in database
@@ -225,7 +225,7 @@ TESTER: _______________
   [ ] Dashboard loads correctly
   [ ] Payment History loads correctly
 
-✓ Networx Configuration:
+✓ Secure-Processor Configuration:
   [ ] Return URL updated in dashboard
   [ ] Webhook URL updated in dashboard
   [ ] URLs use www.yum-mi.com
@@ -234,7 +234,7 @@ TESTER: _______________
 
 ✓ Payment Flow Test:
   [ ] Initiated payment from dashboard
-  [ ] Redirected to Networx HPP
+  [ ] Redirected to Secure-Processor HPP
   [ ] Completed payment with test card
   [ ] Redirected to: www.yum-mi.com/dashboard ✓
   [ ] Webhook received at server
@@ -324,10 +324,10 @@ If critical issues occur after deployment:
    git push
    ```
 
-2. **Update Networx Dashboard**:
+2. **Update Secure-Processor Dashboard**:
    ```
    Return URL: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/dashboard
-   Webhook URL: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+   Webhook URL: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
    ```
 
 3. **Verify**:
@@ -394,16 +394,16 @@ All documentation for this migration:
 - [x] Code updated to use `www.yum-mi.com`
 - [x] Git branch created and pushed
 - [x] Comprehensive documentation created
-- [x] Ready for Networx configuration
+- [x] Ready for Secure-Processor configuration
 
 ### ⏳ Pending
-- [ ] Update Networx merchant dashboard
+- [ ] Update Secure-Processor merchant dashboard
 - [ ] Test payment flow
 - [ ] Deploy to production
 - [ ] Verify end-to-end
 
 ### 🎯 Next Action
-**Update Networx Dashboard** → **Test** → **Deploy** → **Monitor**
+**Update Secure-Processor Dashboard** → **Test** → **Deploy** → **Monitor**
 
 ---
 
@@ -411,11 +411,11 @@ All documentation for this migration:
 
 ### Technical Support
 - **Vercel**: support@vercel.com
-- **Networx**: support@networxpay.com
+- **Secure-Processor**: support@secure-processorpay.com
 - **Domain Issues**: (Your registrar)
 
 ### Documentation
-- **Networx API**: https://docs.networxpay.com
+- **Secure-Processor API**: https://docs.secure-processorpay.com
 - **Vercel Docs**: https://vercel.com/docs
 - **This Project**: See documentation files in repo
 
@@ -435,7 +435,7 @@ Before marking this migration as complete:
 - [x] ✅ Git branch created
 - [x] ✅ Changes committed
 - [x] ✅ Branch pushed to GitHub
-- [ ] ⏳ Networx dashboard updated
+- [ ] ⏳ Secure-Processor dashboard updated
 - [ ] ⏳ Test payment completed
 - [ ] ⏳ Pull request created
 - [ ] ⏳ Code reviewed (if team)
@@ -451,5 +451,5 @@ Before marking this migration as complete:
 **Commit**: `2e29e58`  
 **Domain**: www.yum-mi.com  
 **Status**: ✅ Code Ready → ⏳ Awaiting Configuration & Testing  
-**Next Step**: **Update Networx Dashboard (CRITICAL)**
+**Next Step**: **Update Secure-Processor Dashboard (CRITICAL)**
 

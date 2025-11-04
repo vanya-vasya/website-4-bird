@@ -13,11 +13,11 @@
 
 ### Return URL Update
 
-**File**: `app/api/payment/networx/route.ts` (line 52)
+**File**: `app/api/payment/secure-processor/route.ts` (line 52)
 
 **Before**:
 ```typescript
-const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx';
+const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor';
 ```
 
 **After**:
@@ -30,7 +30,7 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 | Setting | URL | Purpose |
 |---------|-----|---------|
 | **Return URL** | `/dashboard` | User redirect after payment |
-| **Notification URL** | `/api/webhooks/networx` | Server webhook for processing |
+| **Notification URL** | `/api/webhooks/secure-processor` | Server webhook for processing |
 
 ---
 
@@ -42,10 +42,10 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 1️⃣ User initiates payment
    ↓ (User clicks "Buy Tokens")
    
-2️⃣ Redirect to Networx payment page
+2️⃣ Redirect to Secure-Processor payment page
    ↓ (User enters card details)
    
-3️⃣ Payment processed on Networx
+3️⃣ Payment processed on Secure-Processor
    ↓ (Payment successful)
    
 4️⃣ User redirected to /dashboard ← NEW BEHAVIOR
@@ -116,7 +116,7 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 ## 📁 Files Changed (3 files)
 
 ### Code Changes
-1. ✅ **`app/api/payment/networx/route.ts`**
+1. ✅ **`app/api/payment/secure-processor/route.ts`**
    - Line 52: Return URL updated to `/dashboard`
    - Comments updated to reflect new flow
 
@@ -158,8 +158,8 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 
 ### Before Deploying to Production
 
-- [ ] **Update Networx Dashboard Configuration**
-  - Log into: https://merchant.networxpay.com
+- [ ] **Update Secure-Processor Dashboard Configuration**
+  - Log into: https://merchant.secure-processorpay.com
   - Navigate to: Settings → API Configuration → HPP
   - Update Success Return URL: `https://website-3.../dashboard`
   - Save changes
@@ -196,7 +196,7 @@ const returnUrl = 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.a
 
 ### Configuration
 - ✅ Return URL: `/dashboard` (user redirect)
-- ✅ Webhook URL: `/api/webhooks/networx` (transaction processing)
+- ✅ Webhook URL: `/api/webhooks/secure-processor` (transaction processing)
 - ✅ Both URLs configured independently
 - ✅ Clean separation of concerns
 
@@ -311,7 +311,7 @@ Show dismissible banner at top of dashboard:
 - Clear confirmation for users
 
 ### v2.0 - Webhook Endpoint (Short-lived)
-- Return URL: `/api/webhooks/networx`
+- Return URL: `/api/webhooks/secure-processor`
 - Attempted to consolidate URLs
 - Poor UX (users saw JSON)
 - Quickly replaced
@@ -363,7 +363,7 @@ Show dismissible banner at top of dashboard:
 - [x] ✅ Code changes completed
 - [x] ✅ Documentation created
 - [x] ✅ Branch created and pushed
-- [ ] ⏳ Networx dashboard configuration updated
+- [ ] ⏳ Secure-Processor dashboard configuration updated
 - [ ] ⏳ Test payment flow in staging
 - [ ] ⏳ Review with team
 - [ ] ⏳ Create Pull Request
@@ -425,13 +425,13 @@ Show dismissible banner at top of dashboard:
 - **Quick Fix Guide**: `QUICK_FIX_GUIDE.md`
 
 ### External Resources
-- **Networx Docs**: https://docs.networxpay.com
-- **Networx Dashboard**: https://merchant.networxpay.com
+- **Secure-Processor Docs**: https://docs.secure-processorpay.com
+- **Secure-Processor Dashboard**: https://merchant.secure-processorpay.com
 - **GitHub Repo**: https://github.com/vanya-vasya/website-3
 - **Vercel Dashboard**: https://vercel.com
 
 ### Contact
-- **Networx Support**: support@networxpay.com
+- **Secure-Processor Support**: support@secure-processorpay.com
 - **Vercel Support**: support@vercel.com
 
 ---
@@ -439,7 +439,7 @@ Show dismissible banner at top of dashboard:
 ## 🎉 Summary
 
 ### What Changed
-✅ Payment return URL updated from `/api/webhooks/networx` to `/dashboard`
+✅ Payment return URL updated from `/api/webhooks/secure-processor` to `/dashboard`
 
 ### Why This Is Better
 ✅ Faster user flow, immediate dashboard access, familiar interface
@@ -448,7 +448,7 @@ Show dismissible banner at top of dashboard:
 ✅ Dashboard after payment with updated token balance (within 3 seconds)
 
 ### What You Need to Do
-✅ Update Networx merchant dashboard to match this configuration
+✅ Update Secure-Processor merchant dashboard to match this configuration
 
 ### When to Deploy
 ✅ After testing in staging and reviewing with team

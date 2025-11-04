@@ -8,21 +8,21 @@ For production deployment on Vercel, add these environment variables to your Ver
 
 ### Server-side Variables (Private)
 ```
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=false
-NETWORX_RETURN_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
-NETWORX_CANCEL_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/cancel
-NETWORX_WEBHOOK_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=false
+SECURE-PROCESSOR_RETURN_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
+SECURE-PROCESSOR_CANCEL_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/cancel
+SECURE-PROCESSOR_WEBHOOK_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
 ```
 
 ### Client-side Variables (Public)
 ```
-NEXT_PUBLIC_NETWORX_SHOP_ID=29959
-NEXT_PUBLIC_NETWORX_TEST_MODE=false
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
-NETWORX_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+LFkyD1NdJHu5ZcV2X/01b3jHhlA6vTFSPpNYnHq8Y3WEe7jrSc44PsR0kGibMjZJAB+S1vyZrI/c1OJKk0njXU59ofyRVR6fTkpytwIXqALweGKfWmmSxpJDJXGt+m0sQyG+UjYunHNY6Qw4ARO5+MWNT2GVpbuAEQ+sOksYWjUi9ftEhlcFeFGhO25/eqbV/QtnbqBXjZj3TsCUM1mQY/F9PhXj8Ku6T1vi/Av+Tf4dgyEsch57DTWZa7hMfp663UpaDLNk7Zd90nztYhjPrN9/AWrqyQQ9IKZHpco2iPLbqM8iloi4n5wSTIfWSVR8bZ1kWPhhoAQIDAQAB
+NEXT_PUBLIC_SECURE-PROCESSOR_SHOP_ID=29959
+NEXT_PUBLIC_SECURE-PROCESSOR_TEST_MODE=false
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+LFkyD1NdJHu5ZcV2X/01b3jHhlA6vTFSPpNYnHq8Y3WEe7jrSc44PsR0kGibMjZJAB+S1vyZrI/c1OJKk0njXU59ofyRVR6fTkpytwIXqALweGKfWmmSxpJDJXGt+m0sQyG+UjYunHNY6Qw4ARO5+MWNT2GVpbuAEQ+sOksYWjUi9ftEhlcFeFGhO25/eqbV/QtnbqBXjZj3TsCUM1mQY/F9PhXj8Ku6T1vi/Av+Tf4dgyEsch57DTWZa7hMfp663UpaDLNk7Zd90nztYhjPrN9/AWrqyQQ9IKZHpco2iPLbqM8iloi4n5wSTIfWSVR8bZ1kWPhhoAQIDAQAB
 ```
 
 ## How to Add Environment Variables to Vercel

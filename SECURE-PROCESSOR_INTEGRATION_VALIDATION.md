@@ -1,4 +1,4 @@
-# NetworxPay Integration - Complete Validation & Configuration
+# Secure-ProcessorPay Integration - Complete Validation & Configuration
 
 ## ✅ ISSUES FIXED (2025-10-09)
 
@@ -14,7 +14,7 @@ const amountInCents = Math.round(amount * 100);
 **Problem:** Wrong endpoint `/api/v1/payment/init`
 **Fix:** Corrected to `/ctp/api/checkouts`
 ```typescript
-const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
+const secure-processorApiUrl = `${apiUrl}/ctp/api/checkouts`;
 ```
 
 ### 3. User Experience Issue
@@ -33,16 +33,16 @@ setTimeout(() => {
 ### Required Environment Variables
 
 ```bash
-# NetworxPay Credentials
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+# Secure-ProcessorPay Credentials
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
 
 # API Configuration
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=true  # Set to 'false' for production
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=true  # Set to 'false' for production
 
 # Frontend Widget URL (for reference)
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
 ```
 
 ### Deployment URLs (Current Vercel Setup)
@@ -52,7 +52,7 @@ NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
 https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
 
 # Webhook URL (for payment notifications)
-https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
 ```
 
 ---
@@ -62,7 +62,7 @@ https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/net
 ### Correct Request Structure
 
 ```http
-POST https://checkout.networxpay.com/ctp/api/checkouts
+POST https://checkout.secure-processorpay.com/ctp/api/checkouts
 Content-Type: application/json
 Accept: application/json
 X-API-Version: 2
@@ -86,7 +86,7 @@ Authorization: Basic {base64(SHOP_ID:SECRET_KEY)}
     },
     "settings": {
       "return_url": "https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success",
-      "notification_url": "https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx"
+      "notification_url": "https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor"
     }
   }
 }
@@ -97,7 +97,7 @@ Authorization: Basic {base64(SHOP_ID:SECRET_KEY)}
 {
   "checkout": {
     "token": "15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8",
-    "redirect_url": "https://checkout.networxpay.com/widget/hpp.html?token=15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8"
+    "redirect_url": "https://checkout.secure-processorpay.com/widget/hpp.html?token=15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8"
   }
 }
 ```
@@ -123,7 +123,7 @@ Authorization: Basic {base64(SHOP_ID:SECRET_KEY)}
 - [ ] Verify order status updated
 
 #### Refund
-- [ ] Initiate refund via NetworxPay dashboard
+- [ ] Initiate refund via Secure-ProcessorPay dashboard
 - [ ] Verify webhook notification received
 - [ ] Verify refund status updated
 - [ ] Verify customer notified
@@ -137,7 +137,7 @@ Authorization: Basic {base64(SHOP_ID:SECRET_KEY)}
 ### 2. Production Mode Testing
 
 **⚠️ Before Production:**
-- [ ] Set `NETWORX_TEST_MODE=false`
+- [ ] Set `SECURE-PROCESSOR_TEST_MODE=false`
 - [ ] Verify credentials are production credentials
 - [ ] Test with small real amount (e.g., 0.01 EUR)
 - [ ] Verify all webhooks are received
@@ -227,7 +227,7 @@ Authorization: Basic {base64(SHOP_ID:SECRET_KEY)}
    - Alert if success rate drops below 95%
 
 2. **API Response Times**
-   - Track /api/payment/networx response times
+   - Track /api/payment/secure-processor response times
    - Alert if P95 > 3 seconds
 
 3. **Webhook Delivery**
@@ -275,8 +275,8 @@ Authorization: Basic {base64(SHOP_ID:SECRET_KEY)}
 **Fix:** Use `redirect_url` from API response
 
 ### Issue: "Test mode not working"
-**Cause:** `NETWORX_TEST_MODE` env variable not set
-**Fix:** Set `NETWORX_TEST_MODE=true` in .env
+**Cause:** `SECURE-PROCESSOR_TEST_MODE` env variable not set
+**Fix:** Set `SECURE-PROCESSOR_TEST_MODE=true` in .env
 
 ---
 
@@ -316,7 +316,7 @@ Card: 4000000000000127 (Incorrect CVC)
 ### Before Deploying to Production
 
 1. **Environment Variables**
-   - [ ] Update `NETWORX_TEST_MODE=false` on Vercel
+   - [ ] Update `SECURE-PROCESSOR_TEST_MODE=false` on Vercel
    - [ ] Verify production credentials are set
    - [ ] Verify webhook URL is production URL
    - [ ] Verify return URL is production URL
@@ -335,7 +335,7 @@ Card: 4000000000000127 (Incorrect CVC)
 
 4. **Documentation**
    - [ ] Update README with production setup
-   - [ ] Document support contact (support@networxpay.com)
+   - [ ] Document support contact (support@secure-processorpay.com)
    - [ ] Document escalation process
    - [ ] Update architecture diagrams
 
@@ -343,9 +343,9 @@ Card: 4000000000000127 (Incorrect CVC)
 
 ## 📞 SUPPORT
 
-**NetworxPay Support:**
-- Email: support@networxpay.com
-- Documentation: https://docs.networxpay.com
+**Secure-ProcessorPay Support:**
+- Email: support@secure-processorpay.com
+- Documentation: https://docs.secure-processorpay.com
 
 **Current Implementation Status:**
 - ✅ Payment creation (fixed)

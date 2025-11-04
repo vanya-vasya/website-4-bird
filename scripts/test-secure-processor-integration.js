@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 
 /**
- * NetworxPay Integration Test Script
+ * Secure-ProcessorPay Integration Test Script
  * 
  * Tests the payment integration end-to-end in sandbox mode
- * Run: node scripts/test-networx-integration.js
+ * Run: node scripts/test-secure-processor-integration.js
  */
 
 const https = require('https');
 
 // Configuration (from environment variables)
 const config = {
-  shopId: process.env.NETWORX_SHOP_ID || '29959',
-  secretKey: process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950',
-  apiUrl: process.env.NETWORX_API_URL || 'https://checkout.networxpay.com',
+  shopId: process.env.SECURE-PROCESSOR_SHOP_ID || '29959',
+  secretKey: process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950',
+  apiUrl: process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com',
   returnUrl: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success',
-  notificationUrl: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx',
+  notificationUrl: 'https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor',
   testMode: true
 };
 
@@ -45,7 +45,7 @@ const testCases = [
 ];
 
 /**
- * Make HTTP request to NetworxPay API
+ * Make HTTP request to Secure-ProcessorPay API
  */
 function makeRequest(requestData) {
   return new Promise((resolve, reject) => {
@@ -53,7 +53,7 @@ function makeRequest(requestData) {
     const postData = JSON.stringify(requestData);
 
     const options = {
-      hostname: 'checkout.networxpay.com',
+      hostname: 'checkout.secure-processorpay.com',
       port: 443,
       path: '/ctp/api/checkouts',
       method: 'POST',
@@ -173,8 +173,8 @@ async function runTestCase(testCase) {
       },
       {
         name: 'redirect_url is valid',
-        pass: response.body.checkout?.redirect_url?.startsWith('https://checkout.networxpay.com'),
-        expected: 'starts with https://checkout.networxpay.com',
+        pass: response.body.checkout?.redirect_url?.startsWith('https://checkout.secure-processorpay.com'),
+        expected: 'starts with https://checkout.secure-processorpay.com',
         actual: response.body.checkout?.redirect_url
       },
       {
@@ -230,7 +230,7 @@ async function runTestCase(testCase) {
  */
 async function runAllTests() {
   console.log('╔═══════════════════════════════════════════════════════════════════╗');
-  console.log('║         NetworxPay Integration Test Suite                        ║');
+  console.log('║         Secure-ProcessorPay Integration Test Suite                        ║');
   console.log('╚═══════════════════════════════════════════════════════════════════╝');
   
   console.log('\n📋 CONFIGURATION:');
@@ -287,7 +287,7 @@ async function runAllTests() {
     console.log('   2. Verify Shop ID and Secret Key are valid');
     console.log('   3. Check API endpoint is correct');
     console.log('   4. Review request/response logs above');
-    console.log('   5. Contact NetworxPay support if issues persist');
+    console.log('   5. Contact Secure-ProcessorPay support if issues persist');
   }
 
   console.log('\n');

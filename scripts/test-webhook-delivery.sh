@@ -24,7 +24,7 @@ NC='\033[0m' # No Color
 USER_ID=${1:-"user_test_123"}
 AMOUNT=${2:-2380}
 TOKENS=${3:-100}
-WEBHOOK_URL="https://www.yum-mi.com/api/webhooks/networx"
+WEBHOOK_URL="https://www.yum-mi.com/api/webhooks/secure-processor"
 
 echo ""
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"

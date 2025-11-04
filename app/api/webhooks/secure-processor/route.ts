@@ -4,7 +4,7 @@ import prismadb from '@/lib/prismadb';
 import { transporter } from '@/config/nodemailer';
 import { generatePdfReceipt } from '@/lib/receiptGeneration';
 
-// Функция для верификации подписи webhook согласно документации Networx
+// Функция для верификации подписи webhook согласно документации Secure-Processor
 function verifyWebhookSignature(data: Record<string, any>, signature: string, secretKey: string): boolean {
   // Удаляем подпись из данных для верификации
   const { signature: _, ...dataForSignature } = data;
@@ -31,12 +31,12 @@ function verifyWebhookSignature(data: Record<string, any>, signature: string, se
   return expectedSignature === signature;
 }
 
-// POST - Обработка webhook уведомлений от Networx Hosted Payment Page
+// POST - Обработка webhook уведомлений от Secure-Processor Hosted Payment Page
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     console.log('═'.repeat(60));
-    console.log('📥 Networx HPP Webhook Received');
+    console.log('📥 Secure-Processor HPP Webhook Received');
     console.log('═'.repeat(60));
     console.log(JSON.stringify(body, null, 2));
     console.log('═'.repeat(60));
@@ -44,16 +44,16 @@ export async function POST(request: NextRequest) {
     // Structured logging for environment tracking
     console.log('🔍 [WEBHOOK-ENV]', JSON.stringify({
       environment: process.env.NODE_ENV || 'development',
-      testMode: process.env.NETWORX_TEST_MODE || 'not set',
+      testMode: process.env.SECURE-PROCESSOR_TEST_MODE || 'not set',
       databaseType: process.env.DATABASE_URL?.includes('neon.tech') ? 'Neon Production' : 
                     process.env.DATABASE_URL?.includes('localhost') ? 'Local PostgreSQL' :
                     process.env.DATABASE_URL?.startsWith('file:') ? 'SQLite' : 'Unknown',
       timestamp: new Date().toISOString(),
     }, null, 2));
 
-    const secretKey = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
+    const secretKey = process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
     if (!secretKey) {
-      console.error('❌ NETWORX_SECRET_KEY not configured');
+      console.error('❌ SECURE-PROCESSOR_SECRET_KEY not configured');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
@@ -318,7 +318,7 @@ support@yum-mi.com`,
         console.log(`❓ Unknown payment status: ${status} for order ${tracking_id}`);
     }
 
-    // Возвращаем успешный ответ согласно требованиям Networx
+    // Возвращаем успешный ответ согласно требованиям Secure-Processor
     return NextResponse.json({ status: 'ok' }, { status: 200 });
 
   } catch (error) {
@@ -333,7 +333,7 @@ support@yum-mi.com`,
 // GET - Для проверки доступности endpoint'а
 export async function GET() {
   return NextResponse.json({
-    message: 'Networx webhook endpoint is active',
+    message: 'Secure-Processor webhook endpoint is active',
     timestamp: new Date().toISOString(),
   });
 }

@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
 /**
- * Networx Payment API Test Script
+ * Secure-Processor Payment API Test Script
  * 
- * This script tests the Networx payment integration end-to-end
+ * This script tests the Secure-Processor payment integration end-to-end
  * 
  * Usage:
- *   node scripts/test-networx-payment.js
+ *   node scripts/test-secure-processor-payment.js
  */
 
 const https = require('https');
 
 // Configuration
-const API_URL = 'https://checkout.networxpay.com/ctp/api/checkouts';
-const SHOP_ID = process.env.NETWORX_SHOP_ID || '29959';
-const SECRET_KEY = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
+const API_URL = 'https://checkout.secure-processorpay.com/ctp/api/checkouts';
+const SHOP_ID = process.env.SECURE-PROCESSOR_SHOP_ID || '29959';
+const SECRET_KEY = process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
 const TEST_MODE = true;
 
 // Test data
@@ -33,7 +33,7 @@ const testPayload = {
     },
     settings: {
       return_url: "https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success",
-      notification_url: "https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx"
+      notification_url: "https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor"
     }
   }
 };
@@ -41,7 +41,7 @@ const testPayload = {
 // Create Basic Auth header
 const auth = Buffer.from(`${SHOP_ID}:${SECRET_KEY}`).toString('base64');
 
-console.log('\n🧪 Networx Payment API Test');
+console.log('\n🧪 Secure-Processor Payment API Test');
 console.log('═'.repeat(60));
 console.log(`Mode: ${TEST_MODE ? '🧪 SANDBOX' : '💳 PRODUCTION'}`);
 console.log(`Endpoint: ${API_URL}`);

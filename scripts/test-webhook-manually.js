@@ -3,7 +3,7 @@
 /**
  * Manual Webhook Testing Script
  * 
- * Simulates a Networx webhook POST request to test database write functionality
+ * Simulates a Secure-Processor webhook POST request to test database write functionality
  * 
  * Usage:
  *   node scripts/test-webhook-manually.js [userId] [amount] [tokens]
@@ -23,7 +23,7 @@ const tokens = parseInt(args[2]) || 100;
 const currency = args[3] || 'EUR';
 
 // Configuration
-const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:3000/api/webhooks/networx';
+const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:3000/api/webhooks/secure-processor';
 
 // Create mock webhook payload
 const webhookPayload = {
@@ -44,7 +44,7 @@ const webhookPayload = {
       payment_method_type: 'credit_card',
       message: 'Payment successful',
       paid_at: new Date().toISOString(),
-      receipt_url: 'https://networxpay.com/receipt/test123',
+      receipt_url: 'https://secure-processorpay.com/receipt/test123',
     },
   },
 };

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 
-// Функция для создания подписи согласно документации Networx
+// Функция для создания подписи согласно документации Secure-Processor
 function createSignature(data: Record<string, any>, secretKey: string): string {
   // Сортируем параметры по ключу
   const sortedParams = Object.keys(data)
@@ -26,7 +26,7 @@ function createSignature(data: Record<string, any>, secretKey: string): string {
 // POST - Создание токена для платежа
 export async function POST(request: NextRequest) {
   try {
-    console.log('=== Networx Payment API Called ===');
+    console.log('=== Secure-Processor Payment API Called ===');
     const body = await request.json();
     console.log('Request body:', body);
     
@@ -40,18 +40,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Networx Pay API credentials and configuration
-    const shopId = process.env.NETWORX_SHOP_ID || '29959';
-    const secretKey = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
-    // Use checkout.networxpay.com - verified working endpoint
+    // Secure-Processor Pay API credentials and configuration
+    const shopId = process.env.SECURE-PROCESSOR_SHOP_ID || '29959';
+    const secretKey = process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
+    // Use checkout.secure-processorpay.com - verified working endpoint
     // Remove /ctp/api/checkouts if it's already in the env variable (avoid duplication)
-    let apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com';
+    let apiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com';
     apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip trailing path if present
     // Force correct URLs (override old env variables)
     // Production URLs using custom domain yum-mi.com
     const returnUrl = 'https://www.yum-mi.com/dashboard';
-    const notificationUrl = 'https://www.yum-mi.com/api/webhooks/networx';
-    const testMode = process.env.NETWORX_TEST_MODE === 'true'; // Use test mode based on env variable
+    const notificationUrl = 'https://www.yum-mi.com/api/webhooks/secure-processor';
+    const testMode = process.env.SECURE-PROCESSOR_TEST_MODE === 'true'; // Use test mode based on env variable
     
     console.log('Environment variables:', {
       shopId: shopId ? 'SET' : 'MISSING',
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     const amountRounded = Math.round(amount * 100) / 100; // Round to 2 decimals: 2.38
     const amountInCents = Math.round(amountRounded * 100); // Convert to cents: 238
     
-    // Request structure for Networx Pay Hosted Payment Page API v2
+    // Request structure for Secure-Processor Pay Hosted Payment Page API v2
     const requestData = {
       checkout: {
         test: testMode, // Use test mode from environment variable
@@ -92,16 +92,16 @@ export async function POST(request: NextRequest) {
     console.log('Final request data:', JSON.stringify(requestData, null, 2));
     console.log(`Amount conversion: ${amount} ${currency} -> ${amountRounded} (rounded) -> ${amountInCents} cents`);
     
-    // Make API call to Networx Pay
+    // Make API call to Secure-Processor Pay
     // The 'test' parameter in requestData controls sandbox/production mode
-    // NetworxPay will return a real token, but the transaction will be test/production based on the 'test' flag
-    const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
-    console.log('Making request to:', networxApiUrl);
+    // Secure-ProcessorPay will return a real token, but the transaction will be test/production based on the 'test' flag
+    const secure-processorApiUrl = `${apiUrl}/ctp/api/checkouts`;
+    console.log('Making request to:', secure-processorApiUrl);
     console.log(`Mode: ${testMode ? '🧪 SANDBOX (test cards)' : '💳 PRODUCTION (real cards)'}`);
-    console.log('Using Networx Pay API v2 with correct endpoint');
+    console.log('Using Secure-Processor Pay API v2 with correct endpoint');
 
     try {
-      const networxResponse = await fetch(networxApiUrl, {
+      const secure-processorResponse = await fetch(secure-processorApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,46 +112,46 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(requestData),
       });
 
-      if (!networxResponse.ok) {
-        const errorData = await networxResponse.text();
-        console.error('Networx API Error Response:', errorData);
+      if (!secure-processorResponse.ok) {
+        const errorData = await secure-processorResponse.text();
+        console.error('Secure-Processor API Error Response:', errorData);
         return NextResponse.json(
           { 
             error: 'Failed to create payment token',
-            details: `API returned ${networxResponse.status}: ${errorData}`
+            details: `API returned ${secure-processorResponse.status}: ${errorData}`
           },
           { status: 400 }
         );
       }
 
-      const networxResult = await networxResponse.json();
-      console.log('Networx API Success Response:', JSON.stringify(networxResult, null, 2));
+      const secure-processorResult = await secure-processorResponse.json();
+      console.log('Secure-Processor API Success Response:', JSON.stringify(secure-processorResult, null, 2));
 
       // Check for successful response with token and redirect_url
-      if (networxResult.checkout && networxResult.checkout.token && networxResult.checkout.redirect_url) {
+      if (secure-processorResult.checkout && secure-processorResult.checkout.token && secure-processorResult.checkout.redirect_url) {
         console.log('✅ Payment checkout created successfully');
-        console.log('Token:', networxResult.checkout.token);
-        console.log('Redirect URL:', networxResult.checkout.redirect_url);
+        console.log('Token:', secure-processorResult.checkout.token);
+        console.log('Redirect URL:', secure-processorResult.checkout.redirect_url);
         
         return NextResponse.json({
           success: true,
-          token: networxResult.checkout.token,
-          redirect_url: networxResult.checkout.redirect_url, // Use redirect_url (not payment_url)
-          checkout_id: networxResult.checkout.token,
+          token: secure-processorResult.checkout.token,
+          redirect_url: secure-processorResult.checkout.redirect_url, // Use redirect_url (not payment_url)
+          checkout_id: secure-processorResult.checkout.token,
         });
       } else {
-        console.error('❌ Networx API returned unsuccessful response:', networxResult);
+        console.error('❌ Secure-Processor API returned unsuccessful response:', secure-processorResult);
         return NextResponse.json(
           { 
             error: 'Payment checkout creation failed',
-            details: networxResult.error || networxResult.message || 'Unknown error'
+            details: secure-processorResult.error || secure-processorResult.message || 'Unknown error'
           },
           { status: 400 }
         );
       }
 
     } catch (fetchError) {
-      console.error('Network error calling Networx API:', fetchError);
+      console.error('Network error calling Secure-Processor API:', fetchError);
       return NextResponse.json(
         { 
           error: 'Failed to connect to payment gateway',
@@ -187,12 +187,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const shopId = process.env.NETWORX_SHOP_ID || '29959';
-    const secretKey = process.env.NETWORX_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
-    const apiUrl = process.env.NETWORX_API_URL || 'https://checkout.networxpay.com'; // API URL
+    const shopId = process.env.SECURE-PROCESSOR_SHOP_ID || '29959';
+    const secretKey = process.env.SECURE-PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
+    const apiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://checkout.secure-processorpay.com'; // API URL
 
-    // Send request to Networx HPP API for status check
-    const networxResponse = await fetch(`${apiUrl}/ctp/api/checkouts/${token}`, {
+    // Send request to Secure-Processor HPP API for status check
+    const secure-processorResponse = await fetch(`${apiUrl}/ctp/api/checkouts/${token}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -201,20 +201,20 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const networxResult = await networxResponse.json();
+    const secure-processorResult = await secure-processorResponse.json();
 
-    if (!networxResponse.ok) {
-      console.error('Networx HPP Status API Error:', networxResult);
+    if (!secure-processorResponse.ok) {
+      console.error('Secure-Processor HPP Status API Error:', secure-processorResult);
       return NextResponse.json(
-        { error: 'Failed to check payment status', details: networxResult },
+        { error: 'Failed to check payment status', details: secure-processorResult },
         { status: 400 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      status: networxResult.status,
-      transaction: networxResult,
+      status: secure-processorResult.status,
+      transaction: secure-processorResult,
     });
 
   } catch (error) {

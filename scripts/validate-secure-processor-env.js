@@ -1,44 +1,44 @@
 #!/usr/bin/env node
 
 /**
- * NetworxPay Environment Variables Validation Script
+ * Secure-ProcessorPay Environment Variables Validation Script
  * 
- * Validates all required environment variables for NetworxPay integration
- * Run: node scripts/validate-networx-env.js
+ * Validates all required environment variables for Secure-ProcessorPay integration
+ * Run: node scripts/validate-secure-processor-env.js
  */
 
 // Required environment variables
 const requiredVars = [
   {
-    name: 'NETWORX_SHOP_ID',
-    description: 'Your NetworxPay Shop ID',
+    name: 'SECURE-PROCESSOR_SHOP_ID',
+    description: 'Your Secure-ProcessorPay Shop ID',
     example: '29959',
     validator: (val) => val && val.length > 0,
     errorMessage: 'Shop ID must not be empty'
   },
   {
-    name: 'NETWORX_SECRET_KEY',
-    description: 'Your NetworxPay Secret Key',
+    name: 'SECURE-PROCESSOR_SECRET_KEY',
+    description: 'Your Secure-ProcessorPay Secret Key',
     example: 'dbfb6f4e977f49880a6ce3c939f1e7be...',
     validator: (val) => val && val.length >= 32,
     errorMessage: 'Secret Key must be at least 32 characters',
     sensitive: true
   },
   {
-    name: 'NETWORX_API_URL',
-    description: 'NetworxPay API base URL',
-    example: 'https://checkout.networxpay.com',
-    validator: (val) => val === 'https://checkout.networxpay.com',
-    errorMessage: 'API URL must be https://checkout.networxpay.com',
+    name: 'SECURE-PROCESSOR_API_URL',
+    description: 'Secure-ProcessorPay API base URL',
+    example: 'https://checkout.secure-processorpay.com',
+    validator: (val) => val === 'https://checkout.secure-processorpay.com',
+    errorMessage: 'API URL must be https://checkout.secure-processorpay.com',
     warning: (val) => {
-      if (val === 'https://gateway.networxpay.com') {
-        return '⚠️  WARNING: You are using gateway.networxpay.com which may not work. Use checkout.networxpay.com instead.';
+      if (val === 'https://gateway.secure-processorpay.com') {
+        return '⚠️  WARNING: You are using gateway.secure-processorpay.com which may not work. Use checkout.secure-processorpay.com instead.';
       }
       return null;
     }
   },
   {
-    name: 'NETWORX_TEST_MODE',
+    name: 'SECURE-PROCESSOR_TEST_MODE',
     description: 'Enable test mode (true/false)',
     example: 'true',
     validator: (val) => val === 'true' || val === 'false',
@@ -50,11 +50,11 @@ const requiredVars = [
 // Optional but recommended
 const optionalVars = [
   {
-    name: 'NEXT_PUBLIC_NETWORX_WIDGET_URL',
+    name: 'NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL',
     description: 'Public-facing widget URL',
-    example: 'https://checkout.networxpay.com',
-    validator: (val) => !val || val === 'https://checkout.networxpay.com',
-    errorMessage: 'If set, must be https://checkout.networxpay.com'
+    example: 'https://checkout.secure-processorpay.com',
+    validator: (val) => !val || val === 'https://checkout.secure-processorpay.com',
+    errorMessage: 'If set, must be https://checkout.secure-processorpay.com'
   }
 ];
 
@@ -106,7 +106,7 @@ function validateVar(varConfig) {
  */
 function validateEnvironment() {
   console.log('╔═══════════════════════════════════════════════════════════════════╗');
-  console.log('║      NetworxPay Environment Variables Validation                 ║');
+  console.log('║      Secure-ProcessorPay Environment Variables Validation                 ║');
   console.log('╚═══════════════════════════════════════════════════════════════════╝\n');
 
   let allValid = true;
@@ -190,7 +190,7 @@ function validateEnvironment() {
     }
 
     console.log('✅ Next Steps:');
-    console.log('   1. Run the integration test: node scripts/test-networx-integration.js');
+    console.log('   1. Run the integration test: node scripts/test-secure-processor-integration.js');
     console.log('   2. Deploy to Vercel with these environment variables');
     console.log('   3. Test the payment flow end-to-end');
     console.log('');
@@ -202,7 +202,7 @@ function validateEnvironment() {
     console.log('   3. Run this script again to validate');
     console.log('   4. Example .env.local:');
     console.log('');
-    console.log('      # NetworxPay Configuration');
+    console.log('      # Secure-ProcessorPay Configuration');
     requiredVars.forEach(v => {
       console.log(`      ${v.name}=${v.example}`);
     });
@@ -214,14 +214,14 @@ function validateEnvironment() {
   console.log('║                    COMMON MISTAKES CHECK                          ║');
   console.log('╚═══════════════════════════════════════════════════════════════════╝\n');
 
-  const apiUrl = process.env.NETWORX_API_URL;
+  const apiUrl = process.env.SECURE-PROCESSOR_API_URL;
   const mistakes = [];
 
-  if (apiUrl === 'https://gateway.networxpay.com') {
+  if (apiUrl === 'https://gateway.secure-processorpay.com') {
     mistakes.push({
       issue: 'Wrong API URL',
       current: apiUrl,
-      correct: 'https://checkout.networxpay.com',
+      correct: 'https://checkout.secure-processorpay.com',
       severity: 'ERROR'
     });
   }
@@ -235,7 +235,7 @@ function validateEnvironment() {
     });
   }
 
-  const testMode = process.env.NETWORX_TEST_MODE;
+  const testMode = process.env.SECURE-PROCESSOR_TEST_MODE;
   if (testMode && testMode !== 'true' && testMode !== 'false') {
     mistakes.push({
       issue: 'Invalid test mode value',

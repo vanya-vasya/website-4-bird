@@ -33,7 +33,7 @@ origin: https://github.com/vanya-vasya/website-3.git
 **Database:** PostgreSQL (via Prisma)  
 **Authentication:** Clerk  
 **Deployment:** Vercel  
-**Payment Gateway:** Networx Pay
+**Payment Gateway:** Secure-Processor Pay
 
 ---
 
@@ -46,8 +46,8 @@ app/
 ├── (dashboard)/     - Dashboard pages
 ├── (landing)/       - Landing pages
 ├── api/             - API routes
-│   ├── payment/networx/    - Payment API
-│   ├── webhooks/networx/   - Payment webhooks
+│   ├── payment/secure-processor/    - Payment API
+│   ├── webhooks/secure-processor/   - Payment webhooks
 │   └── ...
 ├── globals.css
 ├── layout.tsx
@@ -56,7 +56,7 @@ app/
 components/
 ├── ui/              - Shadcn UI components
 ├── landing/         - Landing page components
-├── networx-payment-widget.tsx
+├── secure-processor-payment-widget.tsx
 └── ...
 
 lib/
@@ -79,10 +79,10 @@ prisma/
 
 ### Documentation
 - ✅ `README.md`
-- ✅ `NETWORX_DEPLOYMENT_GUIDE.md`
-- ✅ `NETWORX_ACCESS_DENIED_FIX.md`
-- ✅ `NETWORX_ENDPOINT_FIX.md`
-- ✅ `NETWORX_ENV_SETUP.md`
+- ✅ `SECURE-PROCESSOR_DEPLOYMENT_GUIDE.md`
+- ✅ `SECURE-PROCESSOR_ACCESS_DENIED_FIX.md`
+- ✅ `SECURE-PROCESSOR_ENDPOINT_FIX.md`
+- ✅ `SECURE-PROCESSOR_ENV_SETUP.md`
 - ✅ `ENV_SETUP.md`
 - ✅ Multiple implementation guides
 
@@ -103,8 +103,8 @@ prisma/
 - Protected routes
 
 ### 3. Payment Integration (FIXED) ✅
-- **Networx Payment Gateway**
-- Correct API endpoint: `https://checkout.networxpay.com`
+- **Secure-Processor Payment Gateway**
+- Correct API endpoint: `https://checkout.secure-processorpay.com`
 - Shop ID: 29959
 - Webhook handling
 - Success/Cancel pages
@@ -153,20 +153,20 @@ EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
 EMAIL_FROM=your-email@gmail.com
 
-# Networx Payment Gateway (CORRECTED)
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=false
-NETWORX_RETURN_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
-NETWORX_CANCEL_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/cancel
-NETWORX_WEBHOOK_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+# Secure-Processor Payment Gateway (CORRECTED)
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=false
+SECURE-PROCESSOR_RETURN_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
+SECURE-PROCESSOR_CANCEL_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/cancel
+SECURE-PROCESSOR_WEBHOOK_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
 
 # Public Variables
-NEXT_PUBLIC_NETWORX_SHOP_ID=29959
-NEXT_PUBLIC_NETWORX_TEST_MODE=false
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
-NETWORX_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+LFkyD1NdJHu5ZcV2X/01b3jHhlA6vTFSPpNYnHq8Y3WEe7jrSc44PsR0kGibMjZJAB+S1vyZrI/c1OJKk0njXU59ofyRVR6fTkpytwIXqALweGKfWmmSxpJDJXGt+m0sQyG+UjYunHNY6Qw4ARO5+MWNT2GVpbuAEQ+sOksYWjUi9ftEhlcFeFGhO25/eqbV/QtnbqBXjZj3TsCUM1mQY/F9PhXj8Ku6T1vi/Av+Tf4dgyEsch57DTWZa7hMfp663UpaDLNk7Zd90nztYhjPrN9/AWrqyQQ9IKZHpco2iPLbqM8iloi4n5wSTIfWSVR8bZ1kWPhhoAQIDAQAB
+NEXT_PUBLIC_SECURE-PROCESSOR_SHOP_ID=29959
+NEXT_PUBLIC_SECURE-PROCESSOR_TEST_MODE=false
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+LFkyD1NdJHu5ZcV2X/01b3jHhlA6vTFSPpNYnHq8Y3WEe7jrSc44PsR0kGibMjZJAB+S1vyZrI/c1OJKk0njXU59ofyRVR6fTkpytwIXqALweGKfWmmSxpJDJXGt+m0sQyG+UjYunHNY6Qw4ARO5+MWNT2GVpbuAEQ+sOksYWjUi9ftEhlcFeFGhO25/eqbV/QtnbqBXjZj3TsCUM1mQY/F9PhXj8Ku6T1vi/Av+Tf4dgyEsch57DTWZa7hMfp663UpaDLNk7Zd90nztYhjPrN9/AWrqyQQ9IKZHpco2iPLbqM8iloi4n5wSTIfWSVR8bZ1kWPhhoAQIDAQAB
 NEXT_PUBLIC_APP_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app
 ```
 
@@ -174,16 +174,16 @@ NEXT_PUBLIC_APP_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.
 
 ## 🐛 Recent Fixes Applied
 
-### 1. Networx Payment Integration
+### 1. Secure-Processor Payment Integration
 **Problems Solved:**
 - ✅ Fixed "Access denied" error (test mode mismatch)
 - ✅ Fixed "This route doesn't exist" error (wrong API endpoint)
-- ✅ Corrected API endpoint: `checkout.networxpay.com`
+- ✅ Corrected API endpoint: `checkout.secure-processorpay.com`
 - ✅ Synchronized test mode across codebase
 - ✅ Updated all URLs to website-3 deployment
 
 **Changes:**
-- `app/api/payment/networx/route.ts` - API endpoint corrected
+- `app/api/payment/secure-processor/route.ts` - API endpoint corrected
 - Environment variables - Updated with correct values
 - Documentation - Comprehensive troubleshooting guides
 
@@ -285,7 +285,7 @@ After deployment, test:
 ### Payment Integration
 - [ ] Payment widget loads
 - [ ] Can initiate payment
-- [ ] Redirects to Networx checkout
+- [ ] Redirects to Secure-Processor checkout
 - [ ] Returns to success/cancel URLs
 - [ ] Webhooks receive notifications
 
@@ -299,15 +299,15 @@ After deployment, test:
 ## 📞 Support & Resources
 
 ### Documentation Files
-- `NETWORX_DEPLOYMENT_GUIDE.md` - Complete deployment guide
-- `NETWORX_ACCESS_DENIED_FIX.md` - Troubleshooting "Access denied"
-- `NETWORX_ENDPOINT_FIX.md` - Endpoint routing fix details
-- `NETWORX_ENV_SETUP.md` - Environment configuration
+- `SECURE-PROCESSOR_DEPLOYMENT_GUIDE.md` - Complete deployment guide
+- `SECURE-PROCESSOR_ACCESS_DENIED_FIX.md` - Troubleshooting "Access denied"
+- `SECURE-PROCESSOR_ENDPOINT_FIX.md` - Endpoint routing fix details
+- `SECURE-PROCESSOR_ENV_SETUP.md` - Environment configuration
 - `ENV_SETUP.md` - General setup guide
 
 ### External Resources
 - **GitHub Repository:** https://github.com/vanya-vasya/website-3
-- **Networx Support:** support@networxpay.com
+- **Secure-Processor Support:** support@secure-processorpay.com
 - **Next.js Docs:** https://nextjs.org/docs
 - **Vercel Docs:** https://vercel.com/docs
 
@@ -319,7 +319,7 @@ After deployment, test:
 ✅ **All 536 project files tracked**  
 ✅ **New deployment branch created**  
 ✅ **Branch successfully pushed to GitHub**  
-✅ **Networx payment integration fixed**  
+✅ **Secure-Processor payment integration fixed**  
 ✅ **Comprehensive documentation included**  
 ✅ **Ready for production deployment**
 
@@ -329,9 +329,9 @@ After deployment, test:
 
 ```
 231d0dd - Deploy: Full project deployment branch
-7aa4aad - Fix: Revert to correct Networx API endpoint
-8102f27 - Add comprehensive deployment guide for Networx integration
-719429f - Fix Networx Payment API - Update credentials and endpoints
+7aa4aad - Fix: Revert to correct Secure-Processor API endpoint
+8102f27 - Add comprehensive deployment guide for Secure-Processor integration
+719429f - Fix Secure-Processor Payment API - Update credentials and endpoints
 c70b623 - feat: Replace master-nutritionist guideline images
 9678502 - Replace Master Nutritionist images
 ```

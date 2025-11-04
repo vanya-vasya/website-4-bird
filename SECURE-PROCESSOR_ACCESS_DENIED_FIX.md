@@ -1,14 +1,14 @@
-# Networx "Access Denied" Error - Analysis & Fix
+# Secure-Processor "Access Denied" Error - Analysis & Fix
 
 ## Problem Analysis
 
-**Error:** `"Access denied"` from Networx API
+**Error:** `"Access denied"` from Secure-Processor API
 
 ### Root Causes Found:
 
 1. **❌ Wrong API URL**
-   - Was using: `https://checkout.networxpay.com`
-   - Should use: `https://gateway.networxpay.com` (as per documentation)
+   - Was using: `https://checkout.secure-processorpay.com`
+   - Should use: `https://gateway.secure-processorpay.com` (as per documentation)
 
 2. **❌ Test Mode Mismatch**
    - Code had: `testMode = false` but sent `test: true` in request
@@ -23,10 +23,10 @@
 ### 1. Fixed API URL
 ```typescript
 // Before:
-const apiUrl = 'https://checkout.networxpay.com';
+const apiUrl = 'https://checkout.secure-processorpay.com';
 
 // After:
-const apiUrl = process.env.NETWORX_API_URL || 'https://gateway.networxpay.com';
+const apiUrl = process.env.SECURE-PROCESSOR_API_URL || 'https://gateway.secure-processorpay.com';
 ```
 
 ### 2. Fixed Test Mode Consistency
@@ -38,7 +38,7 @@ checkout: {
   test: true, // Hardcoded true!
   
 // After:
-const testMode = process.env.NETWORX_TEST_MODE === 'true';
+const testMode = process.env.SECURE-PROCESSOR_TEST_MODE === 'true';
 // ...
 checkout: {
   test: testMode, // Now consistent
@@ -46,17 +46,17 @@ checkout: {
 
 ### 3. Made Configuration Flexible
 Now all settings respect environment variables:
-- `NETWORX_API_URL` 
-- `NETWORX_TEST_MODE`
+- `SECURE-PROCESSOR_API_URL` 
+- `SECURE-PROCESSOR_TEST_MODE`
 - Allows easy switching between test/production
 
 ## ✅ SOLUTION APPLIED
 
 ### Updated Configuration
-All Networx credentials and URLs have been updated:
+All Secure-Processor credentials and URLs have been updated:
 
 **API Endpoint:**
-- ✅ Using: `https://checkout.networxpay.com` (verified working)
+- ✅ Using: `https://checkout.secure-processorpay.com` (verified working)
 
 **Credentials Verified:**
 - Shop ID: `29959`
@@ -66,7 +66,7 @@ All Networx credentials and URLs have been updated:
 **URLs Updated:**
 - Return URL: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success`
 - Cancel URL: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/cancel`
-- Webhook URL: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx`
+- Webhook URL: `https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor`
 
 **Test Mode:**
 - Set to: `false` (production mode)
@@ -80,15 +80,15 @@ All Networx credentials and URLs have been updated:
 4. Test payment flow
 
 ### Option 2: Get New Credentials 🔑
-Contact Networx support to verify:
+Contact Secure-Processor support to verify:
 1. **Are the current credentials valid?**
    - Shop ID: `29959`
    - Secret Key: `dbfb...950`
 
-2. **Questions to ask Networx:**
+2. **Questions to ask Secure-Processor:**
    - "What is the correct API endpoint for Hosted Payment Page?"
-     - Is it `https://gateway.networxpay.com/ctp/api/checkouts`?
-     - Or `https://checkout.networxpay.com/ctp/api/checkouts`?
+     - Is it `https://gateway.secure-processorpay.com/ctp/api/checkouts`?
+     - Or `https://checkout.secure-processorpay.com/ctp/api/checkouts`?
    
    - "Are my credentials (Shop ID 29959) active and valid?"
    
@@ -98,19 +98,19 @@ Contact Networx support to verify:
      - Currently using: `X-API-Version: 2`
 
 ### Option 3: Try Alternative Endpoints 🔄
-If Networx confirms credentials are valid, try these endpoints:
+If Secure-Processor confirms credentials are valid, try these endpoints:
 
-1. `https://checkout.networxpay.com/ctp/api/checkouts` ✅ (tried)
-2. `https://gateway.networxpay.com/ctp/api/checkouts` ⏳ (now trying)
-3. `https://api.networxpay.com/ctp/api/checkouts` ❓
+1. `https://checkout.secure-processorpay.com/ctp/api/checkouts` ✅ (tried)
+2. `https://gateway.secure-processorpay.com/ctp/api/checkouts` ⏳ (now trying)
+3. `https://api.secure-processorpay.com/ctp/api/checkouts` ❓
 4. Check if endpoint needs `/v2/` prefix ❓
 
 ## How to Test
 
 ### 1. Update Vercel Environment Variables
 ```bash
-NETWORX_API_URL=https://gateway.networxpay.com
-NETWORX_TEST_MODE=true
+SECURE-PROCESSOR_API_URL=https://gateway.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=true
 ```
 
 ### 2. Redeploy
@@ -130,10 +130,10 @@ Check for new error messages that might give more clues:
 - [x] Fixed API URL to use documented endpoint
 - [x] Fixed test mode consistency
 - [x] Made configuration respect env variables
-- [ ] Verify credentials with Networx
+- [ ] Verify credentials with Secure-Processor
 - [ ] Test with different API endpoints
 - [ ] Check if API v2 authentication method is correct
-- [ ] Verify Shop ID is activated in Networx dashboard
+- [ ] Verify Shop ID is activated in Secure-Processor dashboard
 
 ## Expected Behavior After Fix
 
@@ -142,23 +142,23 @@ Check for new error messages that might give more clues:
 {
   "checkout": {
     "token": "abc123...",
-    "redirect_url": "https://checkout.networxpay.com/ctp/pay/abc123...",
+    "redirect_url": "https://checkout.secure-processorpay.com/ctp/pay/abc123...",
     "status": "pending"
   }
 }
 ```
 
 ### If Still Getting Error:
-Need to contact Networx support - likely credentials issue.
+Need to contact Secure-Processor support - likely credentials issue.
 
-## Contact Networx Support
+## Contact Secure-Processor Support
 
-**Email:** support@networxpay.com
+**Email:** support@secure-processorpay.com
 
 **Information to provide:**
 - Shop ID: 29959
 - Error: "Access denied" 
-- Endpoint trying to use: `https://gateway.networxpay.com/ctp/api/checkouts`
+- Endpoint trying to use: `https://gateway.secure-processorpay.com/ctp/api/checkouts`
 - API Version: 2
 - Request type: Creating Hosted Payment Page checkout
 

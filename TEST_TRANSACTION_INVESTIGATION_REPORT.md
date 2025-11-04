@@ -13,8 +13,8 @@ After a successful Networks test payment, transaction records are not appearing 
 ### Key Findings
 
 1. ✅ **Test and Production use SAME database** - No separate test database
-2. ✅ **Webhook endpoint is correct** - `https://www.yum-mi.com/api/webhooks/networx`
-3. ⚠️ **Test mode flag** - `NETWORX_TEST_MODE=true` (check if this matches Networks dashboard)
+2. ✅ **Webhook endpoint is correct** - `https://www.yum-mi.com/api/webhooks/secure-processor`
+3. ⚠️ **Test mode flag** - `SECURE-PROCESSOR_TEST_MODE=true` (check if this matches Networks dashboard)
 4. ⚠️ **Webhook delivery** - Need to verify Networks sends webhooks for test transactions
 5. ⚠️ **User existence** - Webhook returns 404 if user not found in database
 6. ⚠️ **Logging insufficient** - Added structured logging to track the full flow
@@ -27,16 +27,16 @@ After a successful Networks test payment, transaction records are not appearing 
 
 #### Server-side Variables
 ```bash
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=[varies by environment - check Vercel]
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=[varies by environment - check Vercel]
 ```
 
 #### Webhook Configuration
-- **Endpoint:** `https://www.yum-mi.com/api/webhooks/networx`
-- **Configured in:** `app/api/payment/networx/route.ts:53` (hardcoded)
-- **Handler:** `app/api/webhooks/networx/route.ts`
+- **Endpoint:** `https://www.yum-mi.com/api/webhooks/secure-processor`
+- **Configured in:** `app/api/payment/secure-processor/route.ts:53` (hardcoded)
+- **Handler:** `app/api/webhooks/secure-processor/route.ts`
 
 #### Database Configuration
 - **Provider:** Neon PostgreSQL
@@ -57,16 +57,16 @@ NETWORX_TEST_MODE=[varies by environment - check Vercel]
 **Symptoms:**
 - No webhook logs in Vercel logs
 - Transaction successful in Networks dashboard but no DB record
-- No "📥 Networx HPP Webhook Received" logs
+- No "📥 Secure-Processor HPP Webhook Received" logs
 
 **Verification:**
 ```bash
 # Check Vercel logs for webhook receipt
-vercel logs --follow | grep "Networx HPP Webhook"
+vercel logs --follow | grep "Secure-Processor HPP Webhook"
 
 # Test webhook endpoint accessibility
-curl https://www.yum-mi.com/api/webhooks/networx
-# Should return: {"message":"Networx webhook endpoint is active","timestamp":"..."}
+curl https://www.yum-mi.com/api/webhooks/secure-processor
+# Should return: {"message":"Secure-Processor webhook endpoint is active","timestamp":"..."}
 ```
 
 **Root Causes:**
@@ -78,7 +78,7 @@ curl https://www.yum-mi.com/api/webhooks/networx
 **Fix:**
 1. Login to Networks merchant dashboard
 2. Navigate to **Webhooks** or **API Settings**
-3. Verify webhook URL is set to: `https://www.yum-mi.com/api/webhooks/networx`
+3. Verify webhook URL is set to: `https://www.yum-mi.com/api/webhooks/secure-processor`
 4. Enable webhooks for test transactions (if separate setting)
 5. Test webhook delivery with Networks testing tool
 
@@ -215,7 +215,7 @@ if (!match) {
 Verify the description sent in payment creation matches the expected pattern:
 
 ```typescript
-// In app/api/payment/networx/route.ts or payment widget
+// In app/api/payment/secure-processor/route.ts or payment widget
 const description = `Payment for ${tokens} Tokens (${tokens} Tokens)`;
 ```
 
@@ -300,7 +300,7 @@ Added three key logging points to track the full webhook processing flow:
 ```typescript
 console.log('🔍 [WEBHOOK-ENV]', JSON.stringify({
   environment: process.env.NODE_ENV || 'development',
-  testMode: process.env.NETWORX_TEST_MODE || 'not set',
+  testMode: process.env.SECURE-PROCESSOR_TEST_MODE || 'not set',
   databaseType: process.env.DATABASE_URL?.includes('neon.tech') ? 'Neon Production' : 
                 process.env.DATABASE_URL?.includes('localhost') ? 'Local PostgreSQL' :
                 process.env.DATABASE_URL?.startsWith('file:') ? 'SQLite' : 'Unknown',
@@ -367,7 +367,7 @@ Follow these steps to trigger a test transaction and capture evidence:
 
 ```bash
 # Commit and push changes
-git add app/api/webhooks/networx/route.ts
+git add app/api/webhooks/secure-processor/route.ts
 git commit -m "Add structured logging for test transaction tracking"
 git push
 
@@ -398,7 +398,7 @@ vercel logs --follow | grep "WEBHOOK"
 Look for these log entries in order:
 
 ```
-📥 Networx HPP Webhook Received
+📥 Secure-Processor HPP Webhook Received
 🔍 [WEBHOOK-ENV] - Check testMode and databaseType
 🔍 [WEBHOOK-DATA] - Verify tracking_id, amount, status, description
 📋 Payment Details - See formatted payment info
@@ -477,7 +477,7 @@ SQL
 echo $DATABASE_URL | sed 's/:[^:@]*@/:****@/'
 
 # Check test mode
-echo $NETWORX_TEST_MODE
+echo $SECURE-PROCESSOR_TEST_MODE
 ```
 
 ---
@@ -487,7 +487,7 @@ echo $NETWORX_TEST_MODE
 The issue is RESOLVED when:
 
 1. ✅ Test payment completes successfully
-2. ✅ Webhook is received (log: "📥 Networx HPP Webhook Received")
+2. ✅ Webhook is received (log: "📥 Secure-Processor HPP Webhook Received")
 3. ✅ Environment logged (log: "[WEBHOOK-ENV]")
 4. ✅ Data logged (log: "[WEBHOOK-DATA]")
 5. ✅ User found (log: "✅ Updated user balance")
@@ -515,7 +515,7 @@ The issue is RESOLVED when:
 
 3. **Verify Networks webhook configuration:**
    - Login to Networks dashboard
-   - Check webhook URL: `https://www.yum-mi.com/api/webhooks/networx`
+   - Check webhook URL: `https://www.yum-mi.com/api/webhooks/secure-processor`
    - Ensure webhooks enabled for test transactions
 
 4. **Trigger test payment with monitoring:**
@@ -549,9 +549,9 @@ The issue is RESOLVED when:
 
 | File | Purpose |
 |------|---------|
-| `app/api/webhooks/networx/route.ts` | Webhook handler (MODIFIED with logging) |
+| `app/api/webhooks/secure-processor/route.ts` | Webhook handler (MODIFIED with logging) |
 | `scripts/diagnose-test-transactions.js` | Diagnostic script (NEW) |
-| `app/api/payment/networx/route.ts` | Payment API (webhook URL config) |
+| `app/api/payment/secure-processor/route.ts` | Payment API (webhook URL config) |
 | `lib/api-limit.ts` | `fetchPaymentHistory()` function |
 | `app/(dashboard)/dashboard/billing/payment-history/page.tsx` | Payment History UI |
 | `prisma/schema.prisma` | Database schema |
@@ -560,7 +560,7 @@ The issue is RESOLVED when:
 
 ## 📞 Support Resources
 
-- **Networks Documentation:** https://docs.networxpay.com/
+- **Networks Documentation:** https://docs.secure-processorpay.com/
 - **Neon Console:** https://console.neon.tech
 - **Vercel Dashboard:** https://vercel.com/dashboard
 - **Clerk Dashboard:** https://dashboard.clerk.com

@@ -1,4 +1,4 @@
-# NetworxPay Test Mode Implementation Fix
+# Secure-ProcessorPay Test Mode Implementation Fix
 
 **Date:** 2025-10-09  
 **Priority:** 🔴 CRITICAL  
@@ -12,13 +12,13 @@
 
 **Symptom:**
 ```
-URL: https://checkout.networxpay.com/widget/hpp.html?token=test_1760001390205_go8l4jqt5
+URL: https://checkout.secure-processorpay.com/widget/hpp.html?token=test_1760001390205_go8l4jqt5
 Result: Empty/blank page (widget doesn't load)
 ```
 
 **Working Example:**
 ```
-URL: https://checkout.networxpay.com/widget/hpp.html?token=15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8
+URL: https://checkout.secure-processorpay.com/widget/hpp.html?token=15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8
 Result: Payment widget loads correctly
 ```
 
@@ -27,7 +27,7 @@ Result: Payment widget loads correctly
 | Type | Format | Length | Source | Works? |
 |------|--------|--------|--------|--------|
 | **Fake Test Token** | `test_1760001390205_go8l4jqt5` | ~30 chars | Generated locally | ❌ No |
-| **Real Token** | `15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8` | 64 chars | NetworxPay API | ✅ Yes |
+| **Real Token** | `15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8` | 64 chars | Secure-ProcessorPay API | ✅ Yes |
 
 ### Token Structure
 
@@ -54,23 +54,23 @@ test_1760001390205_go8l4jqt5
 ### Old Implementation (Broken)
 
 ```typescript
-// app/api/payment/networx/route.ts (OLD)
+// app/api/payment/secure-processor/route.ts (OLD)
 if (testMode) {
   // ❌ PROBLEM: Generating a fake token
   const testToken = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
   return NextResponse.json({
     success: true,
-    token: testToken,  // This token doesn't exist in NetworxPay system!
-    redirect_url: `https://checkout.networxpay.com/widget/hpp.html?token=${testToken}`
+    token: testToken,  // This token doesn't exist in Secure-ProcessorPay system!
+    redirect_url: `https://checkout.secure-processorpay.com/widget/hpp.html?token=${testToken}`
   });
 }
 ```
 
 **Why It Fails:**
 1. We generate a random string as "token"
-2. Client redirects to NetworxPay widget with this fake token
-3. NetworxPay tries to look up the token in their database
+2. Client redirects to Secure-ProcessorPay widget with this fake token
+3. Secure-ProcessorPay tries to look up the token in their database
 4. Token doesn't exist → Widget shows empty page
 
 ### Misconception
@@ -85,9 +85,9 @@ if (testMode) {
 
 ## ✅ Solution
 
-### How NetworxPay Test Mode Actually Works
+### How Secure-ProcessorPay Test Mode Actually Works
 
-NetworxPay supports **sandbox mode** through their API:
+Secure-ProcessorPay supports **sandbox mode** through their API:
 
 1. **Send real API request** to production endpoint
 2. **Include `test: true`** in the request body
@@ -98,12 +98,12 @@ NetworxPay supports **sandbox mode** through their API:
 ### New Implementation (Fixed)
 
 ```typescript
-// app/api/payment/networx/route.ts (NEW)
+// app/api/payment/secure-processor/route.ts (NEW)
 
 // Request with test: true for sandbox mode
 const requestData = {
   checkout: {
-    test: testMode,  // ✅ NetworxPay handles sandbox mode
+    test: testMode,  // ✅ Secure-ProcessorPay handles sandbox mode
     transaction_type: "payment",
     order: {
       amount: amountInCents,
@@ -121,9 +121,9 @@ const requestData = {
   }
 };
 
-// ✅ ALWAYS call NetworxPay API (no more fake tokens)
-const networxApiUrl = `${apiUrl}/ctp/api/checkouts`;
-const networxResponse = await fetch(networxApiUrl, {
+// ✅ ALWAYS call Secure-ProcessorPay API (no more fake tokens)
+const secure-processorApiUrl = `${apiUrl}/ctp/api/checkouts`;
+const secure-processorResponse = await fetch(secure-processorApiUrl, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -134,13 +134,13 @@ const networxResponse = await fetch(networxApiUrl, {
   body: JSON.stringify(requestData),
 });
 
-const networxResult = await networxResponse.json();
+const secure-processorResult = await secure-processorResponse.json();
 
-// ✅ Return REAL token from NetworxPay
+// ✅ Return REAL token from Secure-ProcessorPay
 return NextResponse.json({
   success: true,
-  token: networxResult.checkout.token,  // Real 64-char token
-  redirect_url: networxResult.checkout.redirect_url
+  token: secure-processorResult.checkout.token,  // Real 64-char token
+  redirect_url: secure-processorResult.checkout.redirect_url
 });
 ```
 
@@ -152,9 +152,9 @@ return NextResponse.json({
 
 ```bash
 # .env.local
-NETWORX_TEST_MODE=true   # Sandbox mode (test cards)
+SECURE-PROCESSOR_TEST_MODE=true   # Sandbox mode (test cards)
 # OR
-NETWORX_TEST_MODE=false  # Production mode (real cards)
+SECURE-PROCESSOR_TEST_MODE=false  # Production mode (real cards)
 ```
 
 ### API Request Difference
@@ -193,7 +193,7 @@ NETWORX_TEST_MODE=false  # Production mode (real cards)
 {
   "checkout": {
     "token": "15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8",
-    "redirect_url": "https://checkout.networxpay.com/widget/hpp.html?token=..."
+    "redirect_url": "https://checkout.secure-processorpay.com/widget/hpp.html?token=..."
   }
 }
 ```
@@ -206,7 +206,7 @@ NETWORX_TEST_MODE=false  # Production mode (real cards)
 
 ```bash
 # Run test script
-node scripts/test-networx-integration.js
+node scripts/test-secure-processor-integration.js
 
 # Result:
 ❌ Widget shows empty page
@@ -217,7 +217,7 @@ Token: test_1760001390205_go8l4jqt5 (fake)
 
 ```bash
 # Run test script
-node scripts/test-networx-integration.js
+node scripts/test-secure-processor-integration.js
 
 # Result:
 ✅ Widget loads correctly
@@ -234,7 +234,7 @@ Token: 15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8 (real)
 2. **Configure Test Mode**
    ```bash
    # .env.local
-   NETWORX_TEST_MODE=true
+   SECURE-PROCESSOR_TEST_MODE=true
    ```
 
 3. **Create Payment**
@@ -245,9 +245,9 @@ Token: 15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8 (real)
 
 4. **Verify Token Format**
    - Check browser network tab
-   - Look for `/api/payment/networx` response
+   - Look for `/api/payment/secure-processor` response
    - Token should be 64 hex characters
-   - URL should be `https://checkout.networxpay.com/widget/hpp.html?token={64-char-hex}`
+   - URL should be `https://checkout.secure-processorpay.com/widget/hpp.html?token={64-char-hex}`
 
 5. **Complete Payment**
    - Widget should load (not blank)
@@ -263,7 +263,7 @@ Token: 15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8 (real)
 | Aspect | Old (Broken) | New (Fixed) |
 |--------|-------------|-------------|
 | **Test Mode Strategy** | Generate fake token | Call real API with `test: true` |
-| **Token Source** | Local random string | NetworxPay API |
+| **Token Source** | Local random string | Secure-ProcessorPay API |
 | **Token Format** | `test_{timestamp}_{random}` | 64-char SHA256 hex |
 | **Token Length** | ~30 characters | 64 characters |
 | **Widget Loading** | ❌ Empty page | ✅ Loads correctly |
@@ -279,7 +279,7 @@ Token: 15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8 (real)
 
 **Required:**
 - ✅ Environment variables must be set
-- ✅ `NETWORX_TEST_MODE=true` for initial testing
+- ✅ `SECURE-PROCESSOR_TEST_MODE=true` for initial testing
 - ✅ Valid Shop ID and Secret Key
 
 **Not Required:**
@@ -291,12 +291,12 @@ Token: 15e9c004587bc3f9b8e789041cb502da7679f7a18f6cb7ca7b1b0226a527a8a8 (real)
 
 **In Staging:**
 ```bash
-NETWORX_TEST_MODE=true   # Use test cards
+SECURE-PROCESSOR_TEST_MODE=true   # Use test cards
 ```
 
 **In Production:**
 ```bash
-NETWORX_TEST_MODE=false  # Use real cards
+SECURE-PROCESSOR_TEST_MODE=false  # Use real cards
 ```
 
 ---
@@ -306,9 +306,9 @@ NETWORX_TEST_MODE=false  # Use real cards
 ### ✅ Correct Understanding
 
 1. **Test mode is API-side**, not client-side
-2. **Always call the real NetworxPay API**
+2. **Always call the real Secure-ProcessorPay API**
 3. **Use `test: true` parameter** for sandbox mode
-4. **NetworxPay returns real tokens** in both modes
+4. **Secure-ProcessorPay returns real tokens** in both modes
 5. **Widget works the same** in both modes
 6. **Only difference is card processing** (test vs real)
 
@@ -326,15 +326,15 @@ NETWORX_TEST_MODE=false  # Use real cards
 
 ### Error Handling
 
-If NetworxPay API is down:
+If Secure-ProcessorPay API is down:
 ```typescript
 try {
-  const networxResponse = await fetch(networxApiUrl, { /* ... */ });
+  const secure-processorResponse = await fetch(secure-processorApiUrl, { /* ... */ });
   
-  if (!networxResponse.ok) {
+  if (!secure-processorResponse.ok) {
     return NextResponse.json({
       error: 'Payment provider unavailable',
-      details: `API returned ${networxResponse.status}`,
+      details: `API returned ${secure-processorResponse.status}`,
       canRetry: true
     }, { status: 503 });
   }
@@ -354,12 +354,12 @@ try {
 console.log({
   timestamp: Date.now(),
   mode: testMode ? 'SANDBOX' : 'PRODUCTION',
-  endpoint: networxApiUrl,
+  endpoint: secure-processorApiUrl,
   amount_cents: amountInCents,
   currency: currency,
   tracking_id: orderId,
-  token_received: networxResult.checkout.token.substring(0, 8) + '...',
-  token_length: networxResult.checkout.token.length
+  token_received: secure-processorResult.checkout.token.substring(0, 8) + '...',
+  token_length: secure-processorResult.checkout.token.length
 });
 ```
 
@@ -369,10 +369,10 @@ console.log({
 
 Test mode is working correctly when:
 
-- [ ] API request is made to NetworxPay
+- [ ] API request is made to Secure-ProcessorPay
 - [ ] Request includes `test: true` parameter
 - [ ] Response contains 64-character hex token
-- [ ] Widget loads at `https://checkout.networxpay.com/widget/hpp.html?token=...`
+- [ ] Widget loads at `https://checkout.secure-processorpay.com/widget/hpp.html?token=...`
 - [ ] Widget is not blank/empty
 - [ ] Test card `4200000000000000` works
 - [ ] Payment completes successfully
@@ -394,9 +394,9 @@ If you still see empty widget pages:
    - Status should be 200/201
 
 3. **Check environment variables**
-   - `NETWORX_SHOP_ID` is set
-   - `NETWORX_SECRET_KEY` is set
-   - `NETWORX_API_URL=https://checkout.networxpay.com`
+   - `SECURE-PROCESSOR_SHOP_ID` is set
+   - `SECURE-PROCESSOR_SECRET_KEY` is set
+   - `SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com`
 
 4. **Check network**
    - API call is being made

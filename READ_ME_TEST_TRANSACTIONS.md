@@ -14,7 +14,7 @@ git commit -m "Add webhook logging for test transactions"
 git push
 
 # 2. Test webhook endpoint
-curl https://www.yum-mi.com/api/webhooks/networx
+curl https://www.yum-mi.com/api/webhooks/secure-processor
 
 # 3. Monitor logs and trigger test payment
 vercel logs --follow | grep "WEBHOOK"
@@ -66,7 +66,7 @@ DATABASE_URL="postgresql://..." node scripts/diagnose-test-transactions.js
 
 ### 1. Networks Not Sending Webhooks (60%)
 **Fix:** Configure webhook URL in Networks dashboard  
-**URL:** `https://www.yum-mi.com/api/webhooks/networx`
+**URL:** `https://www.yum-mi.com/api/webhooks/secure-processor`
 
 ### 2. User Not Found in Database (30%)
 **Fix:** Sign in before making payment  
@@ -131,7 +131,7 @@ vercel logs --follow
 vercel logs --follow | grep "WEBHOOK"
 
 # Test webhook
-curl https://www.yum-mi.com/api/webhooks/networx
+curl https://www.yum-mi.com/api/webhooks/secure-processor
 ./scripts/test-webhook-delivery.sh user_ID 2380 100
 
 # Run diagnostics
@@ -150,7 +150,7 @@ vercel env pull .env.local
 
 **If webhook not received:**
 - Check Networks dashboard webhook configuration
-- Verify URL: `https://www.yum-mi.com/api/webhooks/networx`
+- Verify URL: `https://www.yum-mi.com/api/webhooks/secure-processor`
 - Check Networks webhook delivery logs
 
 **If user not found (404):**
@@ -172,7 +172,7 @@ vercel env pull .env.local
 ## ✅ Success Criteria
 
 ```
-✅ Webhook received (logs show: "📥 Networx HPP Webhook Received")
+✅ Webhook received (logs show: "📥 Secure-Processor HPP Webhook Received")
 ✅ Environment logged ([WEBHOOK-ENV])
 ✅ Payment data logged ([WEBHOOK-DATA])
 ✅ User found (no 404 error)
