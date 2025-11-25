@@ -6,6 +6,7 @@ import { AnimatedLayout, AnimatedPage } from "@/components/animated-layout";
 import Link from "next/link";
 import Image from "next/image";
 import DashboardHeader from "@/components/dashboard-header";
+import { CreditProvider } from "@/lib/contexts/credit-context";
 
 export default async function DashboardLayout({
   children,
@@ -16,20 +17,24 @@ export default async function DashboardLayout({
   const apiAvailableGenerations = await getApiAvailableGenerations();
 
   return (
-    <div className="h-auto relative min-h-screen bg-white">
+    <CreditProvider
+      initialUsedGenerations={apiUsedGenerations}
+      initialAvailableGenerations={apiAvailableGenerations}
+    >
+      <div className="h-auto relative min-h-screen bg-white">
 
-      <AnimatedLayout>
-        <DashboardHeader 
-          initialUsedGenerations={apiUsedGenerations}
-          initialAvailableGenerations={apiAvailableGenerations}
-        />
-      </AnimatedLayout>
+        <AnimatedLayout>
+          <DashboardHeader 
+            initialUsedGenerations={apiUsedGenerations}
+            initialAvailableGenerations={apiAvailableGenerations}
+          />
+        </AnimatedLayout>
 
-      <main className="flex-1 py-12 lg:pt-16 relative z-10">
-        <div className="container py-8 md:py-10">
-          <AnimatedPage>{children}</AnimatedPage>
-        </div>
-      </main>
+        <main className="flex-1 py-12 lg:pt-16 relative z-10">
+          <div className="container py-8 md:py-10">
+            <AnimatedPage>{children}</AnimatedPage>
+          </div>
+        </main>
 
       <footer className="py-6 border-t border-gray-200 bg-white">
         <div className="container">
@@ -119,5 +124,6 @@ export default async function DashboardLayout({
         </div>
       </footer>
     </div>
+    </CreditProvider>
   );
 }

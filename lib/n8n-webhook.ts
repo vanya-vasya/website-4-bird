@@ -326,8 +326,8 @@ class N8nWebhookClient {
   }
 
   /**
-   * Send file directly to N8N webhook using multipart/form-data
-   * This bypasses the API proxy and sends binary data directly
+   * Send file through /api/generate endpoint (routes to N8N with token deduction)
+   * This ensures proper authentication, credit checking, and token deduction
    */
   async sendFileToWebhook(
     file: File,
@@ -338,11 +338,8 @@ class N8nWebhookClient {
   ): Promise<N8nWebhookResponse> {
     const startTime = Date.now();
     
-    // Select appropriate webhook URL based on toolId
-    const webhookUrl = toolId === 'cal-tracker' ? this.calTrackerWebhookUrl : this.directWebhookUrl;
-    
     try {
-      console.log(`[N8N] Sending file directly to webhook: ${webhookUrl}`, {
+      console.log(`[N8N] Sending file through /api/generate:`, {
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
@@ -371,11 +368,11 @@ class N8nWebhookClient {
         console.warn(`[N8N] File upload timeout after ${timeoutMs}ms`);
       }, timeoutMs);
 
-      const response = await fetch(webhookUrl, {
+      // Route through /api/generate instead of direct N8N call
+      const response = await fetch('/api/generate', {
         method: 'POST',
         body: formData, // No Content-Type header - browser sets it with boundary
         signal: controller.signal,
-        mode: 'cors', // Enable CORS for direct webhook calls
       });
 
       clearTimeout(timeoutId);
@@ -625,7 +622,8 @@ class N8nWebhookClient {
   }
 
   /**
-   * Send description directly to N8N production webhook URL (for Your Own Nutritionist)
+   * Send description through /api/generate endpoint (routes to N8N with token deduction)
+   * This ensures proper authentication, credit checking, and token deduction
    */
   async sendDescriptionToWebhook(
     description: string,
@@ -637,11 +635,10 @@ class N8nWebhookClient {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    console.log('[N8N] Sending description to production webhook:', {
+    console.log('[N8N] Sending description through /api/generate:', {
       toolId,
       descriptionLength: description.length,
       timeout: timeoutMs,
-      webhookUrl: this.productionWebhookUrl,
       timestamp: new Date().toISOString(),
     });
 
@@ -679,20 +676,15 @@ class N8nWebhookClient {
         throw new Error(`Invalid payload: ${validation.errors.join(', ')}`);
       }
 
-      const response = await fetch(this.productionWebhookUrl, {
+      // Route through /api/generate instead of direct N8N call
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Request-ID': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          'X-User-Agent': typeof navigator !== 'undefined' ? navigator.userAgent : 'yum-mi-server',
-          // Add any additional auth headers if required
-          ...(process.env.NEXT_PUBLIC_N8N_AUTH_TOKEN && {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_N8N_AUTH_TOKEN}`
-          }),
         },
         body: JSON.stringify(payload),
         signal: controller.signal,
-        mode: 'cors',
       });
 
       clearTimeout(timeoutId);

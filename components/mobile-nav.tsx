@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { PaymentHistoryAnalytics } from "@/lib/analytics";
 import {
   ChevronRight,
   Crown,
@@ -261,7 +262,10 @@ export function MobileNav({
 
             <Link
               href="/dashboard/billing/payment-history"
-              onClick={handleLinkClick}
+              onClick={() => {
+                PaymentHistoryAnalytics.clickPaymentHistoryLink('mobile_nav');
+                handleLinkClick();
+              }}
               className={cn(
                 "flex w-full items-center p-4 font-medium text-black hover:bg-gray-50 transition-colors",
                 pathname === "/dashboard/billing/payment-history"

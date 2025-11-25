@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { PaymentHistoryAnalytics } from "@/lib/analytics";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -97,7 +98,10 @@ export function MainNav({
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href={"/dashboard/billing/payment-history"}>
+              <Link 
+                href={"/dashboard/billing/payment-history"}
+                onClick={() => PaymentHistoryAnalytics.clickPaymentHistoryLink('desktop_nav')}
+              >
                 <div className="nav-link cursor-pointer group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 group bg-transparent">
                   <CreditCard className="mr-2 h-4 w-4" />
                   Payments

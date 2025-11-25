@@ -5,11 +5,11 @@
 **Problem:** Vercel is still using OLD environment variables  
 **Evidence from logs:**
 ```
-apiUrl: 'https://gateway.networxpay.com'  ❌ OLD
+apiUrl: 'https://gateway.secure-processorpay.com'  ❌ OLD
 return_url: 'https://website-2-fl3pjwurp...'  ❌ OLD
 ```
 
-**Impact:** Networx API returns "This route doesn't exist"
+**Impact:** Secure-Processor API returns "This route doesn't exist"
 
 ---
 
@@ -30,37 +30,37 @@ Or:
 
 **⚠️ CRITICAL - Update immediately:**
 
-#### 1. NETWORX_API_URL
+#### 1. SECURE-PROCESSOR_API_URL
 ```
-Key: NETWORX_API_URL
-Value: https://checkout.networxpay.com
+Key: SECURE-PROCESSOR_API_URL
+Value: https://checkout.secure-processorpay.com
 Environment: Production, Preview, Development (check all)
 ```
 
-#### 2. NETWORX_RETURN_URL
+#### 2. SECURE-PROCESSOR_RETURN_URL
 ```
-Key: NETWORX_RETURN_URL
+Key: SECURE-PROCESSOR_RETURN_URL
 Value: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
 Environment: Production, Preview, Development (check all)
 ```
 
-#### 3. NETWORX_CANCEL_URL
+#### 3. SECURE-PROCESSOR_CANCEL_URL
 ```
-Key: NETWORX_CANCEL_URL
+Key: SECURE-PROCESSOR_CANCEL_URL
 Value: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/cancel
 Environment: Production, Preview, Development (check all)
 ```
 
-#### 4. NETWORX_WEBHOOK_URL
+#### 4. SECURE-PROCESSOR_WEBHOOK_URL
 ```
-Key: NETWORX_WEBHOOK_URL
-Value: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+Key: SECURE-PROCESSOR_WEBHOOK_URL
+Value: https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
 Environment: Production, Preview, Development (check all)
 ```
 
-#### 5. NETWORX_TEST_MODE
+#### 5. SECURE-PROCESSOR_TEST_MODE
 ```
-Key: NETWORX_TEST_MODE
+Key: SECURE-PROCESSOR_TEST_MODE
 Value: false
 Environment: Production, Preview, Development (check all)
 ```
@@ -72,14 +72,14 @@ Environment: Production, Preview, Development (check all)
 **Make sure these are also set (from previous setup):**
 
 ```bash
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
 
-NEXT_PUBLIC_NETWORX_SHOP_ID=29959
-NEXT_PUBLIC_NETWORX_TEST_MODE=false
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
+NEXT_PUBLIC_SECURE-PROCESSOR_SHOP_ID=29959
+NEXT_PUBLIC_SECURE-PROCESSOR_TEST_MODE=false
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
 
-NETWORX_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+LFkyD1NdJHu5ZcV2X/01b3jHhlA6vTFSPpNYnHq8Y3WEe7jrSc44PsR0kGibMjZJAB+S1vyZrI/c1OJKk0njXU59ofyRVR6fTkpytwIXqALweGKfWmmSxpJDJXGt+m0sQyG+UjYunHNY6Qw4ARO5+MWNT2GVpbuAEQ+sOksYWjUi9ftEhlcFeFGhO25/eqbV/QtnbqBXjZj3TsCUM1mQY/F9PhXj8Ku6T1vi/Av+Tf4dgyEsch57DTWZa7hMfp663UpaDLNk7Zd90nztYhjPrN9/AWrqyQQ9IKZHpco2iPLbqM8iloi4n5wSTIfWSVR8bZ1kWPhhoAQIDAQAB
+SECURE-PROCESSOR_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+LFkyD1NdJHu5ZcV2X/01b3jHhlA6vTFSPpNYnHq8Y3WEe7jrSc44PsR0kGibMjZJAB+S1vyZrI/c1OJKk0njXU59ofyRVR6fTkpytwIXqALweGKfWmmSxpJDJXGt+m0sQyG+UjYunHNY6Qw4ARO5+MWNT2GVpbuAEQ+sOksYWjUi9ftEhlcFeFGhO25/eqbV/QtnbqBXjZj3TsCUM1mQY/F9PhXj8Ku6T1vi/Av+Tf4dgyEsch57DTWZa7hMfp663UpaDLNk7Zd90nztYhjPrN9/AWrqyQQ9IKZHpco2iPLbqM8iloi4n5wSTIfWSVR8bZ1kWPhhoAQIDAQAB
 ```
 
 ---
@@ -114,7 +114,7 @@ git push origin main
 
 After redeploying, you should see in logs:
 ```javascript
-apiUrl: 'https://checkout.networxpay.com'  ✅ CORRECT
+apiUrl: 'https://checkout.secure-processorpay.com'  ✅ CORRECT
 return_url: 'https://website-3-gesry583g...'  ✅ CORRECT
 notification_url: 'https://website-3-gesry583g...'  ✅ CORRECT
 ```
@@ -135,20 +135,20 @@ Expected:
 Copy this entire block to ensure nothing is missing:
 
 ```bash
-# Networx Payment Gateway - Server Side
-NETWORX_SHOP_ID=29959
-NETWORX_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
-NETWORX_API_URL=https://checkout.networxpay.com
-NETWORX_TEST_MODE=false
-NETWORX_RETURN_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
-NETWORX_CANCEL_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/cancel
-NETWORX_WEBHOOK_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/networx
+# Secure-Processor Payment Gateway - Server Side
+SECURE-PROCESSOR_SHOP_ID=29959
+SECURE-PROCESSOR_SECRET_KEY=dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950
+SECURE-PROCESSOR_API_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_TEST_MODE=false
+SECURE-PROCESSOR_RETURN_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/success
+SECURE-PROCESSOR_CANCEL_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/payment/cancel
+SECURE-PROCESSOR_WEBHOOK_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app/api/webhooks/secure-processor
 
-# Networx Payment Gateway - Client Side
-NEXT_PUBLIC_NETWORX_SHOP_ID=29959
-NEXT_PUBLIC_NETWORX_TEST_MODE=false
-NEXT_PUBLIC_NETWORX_WIDGET_URL=https://checkout.networxpay.com
-NETWORX_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+LFkyD1NdJHu5ZcV2X/01b3jHhlA6vTFSPpNYnHq8Y3WEe7jrSc44PsR0kGibMjZJAB+S1vyZrI/c1OJKk0njXU59ofyRVR6fTkpytwIXqALweGKfWmmSxpJDJXGt+m0sQyG+UjYunHNY6Qw4ARO5+MWNT2GVpbuAEQ+sOksYWjUi9ftEhlcFeFGhO25/eqbV/QtnbqBXjZj3TsCUM1mQY/F9PhXj8Ku6T1vi/Av+Tf4dgyEsch57DTWZa7hMfp663UpaDLNk7Zd90nztYhjPrN9/AWrqyQQ9IKZHpco2iPLbqM8iloi4n5wSTIfWSVR8bZ1kWPhhoAQIDAQAB
+# Secure-Processor Payment Gateway - Client Side
+NEXT_PUBLIC_SECURE-PROCESSOR_SHOP_ID=29959
+NEXT_PUBLIC_SECURE-PROCESSOR_TEST_MODE=false
+NEXT_PUBLIC_SECURE-PROCESSOR_WIDGET_URL=https://checkout.secure-processorpay.com
+SECURE-PROCESSOR_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Hskkcbbus+LFkyD1NdJHu5ZcV2X/01b3jHhlA6vTFSPpNYnHq8Y3WEe7jrSc44PsR0kGibMjZJAB+S1vyZrI/c1OJKk0njXU59ofyRVR6fTkpytwIXqALweGKfWmmSxpJDJXGt+m0sQyG+UjYunHNY6Qw4ARO5+MWNT2GVpbuAEQ+sOksYWjUi9ftEhlcFeFGhO25/eqbV/QtnbqBXjZj3TsCUM1mQY/F9PhXj8Ku6T1vi/Av+Tf4dgyEsch57DTWZa7hMfp663UpaDLNk7Zd90nztYhjPrN9/AWrqyQQ9IKZHpco2iPLbqM8iloi4n5wSTIfWSVR8bZ1kWPhhoAQIDAQAB
 
 # Application URL
 NEXT_PUBLIC_APP_URL=https://website-3-gesry583g-vladis-projects-8c520e18.vercel.app
