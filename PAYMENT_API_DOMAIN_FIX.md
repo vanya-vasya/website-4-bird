@@ -13,7 +13,7 @@ Payment processing was failing with DNS error:
 Error: getaddrinfo ENOTFOUND checkout.secure-processorpay.com
 ```
 
-**Root Cause:** When replacing "networx" with "secure-processor" throughout the codebase for rebranding, we inadvertently changed the actual payment gateway domain from `checkout.secure-processor.com` (real, working domain) to `checkout.secure-processorpay.com` (fake, non-existent domain).
+**Root Cause:** When replacing "secure-processor" with "secure-processor" throughout the codebase for rebranding, we inadvertently changed the actual payment gateway domain from `checkout.secure-processor.com` (real, working domain) to `checkout.secure-processorpay.com` (fake, non-existent domain).
 
 ---
 
@@ -96,10 +96,10 @@ redirect_url: https://checkout.secure-processor.com/widget/hpp.html?token=...
 
 ### What Happened
 
-The payment gateway is actually **SecureProcessor** (accessed via `checkout.secure-processor.com`). During a rebranding effort to replace "networx" with "secure-processor" in UI/code references, we mistakenly changed:
+The payment gateway is actually **SecureProcessor** (accessed via `checkout.secure-processor.com`). During a rebranding effort to replace "secure-processor" with "secure-processor" in UI/code references, we mistakenly changed:
 
-- Variable names: `NETWORX_*` → `SECURE-PROCESSOR_*` ✅ (intentional, OK)
-- Code references: "Networx" → "Secure-Processor" ✅ (intentional, OK)  
+- Variable names: `SECURE_PROCESSOR_*` → `SECURE-PROCESSOR_*` ✅ (intentional, OK)
+- Code references: "Secure-Processor" → "Secure-Processor" ✅ (intentional, OK)  
 - **API Domain:** `checkout.secure-processor.com` → `checkout.secure-processorpay.com` ❌ (unintentional, BROKE PAYMENTS)
 
 ### The Fix
