@@ -3,8 +3,35 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut, User } from "lucide-react";
+
+const Avatar = ({ src, alt, size }: { src: string; alt: string; size: number }) => {
+  const [errored, setErrored] = useState(false);
+
+  if (errored || !src) {
+    return (
+      <div
+        style={{ width: size, height: size }}
+        className="rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0"
+      >
+        <User size={size * 0.5} className="text-gray-400" />
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      width={size}
+      height={size}
+      onError={() => setErrored(true)}
+      style={{ width: size, height: size }}
+      className="rounded-full object-cover flex-shrink-0 block"
+    />
+  );
+};
 
 export const UserDropdown = () => {
   const { user, isLoaded } = useUser();
@@ -19,9 +46,7 @@ export const UserDropdown = () => {
     router.push("/");
   }, [signOut, router]);
 
-  const handleToggle = useCallback(() => {
-    setOpen((prev) => !prev);
-  }, []);
+  const handleToggle = useCallback(() => setOpen((prev) => !prev), []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -31,7 +56,6 @@ export const UserDropdown = () => {
     if (e.key === "Escape") setOpen(false);
   }, []);
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handleOutside = (e: MouseEvent) => {
@@ -59,17 +83,9 @@ export const UserDropdown = () => {
         aria-label="Open user menu"
         aria-expanded={open}
         aria-haspopup="true"
-        className="flex items-center gap-1 cursor-pointer select-none focus:outline-none"
+        className="flex items-center gap-1 cursor-pointer select-none focus:outline-none bg-transparent border-none p-0"
       >
-        <div className="relative h-9 w-9 rounded-full overflow-hidden">
-          <Image
-            src={avatarUrl}
-            alt={fullName || "User avatar"}
-            fill
-            className="object-cover"
-            sizes="36px"
-          />
-        </div>
+        <Avatar src={avatarUrl} alt={fullName || "User avatar"} size={36} />
         <ChevronDown
           size={14}
           className={`text-gray-400 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
@@ -85,15 +101,7 @@ export const UserDropdown = () => {
         >
           {/* User info */}
           <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-            <div className="relative h-11 w-11 flex-shrink-0 rounded-full overflow-hidden border-2 border-gray-200">
-              <Image
-                src={avatarUrl}
-                alt={fullName || "User avatar"}
-                fill
-                className="object-cover"
-                sizes="44px"
-              />
-            </div>
+            <Avatar src={avatarUrl} alt={fullName || "User avatar"} size={44} />
             <div className="min-w-0 flex flex-col gap-0.5">
               {fullName && (
                 <p className="text-[14px] font-semibold text-[#0f172a] leading-snug truncate">
