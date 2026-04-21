@@ -61,7 +61,7 @@ export const UserDropdown = () => {
         aria-haspopup="true"
         className="flex items-center gap-1 cursor-pointer select-none focus:outline-none"
       >
-        <div className="relative h-9 w-9 rounded-full overflow-hidden border-2 border-gray-200">
+        <div className="relative h-9 w-9 rounded-full overflow-hidden">
           <Image
             src={avatarUrl}
             alt={fullName || "User avatar"}
