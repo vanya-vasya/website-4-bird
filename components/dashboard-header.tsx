@@ -314,7 +314,7 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           transition: none !important;
         }
 
-        /* ─── Clerk UserButton popup: full layout reset ─────────────────── */
+        /* ─── Clerk UserButton popup: full layout + hover freeze ─────────── */
 
         .cl-userButtonPopoverCard {
           z-index: 9999 !important;
@@ -322,14 +322,67 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           min-width: 280px !important;
         }
 
-        /* Stack all sections vertically, no overlap */
+        /* ── Step 1: freeze EVERY element in the popup — no transitions,
+              no background changes, no opacity changes on hover.
+              We do this with a universal rule, then selectively re-enable
+              only the action buttons below. ────────────────────────────── */
+        .cl-userButtonPopoverCard *,
+        .cl-userButtonPopoverCard *:hover,
+        .cl-userButtonPopoverCard *:focus,
+        .cl-userButtonPopoverCard *:focus-within,
+        .cl-userButtonPopoverCard *:active {
+          transition: none !important;
+          animation: none !important;
+          opacity: 1 !important;
+          filter: none !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          transform: none !important;
+          box-shadow: none !important;
+        }
+
+        /* ── Step 2: freeze backgrounds on everything except action buttons */
+        .cl-userButtonPopoverMain,
+        .cl-userButtonPopoverMain:hover,
+        .cl-userPreview,
+        .cl-userPreview:hover,
+        .cl-userPreviewAvatarContainer,
+        .cl-userPreviewAvatarContainer:hover,
+        .cl-userPreviewAvatarBox,
+        .cl-userPreviewAvatarBox:hover,
+        .cl-userPreviewTextContainer,
+        .cl-userPreviewTextContainer:hover,
+        .cl-userPreviewMainIdentifier,
+        .cl-userPreviewMainIdentifier:hover,
+        .cl-userPreviewSecondaryIdentifier,
+        .cl-userPreviewSecondaryIdentifier:hover,
+        .cl-userButtonPopoverActions,
+        .cl-userButtonPopoverActions:hover,
+        .cl-userButtonPopoverFooter,
+        .cl-userButtonPopoverFooter:hover,
+        .cl-userButtonPopoverFooter *,
+        .cl-userButtonPopoverFooter *:hover {
+          background-color: transparent !important;
+          background: none !important;
+        }
+
+        /* ── Step 3: footer always white, never changes */
+        .cl-userButtonPopoverFooter {
+          position: static !important;
+          background-color: #ffffff !important;
+          background: #ffffff !important;
+          border-top: 1px solid #f1f5f9 !important;
+          padding: 10px 16px !important;
+        }
+
+        /* ── Step 4: layout — stack sections vertically */
         .cl-userButtonPopoverMain {
           display: flex !important;
           flex-direction: column !important;
           position: static !important;
         }
 
-        /* User info row: avatar left, text right */
+        /* User info row */
         .cl-userPreview {
           display: flex !important;
           flex-direction: row !important;
@@ -347,7 +400,6 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           position: static !important;
         }
 
-        /* Text column: name then email, clearly separated */
         .cl-userPreviewTextContainer {
           display: flex !important;
           flex-direction: column !important;
@@ -388,7 +440,6 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           width: 100% !important;
         }
 
-        /* "Manage account" action section — sits below user info */
         .cl-userButtonPopoverActions {
           display: flex !important;
           flex-direction: column !important;
@@ -397,25 +448,11 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           border-top: 1px solid #f1f5f9 !important;
         }
 
-        /* Action buttons: Manage account / Sign out — no opacity, no blur, no scale */
-        .cl-userButtonPopoverActionButton,
-        .cl-userButtonPopoverActionButton *,
-        [class*="cl-menuItem"],
-        [class*="cl-menuItem"] * {
+        /* ── Step 5: action buttons — the ONLY elements allowed to change on hover */
+        .cl-userButtonPopoverActionButton {
           position: static !important;
           display: flex !important;
           align-items: center !important;
-          opacity: 1 !important;
-          visibility: visible !important;
-          transform: none !important;
-          filter: none !important;
-          backdrop-filter: none !important;
-          -webkit-backdrop-filter: none !important;
-          background-image: none !important;
-          transition: background-color 150ms ease, color 150ms ease !important;
-        }
-
-        .cl-userButtonPopoverActionButton {
           padding: 10px 12px !important;
           font-family: Inter, system-ui, sans-serif !important;
           font-size: 14px !important;
@@ -425,9 +462,11 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           border-radius: 8px !important;
           width: 100% !important;
           cursor: pointer !important;
+          /* Re-enable transition ONLY for this element */
+          transition: background-color 150ms ease, color 150ms ease !important;
+          opacity: 1 !important;
         }
 
-        /* Hover: solid green tint — no transparency effects */
         .cl-userButtonPopoverActionButton:hover,
         .cl-userButtonPopoverActionButton:focus-visible {
           background-color: #dcfce7 !important;
@@ -437,18 +476,10 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           filter: none !important;
         }
 
-        /* Icon inside action buttons */
-        .cl-userButtonPopoverActionButton svg,
-        .cl-userButtonPopoverActionButton [class*="cl-icon"] {
+        .cl-userButtonPopoverActionButton svg {
           opacity: 1 !important;
           color: inherit !important;
-        }
-
-        .cl-userButtonPopoverFooter {
-          position: static !important;
-          border-top: 1px solid #f1f5f9 !important;
-          padding: 8px 16px !important;
-          opacity: 1 !important;
+          transition: color 150ms ease !important;
         }
 
       `}</style>
