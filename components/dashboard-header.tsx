@@ -397,28 +397,58 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           border-top: 1px solid #f1f5f9 !important;
         }
 
-        .cl-userButtonPopoverActionButton {
+        /* Action buttons: Manage account / Sign out — no opacity, no blur, no scale */
+        .cl-userButtonPopoverActionButton,
+        .cl-userButtonPopoverActionButton *,
+        [class*="cl-menuItem"],
+        [class*="cl-menuItem"] * {
           position: static !important;
           display: flex !important;
           align-items: center !important;
-          padding: 10px 8px !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          transform: none !important;
+          filter: none !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          background-image: none !important;
+          transition: background-color 150ms ease, color 150ms ease !important;
+        }
+
+        .cl-userButtonPopoverActionButton {
+          padding: 10px 12px !important;
           font-family: Inter, system-ui, sans-serif !important;
           font-size: 14px !important;
           font-weight: 500 !important;
           color: #0f172a !important;
+          background-color: transparent !important;
           border-radius: 8px !important;
-          transition: background 200ms ease !important;
+          width: 100% !important;
+          cursor: pointer !important;
         }
 
-        .cl-userButtonPopoverActionButton:hover {
-          background-color: #f0fdf4 !important;
+        /* Hover: solid green tint — no transparency effects */
+        .cl-userButtonPopoverActionButton:hover,
+        .cl-userButtonPopoverActionButton:focus-visible {
+          background-color: #dcfce7 !important;
           color: #059669 !important;
+          opacity: 1 !important;
+          transform: none !important;
+          filter: none !important;
+        }
+
+        /* Icon inside action buttons */
+        .cl-userButtonPopoverActionButton svg,
+        .cl-userButtonPopoverActionButton [class*="cl-icon"] {
+          opacity: 1 !important;
+          color: inherit !important;
         }
 
         .cl-userButtonPopoverFooter {
           position: static !important;
           border-top: 1px solid #f1f5f9 !important;
           padding: 8px 16px !important;
+          opacity: 1 !important;
         }
 
       `}</style>

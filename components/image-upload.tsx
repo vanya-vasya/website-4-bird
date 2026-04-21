@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Upload, X, Image as ImageIcon, Camera } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Camera, CheckCircle2 } from "lucide-react";
 import { toast } from "react-hot-toast";
-import Image from "next/image";
 
 interface ImageUploadProps {
   onImageUpload: (file: File | null) => void;
@@ -146,26 +145,25 @@ export const ImageUpload = ({
     }
   }, [handleCameraClick]);
 
-  if (imagePreview) {
+  if (selectedImage) {
+    const truncatedName = selectedImage.name.length > 24
+      ? `${selectedImage.name.slice(0, 21)}...`
+      : selectedImage.name;
+
     return (
-      <div className="relative group">
-        <div className="relative w-full h-8 rounded-lg overflow-hidden border-2 border-gray-200">
-          <Image
-            src={imagePreview}
-            alt="Selected image"
-            fill
-            className="object-cover"
-          />
-          <button
-            onClick={handleRemoveImage}
-            className="absolute top-0 right-0 p-0.5 bg-black/50 hover:bg-black/70 rounded-full text-white transition-all duration-200"
-          >
-            <X size={8} />
-          </button>
-        </div>
-        <div className="absolute -bottom-1 left-0 right-0 text-[10px] text-center text-gray-500 bg-white/80 rounded-b-lg py-0.5">
-          {selectedImage?.name}
-        </div>
+      <div className="flex items-center gap-2 w-full h-8 px-3 rounded-lg border-2 border-green-300 bg-green-50">
+        <CheckCircle2 size={14} className="text-green-600 flex-shrink-0" />
+        <span className="text-[11px] font-medium text-green-700 truncate flex-1 min-w-0">
+          {truncatedName}
+        </span>
+        <button
+          type="button"
+          onClick={handleRemoveImage}
+          aria-label="Remove selected image"
+          className="flex-shrink-0 text-green-500 hover:text-red-500 transition-colors duration-150"
+        >
+          <X size={12} />
+        </button>
       </div>
     );
   }
