@@ -314,6 +314,55 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           transition: none !important;
         }
 
+        /* Fix Clerk UserButton popup — prevent name/email overlap */
+        .cl-userButtonPopoverCard {
+          z-index: 9999 !important;
+        }
+
+        .cl-userPreview {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: 12px !important;
+          padding: 12px 16px !important;
+        }
+
+        .cl-userPreviewAvatarContainer {
+          flex-shrink: 0 !important;
+        }
+
+        .cl-userPreviewTextContainer {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 4px !important;
+          min-width: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .cl-userPreviewMainIdentifier {
+          display: block !important;
+          font-weight: 600 !important;
+          font-size: 14px !important;
+          line-height: 1.4 !important;
+          color: #0f172a !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          position: static !important;
+        }
+
+        .cl-userPreviewSecondaryIdentifier {
+          display: block !important;
+          font-size: 12px !important;
+          line-height: 1.4 !important;
+          color: #64748b !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          position: static !important;
+        }
+
       `}</style>
     </header>
   );
