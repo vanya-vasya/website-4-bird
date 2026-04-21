@@ -314,53 +314,111 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
           transition: none !important;
         }
 
-        /* Fix Clerk UserButton popup — prevent name/email overlap */
+        /* ─── Clerk UserButton popup: full layout reset ─────────────────── */
+
         .cl-userButtonPopoverCard {
           z-index: 9999 !important;
+          overflow: visible !important;
+          min-width: 280px !important;
         }
 
+        /* Stack all sections vertically, no overlap */
+        .cl-userButtonPopoverMain {
+          display: flex !important;
+          flex-direction: column !important;
+          position: static !important;
+        }
+
+        /* User info row: avatar left, text right */
         .cl-userPreview {
           display: flex !important;
           flex-direction: row !important;
           align-items: center !important;
           gap: 12px !important;
-          padding: 12px 16px !important;
+          padding: 16px 16px 12px !important;
+          position: static !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
         }
 
-        .cl-userPreviewAvatarContainer {
+        .cl-userPreviewAvatarContainer,
+        .cl-userPreviewAvatarBox {
           flex-shrink: 0 !important;
+          position: static !important;
         }
 
+        /* Text column: name then email, clearly separated */
         .cl-userPreviewTextContainer {
           display: flex !important;
           flex-direction: column !important;
           align-items: flex-start !important;
-          gap: 4px !important;
+          justify-content: center !important;
+          gap: 3px !important;
           min-width: 0 !important;
           overflow: hidden !important;
+          position: static !important;
+          flex: 1 !important;
         }
 
         .cl-userPreviewMainIdentifier {
           display: block !important;
+          font-family: Inter, system-ui, sans-serif !important;
           font-weight: 600 !important;
           font-size: 14px !important;
-          line-height: 1.4 !important;
+          line-height: 1.5 !important;
           color: #0f172a !important;
           white-space: nowrap !important;
           overflow: hidden !important;
           text-overflow: ellipsis !important;
           position: static !important;
+          width: 100% !important;
         }
 
         .cl-userPreviewSecondaryIdentifier {
           display: block !important;
+          font-family: Inter, system-ui, sans-serif !important;
+          font-weight: 400 !important;
           font-size: 12px !important;
-          line-height: 1.4 !important;
+          line-height: 1.5 !important;
           color: #64748b !important;
           white-space: nowrap !important;
           overflow: hidden !important;
           text-overflow: ellipsis !important;
           position: static !important;
+          width: 100% !important;
+        }
+
+        /* "Manage account" action section — sits below user info */
+        .cl-userButtonPopoverActions {
+          display: flex !important;
+          flex-direction: column !important;
+          position: static !important;
+          padding: 4px 8px !important;
+          border-top: 1px solid #f1f5f9 !important;
+        }
+
+        .cl-userButtonPopoverActionButton {
+          position: static !important;
+          display: flex !important;
+          align-items: center !important;
+          padding: 10px 8px !important;
+          font-family: Inter, system-ui, sans-serif !important;
+          font-size: 14px !important;
+          font-weight: 500 !important;
+          color: #0f172a !important;
+          border-radius: 8px !important;
+          transition: background 200ms ease !important;
+        }
+
+        .cl-userButtonPopoverActionButton:hover {
+          background-color: #f0fdf4 !important;
+          color: #059669 !important;
+        }
+
+        .cl-userButtonPopoverFooter {
+          position: static !important;
+          border-top: 1px solid #f1f5f9 !important;
+          padding: 8px 16px !important;
         }
 
       `}</style>
