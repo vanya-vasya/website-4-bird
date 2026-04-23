@@ -91,14 +91,27 @@ export const parseNutritionReport = (raw: string): NutritionReport | null => {
   try {
     const parsed = JSON.parse(raw);
 
-    // Direct format
+    // Direct format: { summary, sections }
     if (isNutritionReport(parsed)) return parsed;
 
-    // Wrapped: { output: { summary, sections } }
+    // Wrapped object: { output: { summary, sections } }
     if (isNutritionReport(parsed?.output)) return parsed.output as NutritionReport;
+
+    // Double-encoded: { output: "{\"summary\":...,\"sections\":[...]}" }
+    // N8N returns output as a JSON string — parse it a second time
+    if (typeof parsed?.output === "string") {
+      const inner = JSON.parse(parsed.output);
+      if (isNutritionReport(inner)) return inner;
+    }
 
     // Wrapped: { response: { summary, sections } }
     if (isNutritionReport(parsed?.response)) return parsed.response as NutritionReport;
+
+    // Double-encoded via response key
+    if (typeof parsed?.response === "string") {
+      const inner = JSON.parse(parsed.response);
+      if (isNutritionReport(inner)) return inner;
+    }
 
     return null;
   } catch {
