@@ -1,35 +1,14 @@
 "use client";
 
+import { CURRENCIES, useCurrency } from "@/contexts/currency-context";
+import type { CurrencyCode } from "@/contexts/currency-context";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-type Currency = {
-  code: string;
-  label: string;
-  symbol: string;
-  flag: string;
-};
-
-const CURRENCIES: Currency[] = [
-  { code: "USD", label: "US Dollar", symbol: "$", flag: "🇺🇸" },
-  { code: "EUR", label: "Euro", symbol: "€", flag: "🇪🇺" },
-  { code: "GBP", label: "British Pound", symbol: "£", flag: "🇬🇧" },
-];
-
-const STORAGE_KEY = "yummi_currency";
-
 const CurrencySelector = () => {
+  const { currency, setCurrency } = useCurrency();
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState<Currency>(CURRENCIES[0]);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const found = CURRENCIES.find((c) => c.code === stored);
-      if (found) setSelected(found);
-    }
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -41,9 +20,8 @@ const CurrencySelector = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (currency: Currency) => {
-    setSelected(currency);
-    localStorage.setItem(STORAGE_KEY, currency.code);
+  const handleSelect = (code: CurrencyCode) => {
+    setCurrency(code);
     setIsOpen(false);
   };
 
@@ -57,28 +35,26 @@ const CurrencySelector = () => {
 
   return (
     <div ref={ref} className="relative inline-block">
-      {/* Dropdown list — opens upward */}
+      {/* Dropdown — opens upward */}
       {isOpen && (
         <div
-          className="absolute bottom-full mb-2 left-0 min-w-[200px] bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+          className="absolute bottom-full mb-2 left-0 min-w-[220px] bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
           role="listbox"
           aria-label="Currency options"
         >
-          {CURRENCIES.map((currency) => {
-            const isSelected = currency.code === selected.code;
+          {CURRENCIES.map((c, i) => {
+            const isSelected = c.code === currency.code;
             return (
               <button
-                key={currency.code}
+                key={c.code}
                 role="option"
                 aria-selected={isSelected}
-                onClick={() => handleSelect(currency)}
+                onClick={() => handleSelect(c.code)}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors ${
-                  isSelected
-                    ? "bg-blue-50"
-                    : "hover:bg-gray-50"
-                } ${currency !== CURRENCIES[CURRENCIES.length - 1] ? "border-b border-gray-100" : ""}`}
+                  isSelected ? "bg-blue-50" : "hover:bg-gray-50"
+                } ${i !== CURRENCIES.length - 1 ? "border-b border-gray-100" : ""}`}
               >
-                <span className="text-xl leading-none">{currency.flag}</span>
+                <span className="text-xl leading-none">{c.flag}</span>
                 <span
                   className="flex-1 text-sm font-semibold text-slate-900"
                   style={{
@@ -86,7 +62,7 @@ const CurrencySelector = () => {
                       'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
                   }}
                 >
-                  {currency.code} - {currency.label}
+                  {c.code} — {c.label}
                 </span>
                 {isSelected && <Check className="h-4 w-4 text-blue-500 shrink-0" />}
               </button>
@@ -95,17 +71,17 @@ const CurrencySelector = () => {
         </div>
       )}
 
-      {/* Trigger button */}
+      {/* Trigger */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         onKeyDown={handleKeyDown}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-label={`Current currency: ${selected.code} (${selected.symbol}). Click to change currency`}
+        aria-label={`Current currency: ${currency.code} (${currency.symbol}). Click to change`}
         className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
       >
-        <span className="text-lg leading-none">{selected.flag}</span>
+        <span className="text-lg leading-none">{currency.flag}</span>
         <span
           className="text-sm font-semibold text-slate-900"
           style={{
@@ -113,7 +89,7 @@ const CurrencySelector = () => {
               'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
           }}
         >
-          {selected.code} ({selected.symbol})
+          {currency.code} ({currency.symbol})
         </span>
         {isOpen ? (
           <ChevronUp className="h-4 w-4 text-slate-500" />

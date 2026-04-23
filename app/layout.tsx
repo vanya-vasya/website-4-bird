@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { ModalProvider } from "@/components/modal-provider";
 import { ToasterProvider } from "@/components/toaster-provider";
+import { CurrencyProvider } from "@/contexts/currency-context";
 
 import NextTopLoader from "nextjs-toploader";
 
@@ -46,10 +47,12 @@ export default function RootLayout({
           )}
         >
           <GoogleAnalytics gaId="G-DYY23NK5V1" />
-          <ModalProvider />
-          <ToasterProvider />
-          <NextTopLoader color="#3c3c77" showSpinner={false} />
-          {children}
+          <CurrencyProvider>
+            <ModalProvider />
+            <ToasterProvider />
+            <NextTopLoader color="#3c3c77" showSpinner={false} />
+            {children}
+          </CurrencyProvider>
         </body>
       </html>
     </ClerkProvider>
