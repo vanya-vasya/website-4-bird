@@ -30,10 +30,10 @@ export function UsageProgress({
 
   return (
     <div
-      className="relative overflow-hidden p-3 cursor-pointer border-0 bg-white/5 backdrop-blur-sm rounded-xl h-full"
+      className="relative p-3 cursor-pointer border-0 bg-white/5 backdrop-blur-sm rounded-xl h-full"
       onClick={proModal.onOpen}
     >
-      <div className="relative z-20 flex flex-col gap-2">
+      <div className="relative flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs text-black">
           <div className="flex items-center gap-1.5">
             <div className="relative w-6 h-6 flex items-center justify-center">

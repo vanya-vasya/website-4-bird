@@ -45,7 +45,7 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }: DashboardHeaderProps) => {
   return (
-    <header className="bg-white">
+    <header className="bg-white relative z-50">
       <nav className="mx-auto flex max-w-7xl items-center justify-between p-3 lg:px-6 gap-1">
         <div className="flex">
           <Link href="/dashboard" className="-m-1.5 p-1.5">
