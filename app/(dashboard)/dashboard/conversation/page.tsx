@@ -31,9 +31,7 @@ import { friendlyFormatter, FriendlyResponse } from "@/lib/friendly-response-for
 import { GuidelineSection } from "@/components/GuidelineSection";
 
 import { getFormSchema } from "./constants";
-import { MODEL_GENERATIONS_PRICE, tools } from "@/constants";
 import { N8nWebhookClient } from "@/lib/n8n-webhook";
-import { getApiAvailableGenerations, getApiUsedGenerations } from "@/lib/api-limit";
 import { useCredits } from "@/lib/contexts/credit-context";
 import { NutritionReport, parseNutritionReport } from "@/lib/nutrition-report-types";
 

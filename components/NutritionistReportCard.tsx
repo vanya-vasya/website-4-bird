@@ -186,14 +186,18 @@ const MEAL_CONFIG: Record<string, MealConfig> = {
   },
 };
 
-const getMealConfig = (type: string): MealConfig =>
-  MEAL_CONFIG[type.toLowerCase()] ?? {
-    icon: <UtensilsCrossed className="h-3.5 w-3.5" />,
-    border: "border-gray-200",
-    bg: "bg-gray-50",
-    iconBg: "bg-gray-100 text-gray-600",
-    label: type.charAt(0).toUpperCase() + type.slice(1),
-  };
+const getMealConfig = (type?: string | null): MealConfig => {
+  const key = (type ?? "").toLowerCase();
+  return (
+    MEAL_CONFIG[key] ?? {
+      icon: <UtensilsCrossed className="h-3.5 w-3.5" />,
+      border: "border-gray-200",
+      bg: "bg-gray-50",
+      iconBg: "bg-gray-100 text-gray-600",
+      label: type ? type.charAt(0).toUpperCase() + type.slice(1) : "Meal",
+    }
+  );
+};
 
 /* ────────────────────────────────────────────────────────────────
    Callout variant config
@@ -245,8 +249,8 @@ const CALLOUT_CONFIG: Record<CalloutVariant | "default", CalloutConfig> = {
   },
 };
 
-const getCalloutConfig = (variant?: CalloutVariant): CalloutConfig =>
-  CALLOUT_CONFIG[variant ?? "default"] ?? CALLOUT_CONFIG.default;
+const getCalloutConfig = (variant?: CalloutVariant | string | null): CalloutConfig =>
+  (variant ? CALLOUT_CONFIG[variant as CalloutVariant] : undefined) ?? CALLOUT_CONFIG.default;
 
 /* ────────────────────────────────────────────────────────────────
    Section-type icon map (for the §XX header)
