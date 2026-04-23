@@ -459,6 +459,39 @@ input:-webkit-autofill:active {
 
 
 
+/* ── Clerk UserButton popover overrides ────────────────────────── */
+
+/* Ensure the popover always floats above every other element */
+.cl-userButtonPopoverRootBox,
+.cl-userButtonPopoverCard {
+  z-index: 99999 !important;
+}
+
+/* Give the card a comfortable fixed width and clean padding */
+.cl-userButtonPopoverCard {
+  min-width: 300px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  overflow: hidden !important;
+}
+
+/* User info section — more breathing room */
+.cl-userButtonPopoverMain {
+  padding: 16px !important;
+}
+
+/* Each action row — comfortable tap target */
+.cl-userButtonPopoverActions {
+  padding: 8px 12px 12px !important;
+}
+
+/* "Secured by Clerk" footer */
+.cl-userButtonPopoverFooter {
+  padding: 10px 16px !important;
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+
 /* Make sure the input has transparent background even on autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
