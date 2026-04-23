@@ -43,6 +43,7 @@ type ChatCompletionRequestMessage = {
   recipeData?: Recipe; // Optional recipe data for structured responses
   friendlyResponse?: FriendlyResponse; // Friendly formatted response for Your Own Nutritionist
   nutritionData?: NutritionData; // Simple nutritional data for Your Own Tracker
+  rawContent?: string; // Raw n8n response string for structured report rendering
 };
 
 // Recipe type for structured recipe responses
@@ -325,8 +326,9 @@ const ConversationPage = () => {
           
           assistantMessage = {
             role: "assistant",
-            content: friendlyResponse.greeting, // Use greeting as main content
-            friendlyResponse: friendlyResponse, // Include full friendly response data
+            content: friendlyResponse.greeting,
+            friendlyResponse: friendlyResponse,
+            rawContent: webhookResponse.data.response, // raw string for report parser
           };
           
           successMessage = `✨ Personalized nutrition guidance ready in ${(webhookResponse.data.processingTime / 1000).toFixed(1)}s!`;
@@ -639,6 +641,7 @@ const ConversationPage = () => {
                   <div className="w-full">
                     <NutritionistReportCard
                       response={message.friendlyResponse}
+                      rawContent={message.rawContent}
                       gradient={currentTool.gradient}
                       toolTitle={currentTool.title}
                     />
