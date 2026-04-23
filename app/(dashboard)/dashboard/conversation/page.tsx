@@ -35,15 +35,17 @@ import { MODEL_GENERATIONS_PRICE, tools } from "@/constants";
 import { N8nWebhookClient } from "@/lib/n8n-webhook";
 import { getApiAvailableGenerations, getApiUsedGenerations } from "@/lib/api-limit";
 import { useCredits } from "@/lib/contexts/credit-context";
+import { NutritionReport, parseNutritionReport } from "@/lib/nutrition-report-types";
 
 // Define ChatCompletionRequestMessage type locally with friendly response support
 type ChatCompletionRequestMessage = {
   role: 'user' | 'system' | 'assistant';
   content: string;
-  recipeData?: Recipe; // Optional recipe data for structured responses
-  friendlyResponse?: FriendlyResponse; // Friendly formatted response for Your Own Nutritionist
-  nutritionData?: NutritionData; // Simple nutritional data for Your Own Tracker
-  rawContent?: string; // Raw n8n response string for structured report rendering
+  recipeData?: Recipe;
+  friendlyResponse?: FriendlyResponse;
+  nutritionData?: NutritionData;
+  rawContent?: string;
+  nutritionReport?: NutritionReport; // Structured JSON report from N8N
 };
 
 // Recipe type for structured recipe responses
@@ -321,14 +323,18 @@ const ConversationPage = () => {
           successMessage = `🎯 Calorie tracking analysis ready in ${(webhookResponse.data.processingTime / 1000).toFixed(1)}s!`;
           
         } else if (toolId === 'master-nutritionist') {
-          // Handle Your Own Nutritionist responses with friendly formatting
-          const friendlyResponse = friendlyFormatter.formatResponse(webhookResponse.data.response);
-          
+          const rawResponse = webhookResponse.data.response;
+          const friendlyResponse = friendlyFormatter.formatResponse(rawResponse);
+
+          // Attempt to parse as structured JSON report (primary path)
+          const nutritionReport = parseNutritionReport(rawResponse);
+
           assistantMessage = {
             role: "assistant",
-            content: friendlyResponse.greeting,
+            content: nutritionReport ? nutritionReport.summary : friendlyResponse.greeting,
             friendlyResponse: friendlyResponse,
-            rawContent: webhookResponse.data.response, // raw string for report parser
+            rawContent: rawResponse,
+            nutritionReport: nutritionReport ?? undefined,
           };
           
           successMessage = `✨ Personalized nutrition guidance ready in ${(webhookResponse.data.processingTime / 1000).toFixed(1)}s!`;
@@ -636,11 +642,12 @@ const ConversationPage = () => {
                   </div>
                 )}
 
-                {/* Report card for master-nutritionist — looks like an official document */}
+                {/* Report card for master-nutritionist — structured JSON or raw fallback */}
                 {message.role === "assistant" && message.friendlyResponse && !message.nutritionData && toolId === 'master-nutritionist' && (
                   <div className="w-full">
                     <NutritionistReportCard
                       response={message.friendlyResponse}
+                      nutritionReport={message.nutritionReport}
                       rawContent={message.rawContent}
                       gradient={currentTool.gradient}
                       toolTitle={currentTool.title}
