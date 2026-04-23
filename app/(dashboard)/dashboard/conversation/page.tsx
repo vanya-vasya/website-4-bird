@@ -25,6 +25,7 @@ import { Activity, Target, AlertCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RecipeCard } from "@/components/RecipeCard";
 import { FriendlyResponseCard } from "@/components/FriendlyResponseCard";
+import { NutritionistReportCard } from "@/components/NutritionistReportCard";
 import { CalTrackerNutritionCard } from "@/components/CalTrackerNutritionCard";
 import { friendlyFormatter, FriendlyResponse } from "@/lib/friendly-response-formatter";
 import { GuidelineSection } from "@/components/GuidelineSection";
@@ -633,8 +634,19 @@ const ConversationPage = () => {
                   </div>
                 )}
 
-                {/* Friendly response card for Your Own Nutritionist and Your Own Tracker */}
-                {message.role === "assistant" && message.friendlyResponse && !message.nutritionData && (
+                {/* Report card for master-nutritionist — looks like an official document */}
+                {message.role === "assistant" && message.friendlyResponse && !message.nutritionData && toolId === 'master-nutritionist' && (
+                  <div className="w-full">
+                    <NutritionistReportCard
+                      response={message.friendlyResponse}
+                      gradient={currentTool.gradient}
+                      toolTitle={currentTool.title}
+                    />
+                  </div>
+                )}
+
+                {/* Friendly response card for other tools (e.g. Cal Tracker fallback) */}
+                {message.role === "assistant" && message.friendlyResponse && !message.nutritionData && toolId !== 'master-nutritionist' && (
                   <div className="w-full">
                     <FriendlyResponseCard 
                       response={message.friendlyResponse} 
