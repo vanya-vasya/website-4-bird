@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   Leaf,
@@ -725,8 +725,14 @@ export const NutritionistReportCard = ({
   className,
   toolTitle = "Your Own Nutritionist",
 }: NutritionistReportCardProps) => {
-  const reportId = React.useMemo(() => generateReportId(), []);
-  const reportDate = React.useMemo(() => formatReportDate(), []);
+  const [reportId, setReportId] = useState("--------");
+  const [reportDate, setReportDate] = useState("--");
+
+  useEffect(() => {
+    setReportId(generateReportId());
+    setReportDate(formatReportDate());
+  }, []);
+
   const rawBlocks = React.useMemo(
     () => (!nutritionReport && rawContent ? parseRawContent(rawContent) : null),
     [nutritionReport, rawContent]
