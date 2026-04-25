@@ -472,7 +472,7 @@ input:-webkit-autofill:active {
   min-width: 300px !important;
   border-radius: 16px !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 /* User info section — more breathing room */
@@ -488,6 +488,77 @@ input:-webkit-autofill:active {
 /* "Secured by Clerk" footer */
 .cl-userButtonPopoverFooter {
   padding: 10px 16px !important;
+}
+
+/* Fix overlapping user preview: make the user row a proper flex row */
+.cl-userButtonPopoverUserPreview,
+.cl-userPreview {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  position: relative !important;
+}
+
+/* Avatar box — fixed size, no shrink */
+.cl-userButtonPopoverUserPreview .cl-userPreviewAvatarBox,
+.cl-userPreview .cl-userPreviewAvatarBox,
+.cl-userButtonPopoverUserPreview .cl-avatarBox,
+.cl-userPreview .cl-avatarBox {
+  flex-shrink: 0 !important;
+  position: relative !important;
+}
+
+/* Text container — stack name + email vertically */
+.cl-userButtonPopoverUserPreview .cl-userPreviewTextContainer,
+.cl-userPreview .cl-userPreviewTextContainer {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+  position: static !important;
+  overflow: hidden !important;
+}
+
+/* Primary identifier (full name) */
+.cl-userButtonPopoverUserPreview .cl-userPreviewMainIdentifier,
+.cl-userPreview .cl-userPreviewMainIdentifier {
+  display: block !important;
+  position: static !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  line-height: 1.25 !important;
+}
+
+/* Secondary identifier (email) */
+.cl-userButtonPopoverUserPreview .cl-userPreviewSecondaryIdentifier,
+.cl-userPreview .cl-userPreviewSecondaryIdentifier {
+  display: block !important;
+  position: static !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  line-height: 1.25 !important;
+}
+
+/* Action items — each on its own row */
+.cl-userButtonPopoverActionButton {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  position: static !important;
+}
+
+.cl-userButtonPopoverActionButtonText {
+  position: static !important;
+  display: block !important;
 }
 
 /* ─────────────────────────────────────────────────────────────── */
