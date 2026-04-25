@@ -334,7 +334,7 @@ const MealBlock = ({ meal }: { meal: DayMeal }) => {
         )}
       </div>
       <ul className="space-y-1">
-        {meal.items.map((item, i) => (
+        {(meal.items ?? []).map((item, i) => (
           <li key={i} className="flex items-start gap-1.5 text-xs text-gray-700">
             <span className="text-emerald-400 mt-0.5 flex-shrink-0">●</span>
             <span dangerouslySetInnerHTML={{ __html: safe(item) }} />
@@ -401,7 +401,7 @@ const DayCard = ({
       {/* Meal grid — collapsible */}
       {open && (
         <div className="p-4 bg-white grid sm:grid-cols-2 gap-3">
-          {day.meals.map((meal, mi) => (
+          {(day.meals ?? []).map((meal, mi) => (
             <MealBlock key={mi} meal={meal} />
           ))}
         </div>
@@ -420,7 +420,7 @@ const MealPlanRenderer = ({ section }: { section: MealPlanSection }) => (
         </p>
       </div>
     )}
-    {section.days.map((day, i) => (
+    {(section.days ?? []).map((day, i) => (
       <DayCard
         key={day.day ?? i}
         day={day}
@@ -434,7 +434,7 @@ const MealPlanRenderer = ({ section }: { section: MealPlanSection }) => (
 /** list section */
 const ListRenderer = ({ section }: { section: ListSection }) => (
   <ul className="space-y-2.5" role="list">
-    {section.items.map((item, i) => (
+    {(section.items ?? []).map((item, i) => (
       <li
         key={i}
         className="flex items-start gap-3 p-3.5 rounded-xl bg-gray-50 border border-gray-100 hover:bg-emerald-50 hover:border-emerald-200 transition-colors duration-150 group"
@@ -469,7 +469,7 @@ const TableRenderer = ({ section }: { section: TableSection }) => (
     <table className="w-full text-sm">
       <thead>
         <tr className="bg-gradient-to-r from-emerald-600 to-teal-600">
-          {section.headers.map((h, i) => (
+          {(section.headers ?? []).map((h, i) => (
             <th
               key={i}
               className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider"
@@ -480,7 +480,7 @@ const TableRenderer = ({ section }: { section: TableSection }) => (
         </tr>
       </thead>
       <tbody>
-        {section.rows.map((row, ri) => (
+        {(section.rows ?? []).map((row, ri) => (
           <tr
             key={ri}
             className={cn(
@@ -489,7 +489,7 @@ const TableRenderer = ({ section }: { section: TableSection }) => (
               "hover:bg-emerald-50"
             )}
           >
-            {row.map((cell, ci) => (
+            {(row ?? []).map((cell, ci) => (
               <td
                 key={ci}
                 className={cn(
