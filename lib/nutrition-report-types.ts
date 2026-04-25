@@ -1,15 +1,23 @@
 /**
  * Typed schema for the structured JSON returned by the N8N master-nutritionist webhook.
  *
- * Example wire format:
+ * N8N actual wire format (array-wrapped, flat day structure):
+ * [
+ *   {
+ *     "output": "{\"summary\":\"...\",\"sections\":[{\"type\":\"meal_plan\",\"days\":[
+ *       { \"day\": 1, \"breakfast\": { \"description\": \"...\", \"calories\": 350 }, \"lunch\": {...}, ... }
+ *     ]}]}"
+ *   }
+ * ]
+ *
+ * Normalised internal format (what components expect):
  * {
- *   "summary": "Here is your personalised 7-day plan...",
+ *   "summary": "...",
  *   "sections": [
- *     { "id": "s1", "title": "Weekly Meal Plan", "type": "meal_plan", "intro": "...", "days": [...] },
- *     { "id": "s2", "title": "Key Tips",          "type": "list",      "items": ["Drink 2L water", ...] },
- *     { "id": "s3", "title": "About This Plan",   "type": "text",      "content": "..." },
- *     { "id": "s4", "title": "Macros Overview",   "type": "table",     "headers": [...], "rows": [[...]] },
- *     { "id": "s5", "title": "Important Note",    "type": "callout",   "content": "...", "variant": "warning" }
+ *     { "id": "s1", "title": "...", "type": "meal_plan", "days": [
+ *       { "day": 1, "meals": [{ "type": "breakfast", "items": ["..."], "calories": 350 }], "totalCalories": 1400 }
+ *     ]},
+ *     { "id": "s2", "title": "...", "type": "list", "items": ["..."] }
  *   ]
  * }
  */
@@ -83,34 +91,145 @@ export interface NutritionReport {
   sections: NutritionSection[];
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Day normalisation
+   Converts N8N flat-property days into the meals[] format
+───────────────────────────────────────────────────────────── */
+
+const FLAT_MEAL_KEYS = [
+  "breakfast",
+  "brunch",
+  "lunch",
+  "dinner",
+  "supper",
+  "snack",
+  "morning snack",
+  "afternoon snack",
+  "evening snack",
+  "pre-workout",
+  "post-workout",
+] as const;
+
+type FlatMealKey = (typeof FLAT_MEAL_KEYS)[number];
+
+interface RawFlatMeal {
+  description?: string;
+  items?: string[];
+  calories?: number;
+}
+
+const normaliseDays = (rawDays: unknown[]): PlanDay[] =>
+  rawDays.map((d) => {
+    const day = d as Record<string, unknown>;
+
+    // Already in the expected meals[] format
+    if (Array.isArray(day.meals)) {
+      return {
+        day: day.day as string | number,
+        label: day.label as string | undefined,
+        totalCalories: day.totalCalories as number | undefined,
+        meals: (day.meals as Record<string, unknown>[]).map((m) => ({
+          type: (m.type as string) ?? "meal",
+          label: m.label as string | undefined,
+          items: Array.isArray(m.items)
+            ? (m.items as string[])
+            : m.description
+            ? [m.description as string]
+            : [],
+          calories: m.calories as number | undefined,
+        })),
+      };
+    }
+
+    // N8N flat format: { day: 1, breakfast: { description, calories }, lunch: {...}, ... }
+    const meals: DayMeal[] = [];
+    let totalCalories = 0;
+
+    for (const key of FLAT_MEAL_KEYS) {
+      const entry = day[key] as RawFlatMeal | undefined;
+      if (!entry) continue;
+      const items: string[] = Array.isArray(entry.items)
+        ? entry.items
+        : entry.description
+        ? [entry.description]
+        : [];
+      if (!items.length) continue;
+      meals.push({ type: key as string, items, calories: entry.calories });
+      totalCalories += entry.calories ?? 0;
+    }
+
+    return {
+      day: day.day as string | number,
+      label: day.label as string | undefined,
+      totalCalories: totalCalories || (day.totalCalories as number | undefined),
+      meals,
+    };
+  });
+
+const normaliseReport = (report: NutritionReport): NutritionReport => ({
+  ...report,
+  sections: report.sections.map((s) => {
+    if (s.type === "meal_plan" && Array.isArray(s.days)) {
+      return { ...s, days: normaliseDays(s.days) } as MealPlanSection;
+    }
+    return s;
+  }),
+});
+
+/* ─────────────────────────────────────────────────────────────
+   Parser — handles all N8N wrapping variants
+───────────────────────────────────────────────────────────── */
+
+const tryExtract = (value: unknown): NutritionReport | null => {
+  if (isNutritionReport(value)) return normaliseReport(value);
+
+  if (typeof value === "string") {
+    try {
+      const inner = JSON.parse(value);
+      if (isNutritionReport(inner)) return normaliseReport(inner);
+    } catch {
+      // not JSON
+    }
+  }
+
+  return null;
+};
+
 /**
  * Attempt to parse a raw string from N8N into a NutritionReport.
- * Returns null if the string is not valid JSON or does not match the schema.
+ * Handles all known wrapping variants:
+ *   - Direct: { summary, sections }
+ *   - Object-wrapped: { output: ... } or { response: ... }
+ *   - Array-wrapped: [{ output: ... }]
+ *   - Double-encoded strings at any level
  */
 export const parseNutritionReport = (raw: string): NutritionReport | null => {
   try {
     const parsed = JSON.parse(raw);
 
-    // Direct format: { summary, sections }
-    if (isNutritionReport(parsed)) return parsed;
+    // Direct
+    const direct = tryExtract(parsed);
+    if (direct) return direct;
 
-    // Wrapped object: { output: { summary, sections } }
-    if (isNutritionReport(parsed?.output)) return parsed.output as NutritionReport;
+    // Array-wrapped: N8N returns [{ output: "..." }]
+    const candidate = Array.isArray(parsed) ? parsed[0] : parsed;
 
-    // Double-encoded: { output: "{\"summary\":...,\"sections\":[...]}" }
-    // N8N returns output as a JSON string — parse it a second time
-    if (typeof parsed?.output === "string") {
-      const inner = JSON.parse(parsed.output);
-      if (isNutritionReport(inner)) return inner;
+    // { output: ... }
+    if (candidate?.output !== undefined) {
+      const fromOutput = tryExtract(candidate.output);
+      if (fromOutput) return fromOutput;
     }
 
-    // Wrapped: { response: { summary, sections } }
-    if (isNutritionReport(parsed?.response)) return parsed.response as NutritionReport;
+    // { response: ... }
+    if (candidate?.response !== undefined) {
+      const fromResponse = tryExtract(candidate.response);
+      if (fromResponse) return fromResponse;
+    }
 
-    // Double-encoded via response key
-    if (typeof parsed?.response === "string") {
-      const inner = JSON.parse(parsed.response);
-      if (isNutritionReport(inner)) return inner;
+    // { message: ... }
+    if (candidate?.message !== undefined) {
+      const fromMessage = tryExtract(candidate.message);
+      if (fromMessage) return fromMessage;
     }
 
     return null;
@@ -122,5 +241,6 @@ export const parseNutritionReport = (raw: string): NutritionReport | null => {
 const isNutritionReport = (v: unknown): v is NutritionReport =>
   !!v &&
   typeof v === "object" &&
+  !Array.isArray(v) &&
   typeof (v as NutritionReport).summary === "string" &&
   Array.isArray((v as NutritionReport).sections);
