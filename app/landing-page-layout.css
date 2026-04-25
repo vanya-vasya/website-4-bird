@@ -57,13 +57,20 @@ header nav {
   position: relative !important;
 }
 
-/* DropdownMenu content */
-[role="menu"],
+/* DropdownMenu content — scope tightly to Radix only, NOT Clerk popovers */
 [data-radix-dropdown-menu-content] {
   z-index: 9999 !important;
   position: absolute !important;
   /* Ensure dropdown appears below header */
   margin-top: 4px !important;
+}
+
+/* Undo any accidental positioning inside Clerk's UserButton popover */
+.cl-userButtonPopoverCard [role="menu"],
+.cl-userButtonPopoverRootBox [role="menu"] {
+  position: static !important;
+  margin-top: 0 !important;
+  z-index: auto !important;
 }
 
 /* Prevent dropdown from being clipped by overflow: hidden parents */
