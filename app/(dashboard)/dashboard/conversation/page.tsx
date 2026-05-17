@@ -426,7 +426,7 @@ const ConversationPage = () => {
       description={currentTool.description}
       iconName={currentTool.iconName as keyof typeof import("lucide-react")}
       gradient={currentTool.gradient}
-      notice={toolId !== 'master-nutritionist' ? "JPEG only. We are currently working on a lightning-fast image converter so you will be able to upload any image format" : undefined}
+      notice="JPEG only. We are currently working on a lightning-fast image converter so you will be able to upload any image format"
     >
       <div className={contentStyles.base}>
         <Form {...form}>
