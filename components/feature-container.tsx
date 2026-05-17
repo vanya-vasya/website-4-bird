@@ -10,6 +10,7 @@ interface FeatureContainerProps {
   description: string;
   iconName: keyof typeof LucideIcons;
   gradient?: string;
+  notice?: string;
 }
 
 const container = {
@@ -33,6 +34,7 @@ export function FeatureContainer({
   description,
   iconName,
   gradient = "from-cyan-400 via-blue-500 to-indigo-600",
+  notice,
 }: FeatureContainerProps) {
   const IconComponent = LucideIcons[iconName] as React.ComponentType<{ className?: string }>;
   
@@ -60,6 +62,14 @@ export function FeatureContainer({
         <p className="text-center text-muted-foreground max-w-[700px] mx-auto whitespace-pre-line">
           {description}
         </p>
+        {notice && (
+          <div className="flex justify-center mt-3">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-300 bg-amber-50 text-amber-800 text-sm font-medium shadow-sm max-w-[600px]">
+              <LucideIcons.Info className="w-4 h-4 shrink-0 text-amber-500" />
+              <span>{notice}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <motion.div variants={item} className="px-4">
