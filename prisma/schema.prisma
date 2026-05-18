@@ -18,6 +18,23 @@ model User {
   usedGenerations      Int           @default(0)
   availableGenerations Int           @default(20)
   transactions         Transaction[]
+  activityLogs         ActivityLog[]
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  toolId      String
+  toolName    String
+  tokensUsed  Int      @default(0)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [clerkId])
+
+  @@index([userId, createdAt])
+  @@index([userId, toolId])
 }
 
 model Transaction {

@@ -36,6 +36,10 @@ const routes = [
     name: "Payment History",
     href: "/dashboard/billing/payment-history",
   },
+  {
+    name: "Activity History",
+    href: "/dashboard/activity-history",
+  },
 ];
 
 interface DashboardHeaderProps {

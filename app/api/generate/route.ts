@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import prismadb from '@/lib/prismadb';
+import { logActivity, type ActivityAction } from '@/lib/activity-log';
 
 // Tool pricing configuration in GBP pence (100 pence = £1.00)
 // Conversion: 1 token = £0.20, so 5 tokens = £1, 10 tokens = £2, 15 tokens = £3
@@ -243,6 +244,26 @@ export async function POST(req: NextRequest) {
             remainingCredits: updatedUser.availableGenerations - updatedUser.usedGenerations,
             timestamp: new Date().toISOString(),
           });
+        });
+
+        // Log activity (non-blocking, outside transaction)
+        const ACTION_MAP: Record<string, ActivityAction> = {
+          'master-chef': 'recipe_generate',
+          'master-nutritionist': 'nutrition_analyze',
+          'cal-tracker': 'cal_track',
+        };
+        await logActivity({
+          userId,
+          action: ACTION_MAP[toolId] ?? 'recipe_generate',
+          toolId,
+          toolName,
+          tokensUsed: toolPriceTokens,
+          metadata: {
+            prompt: payload.content || payload.message || undefined,
+            hasImage: !!file,
+            fileName: file?.name,
+            responseLength: text.length,
+          },
         });
       } catch (dbError) {
         console.error(`[API_GENERATE:${correlationId}] ⚠️ Failed to deduct credits (AI generation succeeded but DB write failed):`, {
