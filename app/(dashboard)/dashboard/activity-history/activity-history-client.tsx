@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Crown, Activity, Target, Zap, Clock, Image as ImageIcon } from "lucide-react";
+import { Crown, Activity, Target, Zap, Clock, Image as ImageIcon, ChevronDown, ChevronUp, Flame } from "lucide-react";
 import type { ChefLog, NutritionistLog, TrackerLog } from "@prisma/client";
 import type { fetchActivityStats } from "@/lib/activity-log";
 
 type Stats = Awaited<ReturnType<typeof fetchActivityStats>>;
-
 type TabId = "chef" | "nutritionist" | "tracker";
 
-const FONT_STYLE = {
+const FONT = {
   fontFamily: 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   fontWeight: 600,
   fontSize: "14px",
@@ -18,39 +17,35 @@ const FONT_STYLE = {
   color: "#0f172a",
 } as const;
 
-const TABS: {
-  id: TabId;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  gradient: string;
-  bgLight: string;
-  borderColor: string;
-}[] = [
+const TABS = [
   {
-    id: "chef",
+    id: "chef" as TabId,
     label: "Your Own Chef",
     icon: Crown,
     gradient: "from-amber-400 via-orange-500 to-red-600",
     bgLight: "bg-amber-50",
-    borderColor: "border-amber-200",
+    border: "border-amber-200",
+    textColor: "text-amber-700",
   },
   {
-    id: "nutritionist",
+    id: "nutritionist" as TabId,
     label: "Your Own Nutritionist",
     icon: Activity,
     gradient: "from-emerald-400 via-green-500 to-teal-600",
     bgLight: "bg-emerald-50",
-    borderColor: "border-emerald-200",
+    border: "border-emerald-200",
+    textColor: "text-emerald-700",
   },
   {
-    id: "tracker",
+    id: "tracker" as TabId,
     label: "Your Own Tracker",
     icon: Target,
     gradient: "from-blue-400 via-cyan-500 to-indigo-600",
     bgLight: "bg-blue-50",
-    borderColor: "border-blue-200",
+    border: "border-blue-200",
+    textColor: "text-blue-700",
   },
-];
+] as const;
 
 const TOOL_STAT_MAP: Record<string, TabId> = {
   "master-chef": "chef",
@@ -58,26 +53,46 @@ const TOOL_STAT_MAP: Record<string, TabId> = {
   "cal-tracker": "tracker",
 };
 
-type AnyLog = ChefLog | NutritionistLog | TrackerLog;
-
-type LogMeta = {
+type ChefMeta = {
+  recipeName?: string;
+  kcal?: number;
+  protein?: number;
+  fat?: number;
+  carbs?: number;
   prompt?: string;
-  responsePreview?: string;
+  recipeText?: string;
   hasImage?: boolean;
   fileName?: string;
-  recipeName?: string;
-  cuisine?: string;
-  portionSize?: string;
-  estimatedCalories?: number;
-  mealType?: string;
-  totalCalories?: number;
-  analysisType?: string;
 };
 
-const parseMeta = (raw: unknown): LogMeta =>
-  raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as LogMeta) : {};
+type NutritionistMeta = {
+  dishName?: string;
+  kcal?: number;
+  protein?: number;
+  fat?: number;
+  carbs?: number;
+  prompt?: string;
+  analysisText?: string;
+  hasImage?: boolean;
+  fileName?: string;
+};
 
-const formatDate = (d: Date) =>
+type TrackerMeta = {
+  dishName?: string;
+  kcal?: number;
+  protein?: number;
+  fat?: number;
+  carbs?: number;
+  prompt?: string;
+  reportText?: string;
+  hasImage?: boolean;
+  fileName?: string;
+};
+
+const parseMeta = <T>(raw: unknown): T =>
+  raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as T) : ({} as T);
+
+const fmt = (d: Date) =>
   new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "2-digit",
@@ -86,97 +101,260 @@ const formatDate = (d: Date) =>
     minute: "2-digit",
   }).format(new Date(d));
 
-function LogTable({
-  logs,
-  tab,
-  emptyLabel,
-}: {
-  logs: AnyLog[];
-  tab: (typeof TABS)[number];
-  emptyLabel: string;
-}) {
-  if (logs.length === 0) {
-    return (
-      <div className="text-center py-16 text-gray-400">
-        <Clock className="w-10 h-10 mx-auto mb-3 opacity-40" />
-        <p style={FONT_STYLE}>{emptyLabel}</p>
-      </div>
-    );
-  }
+// ── Macro badge ──────────────────────────────────────────────────────────────
+const MacroBadge = ({ label, value, color }: { label: string; value: number; color: string }) => (
+  <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-semibold border ${color}`}>
+    {label} {value}g
+  </span>
+);
 
+// ── Expandable recipe row ────────────────────────────────────────────────────
+function ExpandableRow({
+  date,
+  title,
+  titleFallback,
+  kcal,
+  protein,
+  fat,
+  carbs,
+  bodyText,
+  prompt,
+  tokensUsed,
+  hasImage,
+  fileName,
+  tab,
+}: {
+  date: Date;
+  title?: string;
+  titleFallback: string;
+  kcal?: number;
+  protein?: number;
+  fat?: number;
+  carbs?: number;
+  bodyText?: string;
+  prompt?: string;
+  tokensUsed: number;
+  hasImage?: boolean;
+  fileName?: string;
+  tab: (typeof TABS)[number];
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <tr
+        className="hover:bg-gray-50 transition-colors cursor-pointer"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+      >
+        {/* Date */}
+        <td className="whitespace-nowrap py-4 pl-4 pr-3 align-top" style={{ ...FONT, minWidth: 130 }}>
+          {fmt(date)}
+        </td>
+
+        {/* Dish / Name */}
+        <td className="px-3 py-4 align-top" style={{ minWidth: 160 }}>
+          <p className="font-semibold text-gray-900 text-sm">
+            {title || titleFallback}
+          </p>
+          {prompt && (
+            <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{prompt}</p>
+          )}
+        </td>
+
+        {/* Macros */}
+        <td className="px-3 py-4 align-top">
+          <div className="flex flex-wrap gap-1">
+            {kcal !== undefined && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-orange-50 border border-orange-200 text-orange-700">
+                <Flame className="w-3 h-3" /> {kcal} kcal
+              </span>
+            )}
+            {protein !== undefined && (
+              <MacroBadge label="P" value={protein} color="bg-blue-50 border-blue-200 text-blue-700" />
+            )}
+            {fat !== undefined && (
+              <MacroBadge label="F" value={fat} color="bg-yellow-50 border-yellow-200 text-yellow-700" />
+            )}
+            {carbs !== undefined && (
+              <MacroBadge label="C" value={carbs} color="bg-green-50 border-green-200 text-green-700" />
+            )}
+            {kcal === undefined && protein === undefined && (
+              <span className="text-gray-400 text-xs">—</span>
+            )}
+          </div>
+        </td>
+
+        {/* Tokens */}
+        <td className="whitespace-nowrap px-3 py-4 align-top">
+          <span
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${tab.bgLight} ${tab.border} border ${tab.textColor}`}
+          >
+            <Zap className="w-3 h-3" />
+            {tokensUsed}
+          </span>
+        </td>
+
+        {/* Image / Expand */}
+        <td className="px-3 py-4 align-top text-center">
+          <div className="flex items-center justify-center gap-2">
+            {hasImage && (
+              <span title={fileName ?? "image"}>
+                <ImageIcon className="w-4 h-4 text-gray-400" />
+              </span>
+            )}
+            {bodyText && (
+              open
+                ? <ChevronUp className="w-4 h-4 text-gray-400" />
+                : <ChevronDown className="w-4 h-4 text-gray-400" />
+            )}
+          </div>
+        </td>
+      </tr>
+
+      {/* Expanded recipe / analysis text */}
+      {open && bodyText && (
+        <tr>
+          <td colSpan={5} className="px-4 pb-4 bg-gray-50">
+            <div
+              className={`rounded-xl border ${tab.border} ${tab.bgLight} p-4 text-sm text-gray-700 whitespace-pre-wrap`}
+              style={{ fontFamily: FONT.fontFamily, lineHeight: 1.7 }}
+            >
+              {bodyText}
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
+// ── Chef table ───────────────────────────────────────────────────────────────
+function ChefTable({ logs, tab }: { logs: ChefLog[]; tab: (typeof TABS)[number] }) {
+  if (logs.length === 0) return <EmptyState label="No Chef requests yet — try generating a recipe!" />;
+  return (
+    <TableShell>
+      {logs.map((log) => {
+        const m = parseMeta<ChefMeta>(log.metadata);
+        return (
+          <ExpandableRow
+            key={log.id}
+            date={log.createdAt}
+            title={m.recipeName}
+            titleFallback="Recipe"
+            kcal={m.kcal}
+            protein={m.protein}
+            fat={m.fat}
+            carbs={m.carbs}
+            bodyText={m.recipeText}
+            prompt={m.prompt}
+            tokensUsed={log.tokensUsed}
+            hasImage={m.hasImage}
+            fileName={m.fileName}
+            tab={tab}
+          />
+        );
+      })}
+    </TableShell>
+  );
+}
+
+// ── Nutritionist table ───────────────────────────────────────────────────────
+function NutritionistTable({ logs, tab }: { logs: NutritionistLog[]; tab: (typeof TABS)[number] }) {
+  if (logs.length === 0) return <EmptyState label="No Nutritionist requests yet — try a nutrition analysis!" />;
+  return (
+    <TableShell>
+      {logs.map((log) => {
+        const m = parseMeta<NutritionistMeta>(log.metadata);
+        return (
+          <ExpandableRow
+            key={log.id}
+            date={log.createdAt}
+            title={m.dishName}
+            titleFallback="Nutrition Analysis"
+            kcal={m.kcal}
+            protein={m.protein}
+            fat={m.fat}
+            carbs={m.carbs}
+            bodyText={m.analysisText}
+            prompt={m.prompt}
+            tokensUsed={log.tokensUsed}
+            hasImage={m.hasImage}
+            fileName={m.fileName}
+            tab={tab}
+          />
+        );
+      })}
+    </TableShell>
+  );
+}
+
+// ── Tracker table ────────────────────────────────────────────────────────────
+function TrackerTable({ logs, tab }: { logs: TrackerLog[]; tab: (typeof TABS)[number] }) {
+  if (logs.length === 0) return <EmptyState label="No Tracker requests yet — start tracking your meals!" />;
+  return (
+    <TableShell>
+      {logs.map((log) => {
+        const m = parseMeta<TrackerMeta>(log.metadata);
+        return (
+          <ExpandableRow
+            key={log.id}
+            date={log.createdAt}
+            title={m.dishName}
+            titleFallback="Meal Tracked"
+            kcal={m.kcal}
+            protein={m.protein}
+            fat={m.fat}
+            carbs={m.carbs}
+            bodyText={m.reportText}
+            prompt={m.prompt}
+            tokensUsed={log.tokensUsed}
+            hasImage={m.hasImage}
+            fileName={m.fileName}
+            tab={tab}
+          />
+        );
+      })}
+    </TableShell>
+  );
+}
+
+function TableShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
-              {["Date", "Prompt / Request", "Preview", "Tokens", "Image"].map((h) => (
+              {["Date", "Dish / Request", "Nutrition", "Tokens", ""].map((h, i) => (
                 <th
-                  key={h}
+                  key={i}
                   scope="col"
-                  className="py-3.5 px-3 text-left first:pl-4 last:text-center"
-                  style={FONT_STYLE}
+                  className="py-3.5 px-3 text-left first:pl-4"
+                  style={FONT}
                 >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
-            {logs.map((log) => {
-              const meta = parseMeta(log.metadata);
-              return (
-                <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                  <td
-                    className="whitespace-nowrap py-4 pl-4 pr-3 align-top"
-                    style={{ ...FONT_STYLE, minWidth: 130 }}
-                  >
-                    {formatDate(log.createdAt)}
-                  </td>
-                  <td
-                    className="px-3 py-4 align-top max-w-[200px]"
-                    style={{ ...FONT_STYLE, fontWeight: 400 }}
-                  >
-                    <span className="line-clamp-2 text-gray-700 text-xs">
-                      {meta.prompt || "—"}
-                    </span>
-                  </td>
-                  <td
-                    className="px-3 py-4 align-top max-w-[280px]"
-                    style={{ ...FONT_STYLE, fontWeight: 400 }}
-                  >
-                    <span className="line-clamp-3 text-gray-500 text-xs">
-                      {meta.responsePreview || "—"}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 align-top">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${tab.bgLight} ${tab.borderColor} border`}
-                      style={{ color: "#4f46e5" }}
-                    >
-                      <Zap className="w-3 h-3" />
-                      {log.tokensUsed}
-                    </span>
-                  </td>
-                  <td className="px-3 py-4 align-top text-center">
-                    {meta.hasImage ? (
-                      <span title={meta.fileName ?? "image"}>
-                        <ImageIcon className="w-4 h-4 text-gray-400 mx-auto" />
-                      </span>
-                    ) : (
-                      <span className="text-gray-300 text-xs">—</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
+          <tbody className="divide-y divide-gray-100">{children}</tbody>
         </table>
       </div>
     </div>
   );
 }
 
+function EmptyState({ label }: { label: string }) {
+  return (
+    <div className="text-center py-16 text-gray-400">
+      <Clock className="w-10 h-10 mx-auto mb-3 opacity-40" />
+      <p style={FONT}>{label}</p>
+    </div>
+  );
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
 export default function ActivityHistoryClient({
   chefLogs,
   nutritionistLogs,
@@ -196,11 +374,7 @@ export default function ActivityHistoryClient({
     tracker: trackerLogs.length,
   };
 
-  const tokensByTab: Record<TabId, number> = {
-    chef: 0,
-    nutritionist: 0,
-    tracker: 0,
-  };
+  const tokensByTab: Record<TabId, number> = { chef: 0, nutritionist: 0, tracker: 0 };
   stats.byTool.forEach((t) => {
     const tab = TOOL_STAT_MAP[t.toolId];
     if (tab) tokensByTab[tab] = t.tokensUsed;
@@ -229,7 +403,7 @@ export default function ActivityHistoryClient({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 flex-wrap border-b border-gray-200 pb-0">
+      <div className="flex gap-0 flex-wrap border-b border-gray-200">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -240,11 +414,9 @@ export default function ActivityHistoryClient({
                 ? "border-violet-600 text-violet-700"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
-            style={{ fontFamily: FONT_STYLE.fontFamily }}
+            style={{ fontFamily: FONT.fontFamily }}
           >
-            <div
-              className={`bg-gradient-to-r ${tab.gradient} p-1 rounded-full`}
-            >
+            <div className={`bg-gradient-to-r ${tab.gradient} p-1 rounded-full`}>
               <tab.icon className="w-3 h-3 text-white" />
             </div>
             {tab.label}
@@ -261,28 +433,14 @@ export default function ActivityHistoryClient({
         ))}
       </div>
 
-      {/* Table per tab */}
-      {activeTab === "chef" && (
-        <LogTable
-          logs={chefLogs}
-          tab={TABS[0]}
-          emptyLabel="No Chef requests yet — try generating a recipe!"
-        />
-      )}
-      {activeTab === "nutritionist" && (
-        <LogTable
-          logs={nutritionistLogs}
-          tab={TABS[1]}
-          emptyLabel="No Nutritionist requests yet — try a nutrition analysis!"
-        />
-      )}
-      {activeTab === "tracker" && (
-        <LogTable
-          logs={trackerLogs}
-          tab={TABS[2]}
-          emptyLabel="No Tracker requests yet — start tracking your meals!"
-        />
-      )}
+      {/* Hint */}
+      <p className="text-xs text-gray-400" style={{ fontFamily: FONT.fontFamily }}>
+        Click any row to expand the full response
+      </p>
+
+      {activeTab === "chef" && <ChefTable logs={chefLogs} tab={TABS[0]} />}
+      {activeTab === "nutritionist" && <NutritionistTable logs={nutritionistLogs} tab={TABS[1]} />}
+      {activeTab === "tracker" && <TrackerTable logs={trackerLogs} tab={TABS[2]} />}
     </div>
   );
 }

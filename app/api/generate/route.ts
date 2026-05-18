@@ -260,30 +260,73 @@ export async function POST(req: NextRequest) {
         };
 
         const promptText: string = payload.content || payload.message || '';
-        const responsePreview: string = text.slice(0, 300);
         const hasImage = !!file;
         const fileName: string | undefined = file?.name;
+
+        // Try to parse N8N JSON response: { dish, kcal, prot, fat, carb, recipe/analysis/report }
+        let n8nJson: Record<string, unknown> = {};
+        try {
+          const parsed = JSON.parse(text);
+          // N8N may return an array with one object
+          n8nJson = Array.isArray(parsed) ? (parsed[0] ?? {}) : parsed;
+        } catch {
+          // Plain text response — store as-is
+        }
+
+        const dish = typeof n8nJson.dish === 'string' ? n8nJson.dish : undefined;
+        const kcal = typeof n8nJson.kcal === 'number' ? n8nJson.kcal : undefined;
+        const protein = typeof n8nJson.prot === 'number' ? n8nJson.prot : undefined;
+        const fat = typeof n8nJson.fat === 'number' ? n8nJson.fat : undefined;
+        const carbs = typeof n8nJson.carb === 'number' ? n8nJson.carb : undefined;
 
         let productMetadata: ChefMetadata | NutritionistMetadata | TrackerMetadata;
 
         if (toolId === 'master-chef') {
+          const recipeText = typeof n8nJson.recipe === 'string'
+            ? n8nJson.recipe
+            : text;
           productMetadata = {
+            recipeName: dish,
+            kcal,
+            protein,
+            fat,
+            carbs,
             prompt: promptText,
-            responsePreview,
+            recipeText,
             hasImage,
             fileName,
           } satisfies ChefMetadata;
         } else if (toolId === 'master-nutritionist') {
+          const analysisText = typeof n8nJson.analysis === 'string'
+            ? n8nJson.analysis
+            : typeof n8nJson.recipe === 'string'
+            ? n8nJson.recipe
+            : text;
           productMetadata = {
+            dishName: dish,
+            kcal,
+            protein,
+            fat,
+            carbs,
             prompt: promptText,
-            responsePreview,
+            analysisText,
             hasImage,
             fileName,
           } satisfies NutritionistMetadata;
         } else {
+          const reportText = typeof n8nJson.report === 'string'
+            ? n8nJson.report
+            : typeof n8nJson.recipe === 'string'
+            ? n8nJson.recipe
+            : text;
           productMetadata = {
+            dishName: dish,
+            kcal,
+            protein,
+            fat,
+            carbs,
             prompt: promptText,
-            responsePreview,
+            reportText,
             hasImage,
             fileName,
           } satisfies TrackerMetadata;

@@ -7,38 +7,41 @@ export type ActivityAction =
   | "cal_track"
   | "meal_plan";
 
-// Your Own Chef
+// Your Own Chef — parsed from N8N JSON { dish, kcal, prot, fat, carb, recipe }
 export type ChefMetadata = {
-  recipeName?: string;
-  cuisine?: string;
-  portionSize?: string;
-  mainIngredients?: string[];
-  estimatedCalories?: number;
-  prompt?: string;
-  responsePreview?: string;
-  hasImage?: boolean;
-  fileName?: string;
-};
-
-// Your Own Nutritionist
-export type NutritionistMetadata = {
-  analysisType?: string;
-  estimatedCalories?: number;
-  protein?: number;
-  carbs?: number;
+  recipeName?: string;    // dish
+  kcal?: number;
+  protein?: number;       // prot
   fat?: number;
+  carbs?: number;         // carb
   prompt?: string;
-  responsePreview?: string;
+  recipeText?: string;    // full recipe markdown from N8N
   hasImage?: boolean;
   fileName?: string;
 };
 
-// Your Own Tracker
-export type TrackerMetadata = {
-  mealType?: string;
-  totalCalories?: number;
+// Your Own Nutritionist — parsed from N8N JSON { dish, kcal, prot, fat, carb, analysis }
+export type NutritionistMetadata = {
+  dishName?: string;
+  kcal?: number;
+  protein?: number;
+  fat?: number;
+  carbs?: number;
   prompt?: string;
-  responsePreview?: string;
+  analysisText?: string;  // full analysis markdown from N8N
+  hasImage?: boolean;
+  fileName?: string;
+};
+
+// Your Own Tracker — parsed from N8N JSON { dish, kcal, prot, fat, carb, report }
+export type TrackerMetadata = {
+  dishName?: string;
+  kcal?: number;
+  protein?: number;
+  fat?: number;
+  carbs?: number;
+  prompt?: string;
+  reportText?: string;    // full tracker report markdown from N8N
   hasImage?: boolean;
   fileName?: string;
 };
