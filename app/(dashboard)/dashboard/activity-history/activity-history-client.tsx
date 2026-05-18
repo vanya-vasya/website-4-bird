@@ -89,7 +89,7 @@ type TrackerMeta = {
   fileName?: string;
 };
 
-const parseMeta = <T>(raw: unknown): T =>
+const parseMeta = <T,>(raw: unknown): T =>
   raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as T) : ({} as T);
 
 const fmt = (d: Date) =>
