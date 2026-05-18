@@ -259,7 +259,16 @@ export async function POST(req: NextRequest) {
           'cal-tracker': 'cal_track',
         };
 
-        const promptText: string = payload.content || payload.message || '';
+        // payload.content can be a string or an object { role, content, sessionId, ... }
+        const rawContent = payload.content || payload.message;
+        const promptText: string =
+          typeof rawContent === 'string'
+            ? rawContent
+            : typeof rawContent === 'object' && rawContent?.content
+            ? String(rawContent.content)
+            : typeof rawContent === 'object' && rawContent?.text
+            ? String(rawContent.text)
+            : '';
         const hasImage = !!file;
         const fileName: string | undefined = file?.name;
 

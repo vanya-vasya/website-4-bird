@@ -104,6 +104,17 @@ type TrackerMeta = {
 const parseMeta = <T,>(raw: unknown): T =>
   raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as T) : ({} as T);
 
+// Guard: prompt stored in old records may be an object { role, content, ... }
+const safePrompt = (p: unknown): string => {
+  if (typeof p === "string") return p;
+  if (p && typeof p === "object") {
+    const o = p as Record<string, unknown>;
+    if (typeof o.content === "string") return o.content;
+    if (typeof o.text === "string") return o.text;
+  }
+  return "";
+};
+
 const fmt = (d: string) =>
   new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
@@ -170,7 +181,9 @@ function ExpandableRow({
             {title || titleFallback}
           </p>
           {prompt && (
-            <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{prompt}</p>
+            <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
+              {safePrompt(prompt)}
+            </p>
           )}
         </td>
 
