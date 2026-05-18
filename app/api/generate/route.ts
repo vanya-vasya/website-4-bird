@@ -273,14 +273,45 @@ export async function POST(req: NextRequest) {
         const fileName: string | undefined = file?.name;
 
         // Try to parse N8N JSON response: { dish, kcal, prot, fat, carb, recipe/analysis/report }
+        // Nutritionist/Tracker may return { output: "stringified JSON { summary, sections }" }
         let n8nJson: Record<string, unknown> = {};
         try {
           const parsed = JSON.parse(text);
           // N8N may return an array with one object
-          n8nJson = Array.isArray(parsed) ? (parsed[0] ?? {}) : parsed;
+          n8nJson = Array.isArray(parsed) ? (parsed[0] ?? {}) : (parsed as Record<string, unknown>);
         } catch {
           // Plain text response — store as-is
         }
+
+        // Helper: extract human-readable text from N8N { output: "..." } wrapper
+        const extractOutputText = (raw: unknown): string => {
+          if (typeof raw !== 'string') return typeof raw === 'object' ? JSON.stringify(raw) : String(raw ?? '');
+          try {
+            const parsed = JSON.parse(raw);
+            // double-stringified: parsed is itself a JSON string
+            if (typeof parsed === 'string') return extractOutputText(parsed);
+            // structured { summary, sections[] }
+            if (parsed && typeof parsed === 'object') {
+              const p = parsed as Record<string, unknown>;
+              if (typeof p.summary === 'string') {
+                let out = p.summary + '\n\n';
+                if (Array.isArray(p.sections)) {
+                  for (const s of p.sections as Record<string, unknown>[]) {
+                    if (s.title) out += `${s.title}\n`;
+                    if (Array.isArray(s.items)) out += (s.items as string[]).map(i => `• ${i}`).join('\n') + '\n';
+                    if (typeof s.content === 'string') out += s.content + '\n';
+                    out += '\n';
+                  }
+                }
+                return out.trim();
+              }
+              return JSON.stringify(parsed, null, 2);
+            }
+          } catch {
+            // not JSON, return as-is
+          }
+          return raw;
+        };
 
         const dish = typeof n8nJson.dish === 'string' ? n8nJson.dish : undefined;
         const kcal = typeof n8nJson.kcal === 'number' ? n8nJson.kcal : undefined;
@@ -293,6 +324,8 @@ export async function POST(req: NextRequest) {
         if (toolId === 'master-chef') {
           const recipeText = typeof n8nJson.recipe === 'string'
             ? n8nJson.recipe
+            : typeof n8nJson.output === 'string'
+            ? extractOutputText(n8nJson.output)
             : text;
           productMetadata = {
             recipeName: dish,
@@ -310,6 +343,8 @@ export async function POST(req: NextRequest) {
             ? n8nJson.analysis
             : typeof n8nJson.recipe === 'string'
             ? n8nJson.recipe
+            : typeof n8nJson.output === 'string'
+            ? extractOutputText(n8nJson.output)
             : text;
           productMetadata = {
             dishName: dish,
@@ -327,6 +362,8 @@ export async function POST(req: NextRequest) {
             ? n8nJson.report
             : typeof n8nJson.recipe === 'string'
             ? n8nJson.recipe
+            : typeof n8nJson.output === 'string'
+            ? extractOutputText(n8nJson.output)
             : text;
           productMetadata = {
             dishName: dish,

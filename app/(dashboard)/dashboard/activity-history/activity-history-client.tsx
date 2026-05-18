@@ -115,6 +115,49 @@ const safePrompt = (p: unknown): string => {
   return "";
 };
 
+// Extract readable text from nested/double-stringified JSON
+// Handles: { output: "{\"summary\":\"...\",\"sections\":[...]}" }
+const extractReadable = (raw: unknown): string | undefined => {
+  if (typeof raw !== "string") return undefined;
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === "string") return extractReadable(parsed); // double-stringified
+    if (parsed && typeof parsed === "object") {
+      const p = parsed as Record<string, unknown>;
+      // { output: "..." } wrapper
+      if (typeof p.output === "string") return extractReadable(p.output);
+      // { summary, sections[] } structure
+      if (typeof p.summary === "string") {
+        let out = p.summary + "\n\n";
+        if (Array.isArray(p.sections)) {
+          for (const s of p.sections as Record<string, unknown>[]) {
+            if (s.title) out += `${s.title}\n`;
+            if (Array.isArray(s.items)) out += (s.items as string[]).map((i) => `• ${i}`).join("\n") + "\n";
+            if (typeof s.content === "string") out += s.content + "\n";
+            out += "\n";
+          }
+        }
+        return out.trim();
+      }
+    }
+  } catch {
+    // not JSON — return as plain text
+  }
+  return raw;
+};
+
+// Parse old ChefLog responsePreview: "{\"dish\":\"...\",\"kcal\":...,\"recipe\":\"...\"}"
+type ChefPreview = { dish?: string; kcal?: number; prot?: number; fat?: number; carb?: number; recipe?: string };
+const parseChefPreview = (meta: Record<string, unknown> | null): ChefPreview | null => {
+  const rp = meta?.responsePreview;
+  if (typeof rp !== "string") return null;
+  try {
+    return JSON.parse(rp) as ChefPreview;
+  } catch {
+    return null;
+  }
+};
+
 const fmt = (d: string) =>
   new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
@@ -261,17 +304,19 @@ function ChefTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof TABS)[nu
     <TableShell>
       {logs.map((log) => {
         const m = parseMeta<ChefMeta>(log.metadata);
+        // Old records store data in responsePreview JSON string
+        const preview = parseChefPreview(log.metadata);
         return (
           <ExpandableRow
             key={log.id}
             date={log.createdAt}
-            title={m.recipeName}
+            title={m.recipeName ?? preview?.dish}
             titleFallback="Recipe"
-            kcal={m.kcal}
-            protein={m.protein}
-            fat={m.fat}
-            carbs={m.carbs}
-            bodyText={m.recipeText}
+            kcal={m.kcal ?? preview?.kcal}
+            protein={m.protein ?? preview?.prot}
+            fat={m.fat ?? preview?.fat}
+            carbs={m.carbs ?? preview?.carb}
+            bodyText={m.recipeText ?? preview?.recipe}
             prompt={m.prompt}
             tokensUsed={log.tokensUsed}
             hasImage={m.hasImage}
@@ -291,6 +336,8 @@ function NutritionistTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof 
     <TableShell>
       {logs.map((log) => {
         const m = parseMeta<NutritionistMeta>(log.metadata);
+        // analysisText in old records may be double-encoded JSON { output: "{summary, sections}" }
+        const analysisText = extractReadable(m.analysisText);
         return (
           <ExpandableRow
             key={log.id}
@@ -301,7 +348,7 @@ function NutritionistTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof 
             protein={m.protein}
             fat={m.fat}
             carbs={m.carbs}
-            bodyText={m.analysisText}
+            bodyText={analysisText}
             prompt={m.prompt}
             tokensUsed={log.tokensUsed}
             hasImage={m.hasImage}
@@ -321,6 +368,7 @@ function TrackerTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof TABS)
     <TableShell>
       {logs.map((log) => {
         const m = parseMeta<TrackerMeta>(log.metadata);
+        const reportText = extractReadable(m.reportText);
         return (
           <ExpandableRow
             key={log.id}
@@ -331,7 +379,7 @@ function TrackerTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof TABS)
             protein={m.protein}
             fat={m.fat}
             carbs={m.carbs}
-            bodyText={m.reportText}
+            bodyText={reportText}
             prompt={m.prompt}
             tokensUsed={log.tokensUsed}
             hasImage={m.hasImage}
