@@ -1,4 +1,5 @@
 import prismadb from "@/lib/prismadb";
+import { Prisma } from "@prisma/client";
 
 export type ActivityAction =
   | "recipe_generate"
@@ -11,7 +12,7 @@ export type ActivityMetadata = {
   responseLength?: number;
   hasImage?: boolean;
   fileName?: string;
-  [key: string]: unknown;
+  [key: string]: string | number | boolean | null | undefined;
 };
 
 export const logActivity = async ({
@@ -37,7 +38,7 @@ export const logActivity = async ({
         toolId,
         toolName,
         tokensUsed,
-        metadata: metadata ?? {},
+        metadata: (metadata ?? {}) as Prisma.InputJsonValue,
       },
     });
   } catch (error) {
