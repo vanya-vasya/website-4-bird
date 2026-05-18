@@ -368,7 +368,6 @@ function TrackerTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof TABS)
     <TableShell>
       {logs.map((log) => {
         const m = parseMeta<TrackerMeta>(log.metadata);
-        const reportText = extractReadable(m.reportText);
         return (
           <ExpandableRow
             key={log.id}
@@ -379,7 +378,7 @@ function TrackerTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof TABS)
             protein={m.protein}
             fat={m.fat}
             carbs={m.carbs}
-            bodyText={reportText}
+            bodyText={undefined}
             prompt={m.prompt}
             tokensUsed={log.tokensUsed}
             hasImage={m.hasImage}
