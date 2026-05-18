@@ -45,7 +45,7 @@ const ActivityHistoryPage = async () => {
   return (
     <div className="bg-white">
       <FeatureContainer
-        title="Activity History"
+        title="Activities"
         description="All your AI requests in one place — tokens spent, tools used, and usage patterns"
         iconName="History"
         gradient="from-violet-400 via-purple-500 to-indigo-600"

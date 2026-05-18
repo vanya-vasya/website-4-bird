@@ -33,11 +33,11 @@ const routes = [
     href: "/contact",
   },
   {
-    name: "Payment History",
+    name: "Payments",
     href: "/dashboard/billing/payment-history",
   },
   {
-    name: "Activity History",
+    name: "Activities",
     href: "/dashboard/activity-history",
   },
 ];
@@ -103,7 +103,7 @@ const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }
                 className="nav-link"
                 aria-label={`Navigate to ${route.name}`}
                 onClick={() => {
-                  if (route.name === 'Payment History') {
+                  if (route.name === 'Payments') {
                     PaymentHistoryAnalytics.clickPaymentHistoryLink('dashboard_header');
                   }
                 }}

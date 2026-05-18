@@ -16,7 +16,7 @@ import { ProductIcon } from "@/components/shared/ProductIcon";
 
 const routes = [
   {
-    name: "Our Story",
+    name: "Story",
     href: "/story",
   },
   {

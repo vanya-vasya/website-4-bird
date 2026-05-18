@@ -65,7 +65,7 @@ const productItems = [
 // Page routes matching the header
 const pageRoutes = [
   {
-    name: "Our Story",
+    name: "Story",
     href: "/story",
     icon: BookOpen,
   },
