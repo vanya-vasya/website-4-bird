@@ -2,10 +2,22 @@
 
 import { useState } from "react";
 import { Crown, Activity, Target, Zap, Clock, Image as ImageIcon, ChevronDown, ChevronUp, Flame } from "lucide-react";
-import type { ChefLog, NutritionistLog, TrackerLog } from "@prisma/client";
-import type { fetchActivityStats } from "@/lib/activity-log";
 
-type Stats = Awaited<ReturnType<typeof fetchActivityStats>>;
+// Serialized log — dates as ISO strings, metadata as plain object
+export type SerializedLog = {
+  id: string;
+  tokensUsed: number;
+  createdAt: string;
+  metadata: Record<string, unknown> | null;
+};
+
+export type SerializedStats = {
+  totalRequests: number;
+  totalTokensUsed: number;
+  byTool: { toolId: string; toolName: string; requests: number; tokensUsed: number }[];
+};
+
+type Stats = SerializedStats;
 type TabId = "chef" | "nutritionist" | "tracker";
 
 const FONT = {
@@ -92,7 +104,7 @@ type TrackerMeta = {
 const parseMeta = <T,>(raw: unknown): T =>
   raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as T) : ({} as T);
 
-const fmt = (d: Date) =>
+const fmt = (d: string) =>
   new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "2-digit",
@@ -124,7 +136,7 @@ function ExpandableRow({
   fileName,
   tab,
 }: {
-  date: Date;
+  date: string;
   title?: string;
   titleFallback: string;
   kcal?: number;
@@ -230,7 +242,7 @@ function ExpandableRow({
 }
 
 // ── Chef table ───────────────────────────────────────────────────────────────
-function ChefTable({ logs, tab }: { logs: ChefLog[]; tab: (typeof TABS)[number] }) {
+function ChefTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof TABS)[number] }) {
   if (logs.length === 0) return <EmptyState label="No Chef requests yet — try generating a recipe!" />;
   return (
     <TableShell>
@@ -260,7 +272,7 @@ function ChefTable({ logs, tab }: { logs: ChefLog[]; tab: (typeof TABS)[number] 
 }
 
 // ── Nutritionist table ───────────────────────────────────────────────────────
-function NutritionistTable({ logs, tab }: { logs: NutritionistLog[]; tab: (typeof TABS)[number] }) {
+function NutritionistTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof TABS)[number] }) {
   if (logs.length === 0) return <EmptyState label="No Nutritionist requests yet — try a nutrition analysis!" />;
   return (
     <TableShell>
@@ -290,7 +302,7 @@ function NutritionistTable({ logs, tab }: { logs: NutritionistLog[]; tab: (typeo
 }
 
 // ── Tracker table ────────────────────────────────────────────────────────────
-function TrackerTable({ logs, tab }: { logs: TrackerLog[]; tab: (typeof TABS)[number] }) {
+function TrackerTable({ logs, tab }: { logs: SerializedLog[]; tab: (typeof TABS)[number] }) {
   if (logs.length === 0) return <EmptyState label="No Tracker requests yet — start tracking your meals!" />;
   return (
     <TableShell>
@@ -361,9 +373,9 @@ export default function ActivityHistoryClient({
   trackerLogs,
   stats,
 }: {
-  chefLogs: ChefLog[];
-  nutritionistLogs: NutritionistLog[];
-  trackerLogs: TrackerLog[];
+  chefLogs: SerializedLog[];
+  nutritionistLogs: SerializedLog[];
+  trackerLogs: SerializedLog[];
   stats: Stats;
 }) {
   const [activeTab, setActiveTab] = useState<TabId>("chef");
