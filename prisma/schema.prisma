@@ -9,16 +9,64 @@ datasource db {
 }
 
 model User {
-  id                   String        @id @default(cuid())
-  clerkId              String        @unique
-  email                String        @unique
+  id                   String            @id @default(cuid())
+  clerkId              String            @unique
+  email                String            @unique
   photo                String
   firstName            String?
   lastName             String?
-  usedGenerations      Int           @default(0)
-  availableGenerations Int           @default(20)
+  usedGenerations      Int               @default(0)
+  availableGenerations Int               @default(20)
   transactions         Transaction[]
   activityLogs         ActivityLog[]
+  chefLogs             ChefLog[]
+  nutritionistLogs     NutritionistLog[]
+  trackerLogs          TrackerLog[]
+}
+
+// Your Own Chef — recipe generation logs
+model ChefLog {
+  id            String   @id @default(cuid())
+  userId        String
+  activityLogId String?  @unique
+  tokensUsed    Int      @default(0)
+  // metadata: { recipeName, cuisine, portionSize, mainIngredients, estimatedCalories, prompt, responsePreview }
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [clerkId])
+
+  @@index([userId, createdAt])
+}
+
+// Your Own Nutritionist — nutrition analysis logs
+model NutritionistLog {
+  id            String   @id @default(cuid())
+  userId        String
+  activityLogId String?  @unique
+  tokensUsed    Int      @default(0)
+  // metadata: { analysisType, estimatedCalories, protein, carbs, fat, prompt, responsePreview }
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [clerkId])
+
+  @@index([userId, createdAt])
+}
+
+// Your Own Tracker — calorie tracking logs
+model TrackerLog {
+  id            String   @id @default(cuid())
+  userId        String
+  activityLogId String?  @unique
+  tokensUsed    Int      @default(0)
+  // metadata: { mealType, totalCalories, hasImage, fileName, prompt, responsePreview }
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [clerkId])
+
+  @@index([userId, createdAt])
 }
 
 model ActivityLog {

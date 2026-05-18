@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import prismadb from '@/lib/prismadb';
-import { logActivity, type ActivityAction } from '@/lib/activity-log';
+import {
+  logActivity,
+  type ActivityAction,
+  type ChefMetadata,
+  type NutritionistMetadata,
+  type TrackerMetadata,
+} from '@/lib/activity-log';
 
 // Tool pricing configuration in GBP pence (100 pence = £1.00)
 // Conversion: 1 token = £0.20, so 5 tokens = £1, 10 tokens = £2, 15 tokens = £3
@@ -252,18 +258,44 @@ export async function POST(req: NextRequest) {
           'master-nutritionist': 'nutrition_analyze',
           'cal-tracker': 'cal_track',
         };
+
+        const promptText: string = payload.content || payload.message || '';
+        const responsePreview: string = text.slice(0, 300);
+        const hasImage = !!file;
+        const fileName: string | undefined = file?.name;
+
+        let productMetadata: ChefMetadata | NutritionistMetadata | TrackerMetadata;
+
+        if (toolId === 'master-chef') {
+          productMetadata = {
+            prompt: promptText,
+            responsePreview,
+            hasImage,
+            fileName,
+          } satisfies ChefMetadata;
+        } else if (toolId === 'master-nutritionist') {
+          productMetadata = {
+            prompt: promptText,
+            responsePreview,
+            hasImage,
+            fileName,
+          } satisfies NutritionistMetadata;
+        } else {
+          productMetadata = {
+            prompt: promptText,
+            responsePreview,
+            hasImage,
+            fileName,
+          } satisfies TrackerMetadata;
+        }
+
         await logActivity({
           userId,
           action: ACTION_MAP[toolId] ?? 'recipe_generate',
           toolId,
           toolName,
           tokensUsed: toolPriceTokens,
-          metadata: {
-            prompt: payload.content || payload.message || undefined,
-            hasImage: !!file,
-            fileName: file?.name,
-            responseLength: text.length,
-          },
+          metadata: productMetadata,
         });
       } catch (dbError) {
         console.error(`[API_GENERATE:${correlationId}] ⚠️ Failed to deduct credits (AI generation succeeded but DB write failed):`, {
