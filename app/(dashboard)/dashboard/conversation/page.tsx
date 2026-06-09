@@ -23,7 +23,7 @@ import { ImageUpload } from "@/components/image-upload";
 import { inputStyles, buttonStyles, contentStyles, messageStyles, loadingStyles } from "@/components/ui/feature-styles";
 import { Activity, Target, AlertCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { RecipeCard } from "@/components/RecipeCard";
+import { RecipeCard, type Recipe } from "@/components/RecipeCard";
 import { FriendlyResponseCard } from "@/components/FriendlyResponseCard";
 import { NutritionistReportCard } from "@/components/NutritionistReportCard";
 import { CalTrackerNutritionCard } from "@/components/CalTrackerNutritionCard";
@@ -46,15 +46,7 @@ type ChatCompletionRequestMessage = {
   nutritionReport?: NutritionReport; // Structured JSON report from N8N
 };
 
-// Recipe type for structured recipe responses
-type Recipe = {
-  dish: string;
-  kcal: number;
-  prot: number;
-  fat: number;
-  carb: number;
-  recipe: string; // markdown
-};
+// Recipe type is imported from RecipeCard component
 
 // Nutrition data type for Your Own Tracker responses
 type NutritionData = {
@@ -96,27 +88,25 @@ const parseNutritionResponse = (response: string): { text: string; nutrition?: N
 // Helper function to parse JSON response and extract recipe data
 const parseRecipeResponse = (response: string): { text: string; recipe?: Recipe } => {
   try {
-    // Try to parse as JSON first
     const parsed = JSON.parse(response);
-    
-    // Check if it's a recipe object with required fields
-    if (parsed && typeof parsed === 'object' && 
-        parsed.dish && 
-        typeof parsed.kcal === 'number' && 
-        typeof parsed.prot === 'number' && 
-        typeof parsed.fat === 'number' && 
-        typeof parsed.carb === 'number' && 
-        parsed.recipe) {
+
+    // Must have dish name and recipe text; numeric fields can be null
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      typeof parsed.dish === "string" &&
+      parsed.dish &&
+      typeof parsed.recipe === "string" &&
+      parsed.recipe
+    ) {
       return {
-        text: response, // Keep original JSON as text fallback
-        recipe: parsed as Recipe
+        text: response,
+        recipe: parsed as Recipe,
       };
     }
-    
-    // If it's JSON but not a recipe format, return as text
-    return { text: typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2) };
-  } catch (error) {
-    // Not valid JSON, return as plain text
+
+    return { text: typeof parsed === "string" ? parsed : JSON.stringify(parsed, null, 2) };
+  } catch {
     return { text: response };
   }
 };
