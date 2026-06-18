@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
@@ -5,11 +6,7 @@ import { OpenAI } from "openai";
 import { incrementApiLimit, checkApiLimit } from "@/lib/api-limit";
 import { MODEL_GENERATIONS_PRICE } from "@/constants";
 
-const configuration = {
-  apiKey: process.env.OPEN_API_KEY,
-};
-
-const openai = new OpenAI(configuration);
+// Client initialized lazily inside handler
 
 export const maxDuration = 60;
 
@@ -27,7 +24,7 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!configuration.apiKey) {
+    if (!process.env.OPEN_API_KEY) {
       return new NextResponse("OpenAI API Key not configured.", {
         status: 500,
       });
@@ -56,6 +53,7 @@ export async function POST(req: Request) {
     const enhancedPrompt = `Transform the provided reference image in the style of ${prompt}. Maintain the original composition and subject matter, but apply the artistic style transformation. Make it look like ${prompt}.`;
 
     // Вызываем API с моделью gpt-image-1 для создания изображения по референсу
+    const openai = new OpenAI({ apiKey: process.env.OPEN_API_KEY });
     // Документация: https://platform.openai.com/docs/guides/image-generation?image-generation-model=gpt-image-1
     const response = await openai.images.generate({
       prompt: enhancedPrompt,

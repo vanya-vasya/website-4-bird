@@ -42,7 +42,7 @@ const ActivitiesPage = () => (
   <>
     <section className="border-b border-line bg-sand">
       <Container className="py-16 lg:py-20">
-        <Eyebrow>// ACTIVITIES</Eyebrow>
+        <Eyebrow>{"// ACTIVITIES"}</Eyebrow>
         <h1 className="mt-4 max-w-2xl font-heading text-h1 font-medium text-ink">
           A clear record of everything.
         </h1>
@@ -57,7 +57,7 @@ const ActivitiesPage = () => (
     <Section tone="surface">
       <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-start">
         <div>
-          <Eyebrow>// WHAT YOU CAN TRACK</Eyebrow>
+          <Eyebrow>{"// WHAT YOU CAN TRACK"}</Eyebrow>
           <h2 className="mt-4 font-heading text-h2 font-medium text-ink">
             Four kinds of activity, one feed.
           </h2>
@@ -85,7 +85,7 @@ const ActivitiesPage = () => (
 
         <div>
           <p className="mb-4 font-mono text-eyebrow uppercase text-green">
-            // SAMPLE TIMELINE
+            {"// SAMPLE TIMELINE"}
           </p>
           <ActivityTimeline items={mockActivities} />
         </div>

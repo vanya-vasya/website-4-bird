@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { Settings } from "lucide-react";
 
 import { Heading } from "@/components/heading";

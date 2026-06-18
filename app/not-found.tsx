@@ -1,22 +1,20 @@
 import Footer from '@/components/landing/footer'
 import Header from '@/components/landing/header'
-import { Empty } from '@/components/ui/empty'
-import { cn } from '@/lib/utils'
-import { Nunito } from 'next/font/google'
- 
-// Указываем правильные веса, например, 400 и 700
-const nunito = Nunito({
-  subsets: ['latin'], // Указываем подмножество латиницы
-  weight: ['400'], // Указываем допустимые веса
-  display: 'swap', // Для улучшенной загрузки шрифта
-});
+import { Button } from '@/components/fastbird'
 
 export default function NotFound() {
   return (
-    <main className={cn("bg-white text-[#A1AAC9] overflow-x-hidden h-full flex flex-col justify-between", nunito.className)}>
-    <Header/>
-      <Empty label="Page not found." />
-    <Footer/> 
-</main>
+    <main className="flex min-h-screen flex-col bg-surface text-ink">
+      <Header />
+      <div className="flex flex-1 flex-col items-center justify-center gap-6 py-24 text-center">
+        <p className="font-mono text-eyebrow uppercase text-green">// 404</p>
+        <h1 className="font-heading text-h1 font-medium text-ink">Page not found.</h1>
+        <p className="max-w-md text-[15px] text-ink-soft">
+          That page doesn&apos;t exist — but there&apos;s plenty of data waiting wherever you&apos;re headed.
+        </p>
+        <Button href="/" variant="primary" size="md">Back to home</Button>
+      </div>
+      <Footer />
+    </main>
   )
 }

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Replicate from "replicate";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
@@ -5,9 +6,7 @@ import { NextResponse } from "next/server";
 import { incrementApiLimit, checkApiLimit } from "@/lib/api-limit";
 import { MODEL_GENERATIONS_PRICE } from "@/constants";
 
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN!,
-});
+// Client initialized lazily inside handler to avoid build-time errors
 
 export const maxDuration = 60;
 
@@ -35,6 +34,8 @@ export async function POST(req: Request) {
         { status: 403 }
       );
     }
+
+    const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! });
     const response = await replicate.run(
       "adirik/styletts2:989cb5ea6d2401314eb30685740cb9f6fd1c9001b8940659b406f952837ab5ac",
       {

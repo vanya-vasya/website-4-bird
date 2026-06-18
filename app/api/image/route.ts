@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
@@ -6,11 +7,7 @@ import { OpenAI } from "openai";
 import { incrementApiLimit, checkApiLimit } from "@/lib/api-limit";
 import { MODEL_GENERATIONS_PRICE } from "@/constants";
 
-const configuration = {
-  apiKey: process.env.OPEN_API_KEY,
-};
-
-const openai = new OpenAI(configuration);
+// Client initialized lazily inside handler
 
 export const maxDuration = 60;
 
@@ -29,10 +26,8 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!configuration.apiKey) {
-      return new NextResponse("OpenAI API Key not configured.", {
-        status: 500,
-      });
+    if (!process.env.OPEN_API_KEY) {
+      return new NextResponse("OpenAI API Key not configured.", { status: 500 });
     }
 
     if (!prompt) {
@@ -58,6 +53,7 @@ export async function POST(req: Request) {
       );
     }
 
+    const openai = new OpenAI({ apiKey: process.env.OPEN_API_KEY });
     const response = await openai.images.generate({
       prompt,
       n: parseInt(amount, 10),

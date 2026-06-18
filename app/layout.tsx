@@ -18,6 +18,8 @@ const newsreader = Newsreader({
   style: ["normal", "italic"],
   variable: "--font-newsreader",
   display: "swap",
+  // Next.js doesn't have size-adjust overrides for Newsreader yet — suppress the warning
+  adjustFontFallback: false,
 });
 
 const plexSans = IBM_Plex_Sans({

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
@@ -5,17 +6,11 @@ import OpenAI from "openai";
 import { incrementApiLimit, checkApiLimit } from "@/lib/api-limit";
 import { MODEL_GENERATIONS_PRICE } from "@/constants";
 
-const configuration = {
-  apiKey: process.env.OPEN_API_KEY,
-};
-
 const instructionMessage = {
   role: "system",
   content:
     "You are a code generator. You must answer only in markdown code snippets. Use code comments for explanations.",
 };
-
-const openai = new OpenAI(configuration);
 
 export const maxDuration = 60;
 
@@ -29,11 +24,11 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!configuration.apiKey) {
-      return new NextResponse("OpenAI API Key not configured.", {
-        status: 500,
-      });
+    if (!process.env.OPEN_API_KEY) {
+      return new NextResponse("OpenAI API Key not configured.", { status: 500 });
     }
+
+    const openai = new OpenAI({ apiKey: process.env.OPEN_API_KEY });
 
     if (!messages) {
       return new NextResponse("Messages are required", { status: 400 });

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Replicate from "replicate";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
@@ -5,9 +6,7 @@ import { NextResponse } from "next/server";
 import { incrementApiLimit, checkApiLimit } from "@/lib/api-limit";
 import { MODEL_GENERATIONS_PRICE } from "@/constants";
 
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN!,
-});
+// Client initialized lazily inside handler
 
 export const maxDuration = 60;
 
@@ -35,6 +34,7 @@ export async function POST(req: Request) {
       );
     }
 
+    const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! });
     const response = await replicate.run(
       "meta/musicgen:671ac645ce5e552cc63a54a2bbff63fcf798043055d2dac5fc9e36a837eedcfb",
       {
