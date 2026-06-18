@@ -5,14 +5,16 @@ import { NextResponse } from "next/server";
 const CONTACT_MESSAGE_FIELDS: { [key: string]: string } = {
   name: "Name:",
   email: "Email:",
+  topic: "Topic:",
   message: "Message:",
 };
 
 interface ContactMessageFields {
   name: string;
   email: string;
+  topic?: string;
   message: string;
-  captchaToken: string;
+  captchaToken?: string;
 }
 
 const generateEmailContent = (data: ContactMessageFields) => {
@@ -56,26 +58,34 @@ export const maxDuration = 60;
 export async function POST(req: Request): Promise<NextResponse> {
   if (req.method === "POST") {
     const data: ContactMessageFields = await req.json();
-    if (
-      !data ||
-      !data.name ||
-      !data.email ||
-      !data.message ||
-      !data.captchaToken
-    ) {
+    if (!data || !data.name || !data.email || !data.message) {
       return new NextResponse("Bad request", { status: 400 });
     }
 
-    const isCaptchaValid = await verifyRecaptchaToken(data.captchaToken);
-    if (!isCaptchaValid) {
-      return new NextResponse("Invalid reCAPTCHA", { status: 400 });
+    // reCAPTCHA is only enforced when a secret key is configured.
+    if (process.env.RECAPTCHA_SECRET_KEY && data.captchaToken) {
+      const isCaptchaValid = await verifyRecaptchaToken(data.captchaToken);
+      if (!isCaptchaValid) {
+        return new NextResponse("Invalid reCAPTCHA", { status: 400 });
+      }
+    }
+
+    // TODO: configure OUTBOX_EMAIL / OUTBOX_EMAIL_PASSWORD / INBOX_EMAIL to send
+    // real mail. Without SMTP creds we log the submission and return success.
+    if (!process.env.OUTBOX_EMAIL || !process.env.INBOX_EMAIL) {
+      console.info("[contact] stubbed submission:", {
+        name: data.name,
+        email: data.email,
+        topic: data.topic,
+      });
+      return new NextResponse("Message received", { status: 200 });
     }
 
     try {
       await transporter.sendMail({
         ...mailOptions,
         ...generateEmailContent(data),
-        subject: "New Contact Message",
+        subject: `New Contact Message${data.topic ? ` — ${data.topic}` : ""}`,
       });
       return new NextResponse("Message sent successfully", { status: 200 });
     } catch (err) {

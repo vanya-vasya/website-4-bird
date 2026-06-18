@@ -1,265 +1,169 @@
 "use client";
-import Link from "next/link";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { GuestMobileSidebar } from "@/components/guest-mobile-sidebar";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { PRODUCT_ITEMS } from "@/constants/product-navigation";
-import { ProductIcon } from "@/components/shared/ProductIcon";
 
-const routes = [
-  {
-    name: "Story",
-    href: "/story",
-  },
-  {
-    name: "Pricing",
-    href: "/#pricing",
-  },
-  {
-    name: "FAQ",
-    href: "/faq",
-  },
-  {
-    name: "Contact",
-    href: "/contact",
-  },
-];
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu, X, ChevronDown, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button, Container, Logo } from "@/components/fastbird";
+import { mainNav, productsMenu } from "@/constants/nav";
 
 const Header = () => {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
+
+  const isHome = pathname === "/";
+  const transparent = isHome && !scrolled && !open;
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 16);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const linkColor = transparent
+    ? "text-on-dark/90 hover:text-on-dark"
+    : "text-ink-soft hover:text-ink";
 
   return (
-    <header className="bg-white">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between p-3 lg:px-6 gap-1">
-        <div className="flex">
-          <Link href="/" className="-m-1.5 p-1.5">
-            <Image width={"98"} height={"39"} src="/logos/yum-mi-onigiri-logo.png" alt="Yum-mi Logo"/>
-          </Link>
-        </div>
-        <div className="flex gap-x-12 ml-12">
-          <div className="nav-container-light-green">
-            <Link
-              href="/"
-              className="nav-link"
-            >
-              Home
-            </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="nav-link flex items-center gap-1 outline-none">
-                Products
-                <ChevronDown className="h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="start" 
-                className="bg-white border border-green-100 shadow-lg min-w-[240px] p-1"
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-colors duration-300",
+        transparent
+          ? "bg-transparent"
+          : "border-b border-line bg-surface/90 backdrop-blur-md"
+      )}
+    >
+      <Container className="flex h-16 items-center justify-between lg:h-18">
+        <Logo onDark={transparent} />
+
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
+          {mainNav.map((item) =>
+            item.label === "Products" ? (
+              <div
+                key={item.href}
+                className="relative"
+                onMouseEnter={() => setProductsOpen(true)}
+                onMouseLeave={() => setProductsOpen(false)}
               >
-                {PRODUCT_ITEMS.map((product) => (
-                  <DropdownMenuItem 
-                    key={product.href} 
-                    asChild
-                    className="focus:bg-transparent hover:bg-transparent data-[highlighted]:bg-transparent"
-                  >
-                    <Link 
-                      href={product.href}
-                      className="dropdown-menu-item flex items-center gap-3 w-full"
-                    >
-                      <ProductIcon 
-                        icon={product.icon}
-                        iconUrl={product.iconUrl}
-                        fallback={product.iconFallback}
-                        alt={product.label}
-                        size={20}
-                      />
-                      <span className="flex-1">{product.label}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {routes.map((route) => (
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-1 font-sans text-[15px] transition-colors fb-focus rounded-sm",
+                    linkColor
+                  )}
+                >
+                  {item.label}
+                  <ChevronDown className="h-4 w-4" aria-hidden />
+                </Link>
+                {productsOpen && (
+                  <div className="absolute left-1/2 top-full w-60 -translate-x-1/2 pt-3">
+                    <div className="overflow-hidden rounded-md border border-line bg-surface-card p-2 shadow-fb-md">
+                      {productsMenu.map((sub) => (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          className="block rounded-sm px-3 py-2 text-sm text-ink-soft transition-colors hover:bg-sand hover:text-ink fb-focus"
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
               <Link
-                key={route.name}
-                href={route.href}
-                className="nav-link"
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "font-sans text-[15px] transition-colors fb-focus rounded-sm",
+                  linkColor
+                )}
               >
-                {route.name}
+                {item.label}
               </Link>
-            ))}
-          </div>
+            )
+          )}
+        </nav>
+
+        <div className="hidden items-center gap-3 lg:flex">
+          <span
+            className={cn(
+              "flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.06em]",
+              transparent ? "text-on-dark/80" : "text-ink-soft"
+            )}
+            aria-label="Points balance"
+          >
+            <Clock className="h-3.5 w-3.5" aria-hidden />0 Points
+          </span>
+          <Link
+            href="/sign-in"
+            className={cn(
+              "font-mono text-eyebrow uppercase underline-offset-4 transition-colors hover:underline fb-focus rounded-sm",
+              transparent ? "text-on-dark" : "text-green"
+            )}
+          >
+            Log in
+          </Link>
+          <Button href="/sign-up" variant="accent" size="sm">
+            Get started
+          </Button>
         </div>
-        <div className="flex lg:flex-1 lg:justify-end">
-          <div className="flex ">
-            <ul className="main-header__login-sing-up">
-              <li>
-                <SignedIn>
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="nav-container-green">
-                      <Link
-                        href="/dashboard"
-                        className="nav-link"
-                      >
-                        Dashboard
-                      </Link>
-                    </div>
-                  </motion.div>
-                </SignedIn>
-                <SignedOut>
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="nav-container-green">
-                      <Link
-                        href="/dashboard"
-                        className="nav-link"
-                      >
-                        Begin
-                      </Link>
-                    </div>
-                  </motion.div>
-                </SignedOut>
-              </li>
-            </ul>
-          </div>
-          <GuestMobileSidebar />
+
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          className={cn(
+            "rounded-sm p-2 lg:hidden fb-focus",
+            transparent ? "text-on-dark" : "text-ink"
+          )}
+        >
+          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </Container>
+
+      {open && (
+        <div className="fixed inset-0 top-16 z-40 bg-surface lg:hidden">
+          <Container className="flex h-full flex-col py-8">
+            <nav className="flex flex-col gap-1" aria-label="Mobile">
+              {mainNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="border-b border-line py-4 font-heading text-2xl text-ink transition-colors hover:text-green"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-8 flex flex-col gap-3">
+              <Button href="/sign-up" variant="accent" size="lg">
+                Get started
+              </Button>
+              <Button href="/sign-in" variant="secondary" size="lg">
+                Log in
+              </Button>
+            </div>
+          </Container>
         </div>
-      </nav>
-
-      <style jsx global>{`
-        :root {
-          --header-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-          --header-font-size: 16px;
-          --header-text-color: #000000;
-          --nav-font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-          --contact-font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-
-        .nav-container {
-          display: flex;
-          background-color: #f8fafc;
-          border-radius: 9999px;
-          padding: 4px;
-          gap: 4px;
-        }
-
-        .nav-container-green {
-          display: flex;
-          background-color: #86efac;
-          border-radius: 9999px;
-          padding: 4px;
-          gap: 4px;
-        }
-
-        .nav-container-light-green {
-          display: flex;
-          background-color: #dcfce7;
-          border-radius: 9999px;
-          padding: 4px;
-          gap: 4px;
-        }
-
-        .nav-link {
-          font-family: var(--header-font-family);
-          font-weight: 600;
-          font-size: var(--header-font-size);
-          line-height: 1.1;
-          letter-spacing: 0.01em;
-          text-transform: none;
-          color: var(--header-text-color);
-          padding: 8px 16px;
-          border-radius: 9999px;
-          transition: all 500ms ease-in-out;
-        }
-
-        .main-header__login-sing-up .nav-link {
-          font-family: var(--header-font-family) !important;
-          font-weight: 600 !important;
-          font-size: var(--header-font-size) !important;
-          line-height: 1.1 !important;
-          letter-spacing: 0.01em !important;
-          text-transform: none !important;
-          color: var(--header-text-color) !important;
-          padding: 8px 16px !important;
-          border-radius: 9999px !important;
-          border: none !important;
-        }
-
-        .nav-link:hover,
-        .nav-link:focus-visible {
-          background: linear-gradient(to right, #10b981, #059669, #047857);
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          text-decoration: none;
-        }
-
-        /* Ensure dropdown trigger inherits nav-link hover styles */
-        button.nav-link:hover,
-        button.nav-link:focus-visible,
-        button.nav-link[data-state="open"] {
-          background: linear-gradient(to right, #10b981, #059669, #047857);
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          text-decoration: none;
-        }
-
-        /* Dropdown menu item styling - solid black text, green gradient on hover */
-        .dropdown-menu-item {
-          font-family: var(--header-font-family);
-          font-weight: 600;
-          font-size: var(--header-font-size);
-          line-height: 1.1;
-          letter-spacing: 0.01em;
-          text-transform: none;
-          color: #000000 !important;
-          padding: 10px 14px;
-          border-radius: 8px;
-          text-decoration: none;
-          transition: all 500ms ease-in-out;
-        }
-
-        /* Override any inherited or conflicting text colors */
-        .dropdown-menu-item *,
-        .dropdown-menu-item span {
-          color: inherit;
-        }
-
-        .dropdown-menu-item:hover,
-        .dropdown-menu-item:focus-visible,
-        .dropdown-menu-item:active {
-          background: linear-gradient(to right, #10b981, #059669, #047857) !important;
-          background-clip: text !important;
-          -webkit-background-clip: text !important;
-          color: transparent !important;
-          text-decoration: none;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 1024px) {
-          .nav-container-light-green {
-            display: none;
-          }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-          .dropdown-menu-item {
-            color: #f1f5f9;
-          }
-        }
-
-      `}</style>
+      )}
     </header>
   );
 };

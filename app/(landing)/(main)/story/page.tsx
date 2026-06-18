@@ -1,246 +1,118 @@
-"use client";
-
-import { motion } from "framer-motion";
+import type { Metadata } from "next";
 import Image from "next/image";
-import { Split, FileX, Target, Shield } from "lucide-react";
+import { Container, Eyebrow, Section, Button } from "@/components/fastbird";
 
-const StoryPage = () => {
-  return (
-    <div className="bg-white relative" style={{'--contact-font': 'Inter, system-ui, -apple-system, sans-serif'} as React.CSSProperties & {'--contact-font': string}}>
-      {/* Hero Section */}
-      <div className="relative isolate px-6 pt-24 lg:px-8" style={{ marginTop: '80px' }}>
-        <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
-          <div
-            className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
-            style={{
-              clipPath:
-                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-            }}
-          />
-        </div>
-        
-        <div className="mx-auto max-w-4xl py-32 sm:py-48 lg:py-56">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <h1 
-              className="text-black font-semibold leading-[1.1] tracking-[0.01em]" 
-              style={{
-                fontFamily: 'var(--contact-font)',
-                fontSize: '2.5rem',
-                textTransform: 'none'
-              }}
-            >
-              Our Mission
-            </h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="max-w-4xl text-base text-center mx-auto mt-6"
-              style={{
-                fontFamily: 'var(--contact-font)',
-                fontWeight: 600,
-                letterSpacing: '0.01em',
-                textTransform: 'none',
-                color: '#475569'
-              }}
-            >
-              Empower every person to eat better by uniting AI culinary creativity, clinical-grade nutrition, and real-time coaching into one seamless experience
-            </motion.p>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Content Sections */}
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 pb-24">
-        
-
-
-        {/* Problem Section */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="grid grid-cols-1 gap-x-8 gap-y-16 lg:grid-cols-2 mb-24"
-        >
-          <div>
-            <h3 className="text-2xl font-bold tracking-tight text-gray-900 mb-6">
-              The Problem We&apos;re Solving
-            </h3>
-            <div className="space-y-4">
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="max-w-4xl text-base text-left flex items-start gap-3"
-                style={{
-                  fontFamily: 'var(--contact-font)',
-                  fontWeight: 600,
-                  letterSpacing: '0.01em',
-                  textTransform: 'none',
-                  color: '#475569'
-                }}
-              >
-                <Split className="w-5 h-5 mt-0.5 text-slate-500 flex-shrink-0" />
-                Food decisions are fragmented — recipes, nutrition, and tracking live in silos, creating friction and inconsistency
-              </motion.p>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="max-w-4xl text-base text-left flex items-start gap-3"
-                style={{
-                  fontFamily: 'var(--contact-font)',
-                  fontWeight: 600,
-                  letterSpacing: '0.01em',
-                  textTransform: 'none',
-                  color: '#475569'
-                }}
-              >
-                <FileX className="w-5 h-5 mt-0.5 text-slate-500 flex-shrink-0" />
-                Manual logging is inaccurate and unsustainable, especially with portions, mixed dishes, and diverse cuisines
-              </motion.p>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="max-w-4xl text-base text-left flex items-start gap-3"
-                style={{
-                  fontFamily: 'var(--contact-font)',
-                  fontWeight: 600,
-                  letterSpacing: '0.01em',
-                  textTransform: 'none',
-                  color: '#475569'
-                }}
-              >
-                <Target className="w-5 h-5 mt-0.5 text-slate-500 flex-shrink-0" />
-                Advice is generic, not goal-aligned or context-aware, so progress stalls
-              </motion.p>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="max-w-4xl text-base text-left flex items-start gap-3"
-                style={{
-                  fontFamily: 'var(--contact-font)',
-                  fontWeight: 600,
-                  letterSpacing: '0.01em',
-                  textTransform: 'none',
-                  color: '#475569'
-                }}
-              >
-                <Shield className="w-5 h-5 mt-0.5 text-slate-500 flex-shrink-0" />
-                People need trusted, privacy-first guidance that adapts in real time to their bodies, preferences, and constraints
-              </motion.p>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="aspect-[4/3] overflow-hidden rounded-lg bg-gray-100">
-              <Image
-                src="/images/resource/fragmented-food-decisions.png"
-                alt="Fragmented food decisions across different platforms and tools"
-                width={600}
-                height={450}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Solution Section */}
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="grid grid-cols-1 gap-x-8 gap-y-16 lg:grid-cols-2 mb-24"
-        >
-          <div className="relative order-2 lg:order-1">
-            <div className="aspect-[4/3] overflow-hidden rounded-lg bg-gray-100">
-              <Image
-                src="/images/resource/unified-ai-food-platform.png"
-                alt="Unified AI platform converting photos to recipes, nutrition insights, and coaching"
-                width={600}
-                height={450}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </div>
-          <div className="order-1 lg:order-2">
-            <h3 className="text-2xl font-bold tracking-tight text-gray-900 mb-6">
-              Our Solution
-            </h3>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="max-w-4xl text-base text-left mb-6"
-              style={{
-                fontFamily: 'var(--contact-font)',
-                fontWeight: 600,
-                letterSpacing: '0.01em',
-                textTransform: 'none',
-                color: '#475569'
-              }}
-            >
-              A unified platform that converts photos and intent into action turning ingredients into real recipes, meals into precise macro insights, and daily choices into measurable momentum. It blends model-driven perception, nutrition science, and behavioral design to deliver instant clarity and continuous coaching at every bite
-            </motion.p>
-
-          </div>
-        </motion.div>
-
-        {/* Vision Statement */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="mx-auto max-w-4xl text-center"
-        >
-          <div className="rounded-2xl bg-gray-50 px-8 py-12">
-            <h3 className="text-2xl font-bold tracking-tight text-gray-900 mb-6">
-              Our Vision for the Future
-            </h3>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="max-w-4xl text-base text-center mb-6"
-              style={{
-                fontFamily: 'var(--contact-font)',
-                fontWeight: 600,
-                letterSpacing: '0.01em',
-                textTransform: 'none',
-                color: '#475569'
-              }}
-            >
-              Food decisions become ambient, precise, and joyful guided by AI that understands your context and culture, not just your calories.               We will set the global standard for responsible food AI, proving that delight and scientific rigor can coexist at scale
-
-            </motion.p>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="max-w-4xl text-base text-center"
-              style={{
-                fontFamily: 'var(--contact-font)',
-                fontWeight: 600,
-                letterSpacing: '0.01em',
-                textTransform: 'none',
-                color: '#475569'
-              }}
-            >
-            </motion.p>
-          </div>
-        </motion.div>
-      </div>
-    </div>
-  );
+export const metadata: Metadata = {
+  title: "Our Story",
+  description:
+    "Why FastBird exists: travel data without the roaming bills and SIM swaps, built on clarity, fairness, and reliability.",
 };
+
+const values = [
+  {
+    title: "Clarity",
+    body: "Prices you can read at a glance and rules we say out loud. If you have to squint at the fine print, we've failed.",
+  },
+  {
+    title: "Fairness",
+    body: "Local-style rates instead of airport markups, and a balance that respects what you've already paid for.",
+  },
+  {
+    title: "Reliability",
+    body: "Trusted networks, instant delivery, and support that answers — because connectivity you can't count on isn't connectivity.",
+  },
+];
+
+const StoryPage = () => (
+  <>
+    <section className="relative isolate overflow-hidden bg-forest text-on-dark">
+      <Image
+        src="/images/hero/story-hero.webp"
+        alt="A FastBird swift leading a flight along a golden route across the sky"
+        fill
+        priority
+        sizes="100vw"
+        className="absolute inset-0 -z-10 object-cover opacity-60"
+      />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-forest via-forest/80 to-forest/40" />
+      <Container className="flex min-h-[60vh] flex-col justify-end py-24">
+        <Eyebrow onDark>// OUR STORY</Eyebrow>
+        <h1 className="mt-5 max-w-3xl font-heading text-4xl font-medium leading-tight lg:text-display-lg">
+          Small, fast, and always finding the way home.
+        </h1>
+      </Container>
+    </section>
+
+    <Section tone="surface">
+      <div className="fb-measure mx-auto">
+        <p className="font-heading text-2xl font-medium leading-snug text-ink">
+          FastBird started with a familiar sting: switching on your phone abroad
+          and bracing for the bill.
+        </p>
+        <div className="mt-8 space-y-6 text-lg leading-relaxed text-ink-soft">
+          <p>
+            We were tired of hunting for SIM cards in unfamiliar airports, of
+            roaming charges that arrived weeks later, and of plans written to
+            confuse rather than to help. Travel had gone digital in every other
+            way — getting online shouldn&apos;t be the part that still felt stuck
+            in the past.
+          </p>
+          <p>
+            So we built something simpler. A prepaid balance you top up once.
+            Plans by destination, priced in plain Points. A QR code that arrives
+            the instant you pay, ready to scan before you&apos;ve even left for
+            the airport.
+          </p>
+          <p>
+            The bird in our name isn&apos;t decoration. A swift is small and quick
+            and crosses continents without fuss — and it always knows the way
+            home. That&apos;s the feeling we want connectivity to have: light,
+            dependable, and quietly there when you need it.
+          </p>
+        </div>
+      </div>
+    </Section>
+
+    <Section tone="sand">
+      <Eyebrow>// WHAT WE STAND FOR</Eyebrow>
+      <h2 className="mt-4 max-w-xl font-heading text-h2 font-medium text-ink">
+        Three things we won&apos;t compromise on.
+      </h2>
+      <div className="mt-12 grid gap-5 md:grid-cols-3">
+        {values.map((value, i) => (
+          <div
+            key={value.title}
+            className="rounded-md border border-line bg-surface-card p-7 shadow-fb-sm"
+          >
+            <span className="font-mono text-eyebrow text-gold">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <h3 className="mt-3 font-heading text-h3 font-medium text-ink">
+              {value.title}
+            </h3>
+            <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+              {value.body}
+            </p>
+          </div>
+        ))}
+      </div>
+    </Section>
+
+    <Section tone="dark">
+      <div className="mx-auto max-w-2xl text-center">
+        <Eyebrow onDark>// THE SHORT VERSION</Eyebrow>
+        <h2 className="mt-5 font-heading text-h2 font-medium">
+          Travel data should feel like the easiest part of the trip.
+        </h2>
+        <p className="mx-auto mt-4 max-w-lg text-lg text-on-dark/75">
+          That&apos;s the whole idea. Everything we build comes back to it.
+        </p>
+        <Button href="/products" variant="accent" size="lg" className="mt-8">
+          Browse destinations
+        </Button>
+      </div>
+    </Section>
+  </>
+);
 
 export default StoryPage;

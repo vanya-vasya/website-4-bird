@@ -88,14 +88,46 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ['var(--font-sans)', 'Inter', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
-        heading: ['var(--font-heading)', 'Space Grotesk', 'Inter', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
-        mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
+        sans: ['var(--font-sans)', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        heading: ['var(--font-heading)', 'Georgia', '"Times New Roman"', 'serif'],
+        serif: ['var(--font-heading)', 'Georgia', '"Times New Roman"', 'serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
+      maxWidth: {
+        content: '1200px',
+        measure: '680px',
+      },
+      fontSize: {
+        'display-xl': ['4rem', { lineHeight: '1.05', fontWeight: '500' }],
+        'display-lg': ['3rem', { lineHeight: '1.1', fontWeight: '500' }],
+        h1: ['3rem', { lineHeight: '1.1', fontWeight: '500' }],
+        h2: ['2.25rem', { lineHeight: '1.15', fontWeight: '500' }],
+        h3: ['1.625rem', { lineHeight: '1.2', fontWeight: '500' }],
+        stat: ['3rem', { lineHeight: '1.0', fontWeight: '500' }],
+        eyebrow: ['0.75rem', { lineHeight: '1.4', letterSpacing: '0.08em', fontWeight: '500' }],
       },
       transitionDuration: {
         '2000': '2000ms',
       },
       colors: {
+        // ---- FastBird palette (consume these, never raw hex) ----
+        forest: "rgb(var(--color-primary) / <alpha-value>)",
+        green: "rgb(var(--color-green) / <alpha-value>)",
+        sage: "rgb(var(--color-sage) / <alpha-value>)",
+        sand: "rgb(var(--color-sand) / <alpha-value>)",
+        gold: "rgb(var(--color-accent) / <alpha-value>)",
+        ink: {
+          DEFAULT: "rgb(var(--color-ink) / <alpha-value>)",
+          soft: "rgb(var(--color-ink-soft) / <alpha-value>)",
+        },
+        surface: {
+          DEFAULT: "rgb(var(--color-surface) / <alpha-value>)",
+          card: "rgb(var(--color-surface-card) / <alpha-value>)",
+        },
+        "on-dark": "rgb(var(--color-on-dark) / <alpha-value>)",
+        line: "rgb(var(--color-line) / 0.10)",
+
+        // ---- shadcn aliases (HSL) ----
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -139,9 +171,20 @@ module.exports = {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
+        pill: "var(--radius-pill)",
+      },
+      boxShadow: {
+        "fb-sm": "var(--shadow-sm)",
+        "fb-md": "var(--shadow-md)",
+      },
+      spacing: {
+        18: "4.5rem",
+        22: "5.5rem",
+        section: "6rem",
+        "section-lg": "8rem",
       },
       keyframes: {
         "accordion-down": {
