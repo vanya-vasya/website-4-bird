@@ -1,14 +1,13 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Instagram } from "lucide-react";
 import { Container, Logo } from "@/components/fastbird";
 import { footerNav } from "@/constants/nav";
 
-const paymentMethods = ["Visa", "Mastercard", "Amex", "Apple Pay", "Google Pay"];
-
 const Footer = () => (
   <footer className="bg-surface/90 text-ink-soft border-t border-line">
     <Container className="py-16 lg:py-20">
-      <div className="grid gap-12 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
+      <div className="grid gap-12 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div className="max-w-xs">
           <Logo />
           <p className="mt-4 text-sm leading-relaxed text-ink-soft/70">
@@ -24,25 +23,27 @@ const Footer = () => (
           </Link>
         </div>
 
-        {footerNav.map((col) => (
-          <nav key={col.title} aria-label={col.title}>
-            <h2 className="font-mono text-eyebrow uppercase text-ink">
-              {col.title}
-            </h2>
-            <ul className="mt-4 space-y-3">
-              {col.links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-ink-soft transition-colors hover:text-ink fb-focus rounded-sm"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
+        {footerNav
+          .filter((col) => col.title !== "Account")
+          .map((col) => (
+            <nav key={col.title} aria-label={col.title}>
+              <h2 className="font-mono text-eyebrow uppercase text-ink">
+                {col.title}
+              </h2>
+              <ul className="mt-4 space-y-3">
+                {col.links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-ink-soft transition-colors hover:text-ink fb-focus rounded-sm"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
       </div>
 
       <div className="mt-14 border-t border-line pt-8">
@@ -56,16 +57,13 @@ const Footer = () => (
           <p className="font-mono text-xs text-ink-soft/55">
             © 2026 FastBird. All rights reserved.
           </p>
-          <ul className="flex flex-wrap gap-2">
-            {paymentMethods.map((method) => (
-              <li
-                key={method}
-                className="rounded-sm border border-line bg-sand px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.04em] text-ink-soft"
-              >
-                {method}
-              </li>
-            ))}
-          </ul>
+          <Image
+            src="/cards.png"
+            alt="Accepted payment methods"
+            width={180}
+            height={28}
+            className="h-7 w-auto object-contain"
+          />
         </div>
       </div>
     </Container>
