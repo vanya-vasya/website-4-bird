@@ -59,7 +59,7 @@ const steps = [
   {
     n: "02",
     title: "Choose your destination",
-    body: "Search 100+ countries and regions and pick the plan that fits your trip.",
+    body: "Search 60+ countries and regions and pick the plan that fits your trip.",
     img: "/images/spots/step-destination.webp",
   },
   {
