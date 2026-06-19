@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, Clock } from "lucide-react";
+import { Menu, X, Clock } from "lucide-react";
 import { Button, Container, Logo } from "@/components/fastbird";
-import { mainNav, productsMenu } from "@/constants/nav";
+import { mainNav } from "@/constants/nav";
 
 const Header = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [productsOpen, setProductsOpen] = useState(false);
+
+  const isDashboard = pathname.startsWith("/dashboard");
 
   useEffect(() => {
     setOpen(false);
@@ -29,56 +30,26 @@ const Header = () => {
         <Logo />
 
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
-          {mainNav.map((item) =>
-            item.label === "Products" ? (
-              <div
-                key={item.href}
-                className="relative"
-                onMouseEnter={() => setProductsOpen(true)}
-                onMouseLeave={() => setProductsOpen(false)}
-              >
-                <Link
-                  href={item.href}
-                  className="flex items-center gap-1 font-sans text-[15px] text-ink-soft transition-colors hover:text-ink fb-focus rounded-sm"
-                >
-                  {item.label}
-                  <ChevronDown className="h-4 w-4" aria-hidden />
-                </Link>
-                {productsOpen && (
-                  <div className="absolute left-1/2 top-full w-60 -translate-x-1/2 pt-3">
-                    <div className="overflow-hidden rounded-md border border-line bg-surface-card p-2 shadow-fb-md">
-                      {productsMenu.map((sub) => (
-                        <Link
-                          key={sub.href}
-                          href={sub.href}
-                          className="block rounded-sm px-3 py-2 text-sm text-ink-soft transition-colors hover:bg-sand hover:text-ink fb-focus"
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="font-sans text-[15px] text-ink-soft transition-colors hover:text-ink fb-focus rounded-sm"
-              >
-                {item.label}
-              </Link>
-            )
-          )}
+          {mainNav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="font-sans text-[15px] text-ink-soft transition-colors hover:text-ink fb-focus rounded-sm"
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <span
-            className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.06em] text-ink-soft"
-            aria-label="Points balance"
-          >
-            <Clock className="h-3.5 w-3.5" aria-hidden />0 Points
-          </span>
+          {isDashboard && (
+            <span
+              className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.06em] text-ink-soft"
+              aria-label="Points balance"
+            >
+              <Clock className="h-3.5 w-3.5" aria-hidden />0 Points
+            </span>
+          )}
           <Link
             href="/sign-in"
             className="font-mono text-eyebrow uppercase underline-offset-4 transition-colors hover:underline fb-focus rounded-sm text-green"
