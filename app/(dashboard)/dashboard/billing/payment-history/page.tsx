@@ -25,9 +25,7 @@ const PaymentHistoryPage = async () => {
 
         {/* Table */}
         {!transactions || transactions.length === 0 ? (
-          <div className="rounded-md border border-line bg-surface-card p-12 text-center">
-            <p className="font-mono text-sm text-ink-soft">No payment history yet.</p>
-          </div>
+          <p className="font-mono text-sm text-ink-soft">No payment history yet.</p>
         ) : (
           <div className="overflow-hidden rounded-md border border-line bg-surface-card shadow-fb-sm">
             <div className="overflow-x-auto">
