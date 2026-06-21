@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Container, Logo } from "@/components/fastbird";
 import { footerNav } from "@/constants/nav";
 
@@ -43,13 +42,6 @@ const Footer = () => (
           <p className="font-mono text-xs text-ink-soft/55">
             © 2026 FastBird. All rights reserved.
           </p>
-          <Image
-            src="/cards.png"
-            alt="Accepted payment methods"
-            width={360}
-            height={56}
-            className="h-14 w-auto object-contain bg-surface/90"
-          />
         </div>
       </div>
     </Container>
