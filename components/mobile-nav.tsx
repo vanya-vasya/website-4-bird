@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { UsageProgress } from "@/components/usage-progress";
 import {
   Collapsible,
   CollapsibleContent,
@@ -174,14 +173,6 @@ export function MobileNav({
 
         <div className="flex flex-col h-[calc(100vh-4rem)]">
           <div className="flex-1 overflow-y-auto">
-            <div className="p-4">
-              <div className="w-full mb-4">
-                <UsageProgress
-                  initialUsedGenerations={initialUsedGenerations}
-                  initialAvailableGenerations={initialAvailableGenerations}
-                />
-              </div>
-            </div>
 
             {/* Products Section - Matching Header */}
             <Collapsible

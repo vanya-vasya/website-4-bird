@@ -25,10 +25,7 @@ export default async function DashboardLayout({
     >
       <div className="relative min-h-screen bg-surface">
         <AnimatedLayout>
-          <DashboardHeader
-            initialUsedGenerations={apiUsedGenerations}
-            initialAvailableGenerations={apiAvailableGenerations}
-          />
+          <DashboardHeader />
         </AnimatedLayout>
 
         <main className="flex-1 py-12 lg:pt-16 relative z-10">

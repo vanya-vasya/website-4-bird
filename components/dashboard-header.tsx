@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Container, Logo } from "@/components/fastbird";
-import { UsageProgress } from "@/components/usage-progress";
 import { UserDropdown } from "@/components/user-dropdown";
 import { GuestMobileSidebar } from "@/components/guest-mobile-sidebar";
 import { PaymentHistoryAnalytics } from "@/lib/analytics";
@@ -16,15 +15,7 @@ const dashboardNav = [
   { name: "Activities", href: "/dashboard/activity-history" },
 ];
 
-interface DashboardHeaderProps {
-  initialUsedGenerations: number;
-  initialAvailableGenerations: number;
-}
-
-const DashboardHeader = ({
-  initialUsedGenerations,
-  initialAvailableGenerations,
-}: DashboardHeaderProps) => {
+const DashboardHeader = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -76,12 +67,6 @@ const DashboardHeader = ({
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <div className="w-[220px]">
-            <UsageProgress
-              initialUsedGenerations={initialUsedGenerations}
-              initialAvailableGenerations={initialAvailableGenerations}
-            />
-          </div>
           <UserDropdown />
         </div>
 
