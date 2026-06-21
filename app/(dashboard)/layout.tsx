@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AnimatedLayout, AnimatedPage } from "@/components/animated-layout";
 import DashboardHeader from "@/components/dashboard-header";
 import { CreditProvider } from "@/lib/contexts/credit-context";
+import { Container, Logo } from "@/components/fastbird";
 import {
   getApiUsedGenerations,
   getApiAvailableGenerations,
@@ -37,28 +38,33 @@ export default async function DashboardLayout({
           </div>
         </main>
 
-        <footer className="border-t border-line bg-surface py-6">
-          <div className="container flex flex-col items-center justify-between gap-3 md:flex-row">
-            <p className="font-mono text-xs text-ink-soft">
-              © {new Date().getFullYear()} FastBird. All rights reserved.
-            </p>
-            <nav className="flex gap-4" aria-label="Legal">
-              {[
-                { href: "/privacy-policy", label: "Privacy" },
-                { href: "/terms-and-conditions", label: "Terms" },
-                { href: "/return-policy", label: "Refund" },
-                { href: "/cookies-policy", label: "Cookies" },
-              ].map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="font-mono text-xs text-ink-soft transition-colors hover:text-ink"
-                >
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
+        <footer className="border-t border-line bg-surface/90 text-ink-soft">
+          <Container className="py-10">
+            <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <Logo />
+                <nav className="flex flex-wrap gap-6" aria-label="Legal">
+                  {[
+                    { href: "/privacy-policy", label: "Privacy" },
+                    { href: "/terms-and-conditions", label: "Terms" },
+                    { href: "/return-policy", label: "Refund" },
+                    { href: "/cookies-policy", label: "Cookies" },
+                  ].map((l) => (
+                    <Link
+                      key={l.href}
+                      href={l.href}
+                      className="font-mono text-xs text-ink-soft transition-colors hover:text-ink fb-focus rounded-sm"
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+              <p className="font-mono text-xs text-ink-soft/55">
+                © {new Date().getFullYear()} FastBird. All rights reserved.
+              </p>
+            </div>
+          </Container>
         </footer>
       </div>
     </CreditProvider>

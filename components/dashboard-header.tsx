@@ -1,45 +1,19 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { GuestMobileSidebar } from "@/components/guest-mobile-sidebar";
+import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
+import { Container, Logo } from "@/components/fastbird";
 import { UsageProgress } from "@/components/usage-progress";
 import { UserDropdown } from "@/components/user-dropdown";
-import { ChevronDown } from "lucide-react";
+import { GuestMobileSidebar } from "@/components/guest-mobile-sidebar";
 import { PaymentHistoryAnalytics } from "@/lib/analytics";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { PRODUCT_ITEMS } from "@/constants/product-navigation";
-import { ProductIcon } from "@/components/shared/ProductIcon";
+import { mainNav } from "@/constants/nav";
 
-const routes = [
-  {
-    name: "Our Story",
-    href: "/story",
-  },
-  {
-    name: "Pricing",
-    href: "/#pricing",
-  },
-  {
-    name: "FAQ",
-    href: "/faq",
-  },
-  {
-    name: "Contact",
-    href: "/contact",
-  },
-  {
-    name: "Payments",
-    href: "/dashboard/billing/payment-history",
-  },
-  {
-    name: "Activities",
-    href: "/dashboard/activity-history",
-  },
+const dashboardNav = [
+  { name: "Payments", href: "/dashboard/billing/payment-history" },
+  { name: "Activities", href: "/dashboard/activity-history" },
 ];
 
 interface DashboardHeaderProps {
@@ -47,215 +21,103 @@ interface DashboardHeaderProps {
   initialAvailableGenerations: number;
 }
 
-const DashboardHeader = ({ initialUsedGenerations, initialAvailableGenerations }: DashboardHeaderProps) => {
+const DashboardHeader = ({
+  initialUsedGenerations,
+  initialAvailableGenerations,
+}: DashboardHeaderProps) => {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const allMobileNav = [
+    ...mainNav.map((i) => ({ name: i.label, href: i.href })),
+    ...dashboardNav,
+  ];
+
   return (
-    <header className="bg-white relative z-50">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between p-3 lg:px-6 gap-1">
-        <div className="flex">
-          <Link href="/dashboard" className="-m-1.5 p-1.5">
-            <Image width={98} height={39} src="/logos/yum-mi-onigiri-logo.png" alt="Yum-mi Logo"/>
-          </Link>
-        </div>
-        <div className="flex gap-x-12 ml-12">
-          <div className="nav-container-light-green">
+    <header className="sticky top-0 z-50 w-full border-b border-line bg-surface/90 backdrop-blur-md">
+      <Container className="flex h-16 items-center justify-between lg:h-18">
+        <Logo />
+
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Dashboard primary">
+          {mainNav.map((item) => (
             <Link
-              href="/"
-              className="nav-link"
+              key={item.href}
+              href={item.href}
+              className="font-sans text-[15px] text-ink-soft transition-colors hover:text-ink fb-focus rounded-sm"
             >
-              Home
+              {item.label}
             </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="nav-link flex items-center gap-1 outline-none">
-                Products
-                <ChevronDown className="h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="start" 
-                className="bg-white border border-green-100 shadow-lg min-w-[240px] p-1"
-              >
-                {PRODUCT_ITEMS.map((product) => (
-                  <DropdownMenuItem 
-                    key={product.href} 
-                    asChild
-                    className="focus:bg-transparent focus:text-inherit hover:bg-transparent data-[highlighted]:bg-transparent"
-                  >
-                    <Link 
-                      href={product.href}
-                      className="dropdown-menu-item flex items-center gap-3 w-full"
-                    >
-                      <ProductIcon 
-                        icon={product.icon}
-                        iconUrl={product.iconUrl}
-                        fallback={product.iconFallback}
-                        alt={product.label}
-                        size={20}
-                      />
-                      <span className="flex-1">{product.label}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {routes.map((route) => (
-              <Link
-                key={route.name}
-                href={route.href}
-                className="nav-link"
-                aria-label={`Navigate to ${route.name}`}
-                onClick={() => {
-                  if (route.name === 'Payments') {
-                    PaymentHistoryAnalytics.clickPaymentHistoryLink('dashboard_header');
-                  }
-                }}
-              >
-                {route.name}
-              </Link>
-            ))}
+          ))}
+          {dashboardNav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="font-sans text-[15px] text-ink-soft transition-colors hover:text-ink fb-focus rounded-sm"
+              onClick={() => {
+                if (item.name === "Payments") {
+                  PaymentHistoryAnalytics.clickPaymentHistoryLink("dashboard_header");
+                }
+              }}
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="hidden items-center gap-4 lg:flex">
+          <div className="w-[220px]">
+            <UsageProgress
+              initialUsedGenerations={initialUsedGenerations}
+              initialAvailableGenerations={initialAvailableGenerations}
+            />
           </div>
+          <UserDropdown />
         </div>
-        <div className="flex lg:flex-1 lg:justify-end">
-          <div className="flex items-center space-x-4">
-            <div className="hidden md:block w-[220px]">
-              <UsageProgress
-                initialUsedGenerations={initialUsedGenerations}
-                initialAvailableGenerations={initialAvailableGenerations}
-              />
-            </div>
-            <UserDropdown />
-          </div>
+
+        <div className="flex items-center gap-2 lg:hidden">
           <GuestMobileSidebar />
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            className="rounded-sm p-2 fb-focus text-ink"
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
-      </nav>
+      </Container>
 
-      <style jsx global>{`
-        :root {
-          --header-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-          --header-font-size: 16px;
-          --header-text-color: #000000;
-          --nav-font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-          --contact-font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-
-        .nav-container {
-          display: flex;
-          background-color: #f8fafc;
-          border-radius: 9999px;
-          padding: 4px;
-          gap: 4px;
-        }
-
-        .nav-container-green {
-          display: flex;
-          background-color: #86efac;
-          border-radius: 9999px;
-          padding: 4px;
-          gap: 4px;
-        }
-
-        .nav-container-light-green {
-          display: flex;
-          background-color: #dcfce7;
-          border-radius: 9999px;
-          padding: 4px;
-          gap: 4px;
-        }
-
-        .nav-link {
-          font-family: var(--header-font-family);
-          font-weight: 600;
-          font-size: var(--header-font-size);
-          line-height: 1.1;
-          letter-spacing: 0.01em;
-          text-transform: none;
-          color: var(--header-text-color);
-          padding: 8px 16px;
-          border-radius: 9999px;
-          transition: all 500ms ease-in-out;
-        }
-
-        .main-header__login-sing-up .nav-link {
-          font-family: var(--header-font-family) !important;
-          font-weight: 600 !important;
-          font-size: var(--header-font-size) !important;
-          line-height: 1.1 !important;
-          letter-spacing: 0.01em !important;
-          text-transform: none !important;
-          color: var(--header-text-color) !important;
-          padding: 8px 16px !important;
-          border-radius: 9999px !important;
-          border: none !important;
-        }
-
-        .nav-link:hover,
-        .nav-link:focus-visible {
-          background: linear-gradient(to right, #10b981, #059669, #047857);
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          text-decoration: none;
-        }
-
-        /* Ensure dropdown trigger inherits nav-link hover styles */
-        button.nav-link:hover,
-        button.nav-link:focus-visible,
-        button.nav-link[data-state="open"] {
-          background: linear-gradient(to right, #10b981, #059669, #047857);
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          text-decoration: none;
-        }
-
-        /* Dropdown menu item styling - solid black text, green gradient on hover */
-        .dropdown-menu-item {
-          font-family: var(--header-font-family);
-          font-weight: 600;
-          font-size: var(--header-font-size);
-          line-height: 1.1;
-          letter-spacing: 0.01em;
-          text-transform: none;
-          color: #000000 !important;
-          padding: 10px 14px;
-          border-radius: 8px;
-          text-decoration: none;
-          transition: all 500ms ease-in-out;
-        }
-
-        /* Override any inherited or conflicting text colors */
-        .dropdown-menu-item *,
-        .dropdown-menu-item span {
-          color: inherit;
-        }
-
-        .dropdown-menu-item:hover,
-        .dropdown-menu-item:focus-visible,
-        .dropdown-menu-item:active {
-          background: linear-gradient(to right, #10b981, #059669, #047857) !important;
-          background-clip: text !important;
-          -webkit-background-clip: text !important;
-          color: transparent !important;
-          text-decoration: none;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 1024px) {
-          .nav-container-light-green {
-            display: none;
-          }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-          .dropdown-menu-item {
-            color: #f1f5f9;
-          }
-        }
-
-
-      `}</style>
+      {open && (
+        <div className="fixed inset-0 top-16 z-40 bg-surface lg:hidden">
+          <Container className="flex h-full flex-col py-8">
+            <nav className="flex flex-col gap-1" aria-label="Mobile dashboard">
+              {allMobileNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="border-b border-line py-4 font-heading text-2xl text-ink transition-colors hover:text-green"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+          </Container>
+        </div>
+      )}
     </header>
   );
 };
 
 export default DashboardHeader;
-
