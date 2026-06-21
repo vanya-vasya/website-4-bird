@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Zap } from "lucide-react";
 import { Container, Logo } from "@/components/fastbird";
 import { UserDropdown } from "@/components/user-dropdown";
 import { GuestMobileSidebar } from "@/components/guest-mobile-sidebar";
 import { PaymentHistoryAnalytics } from "@/lib/analytics";
 import { mainNav } from "@/constants/nav";
+import { useCredits } from "@/lib/contexts/credit-context";
 
 const dashboardNav = [
   { name: "Payments", href: "/dashboard/billing/payment-history" },
@@ -18,6 +19,7 @@ const dashboardNav = [
 const DashboardHeader = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { remainingCredits } = useCredits();
 
   useEffect(() => {
     setOpen(false);
@@ -67,6 +69,16 @@ const DashboardHeader = () => {
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
+          <Link
+            href="/dashboard/billing/payment-history"
+            aria-label={`${remainingCredits} credits — go to payments`}
+            className="flex items-center gap-2 rounded-full bg-green px-4 py-2 text-white transition-opacity hover:opacity-90 fb-focus"
+            onClick={() => PaymentHistoryAnalytics.clickPaymentHistoryLink("dashboard_header_credits")}
+          >
+            <Zap className="h-4 w-4 fill-white" aria-hidden />
+            <span className="font-semibold text-sm">{remainingCredits}</span>
+            <span className="text-sm font-normal opacity-80">credits</span>
+          </Link>
           <UserDropdown />
         </div>
 
