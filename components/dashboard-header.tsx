@@ -10,6 +10,7 @@ import { GuestMobileSidebar } from "@/components/guest-mobile-sidebar";
 import { PaymentHistoryAnalytics } from "@/lib/analytics";
 import { mainNav } from "@/constants/nav";
 import { useCredits } from "@/lib/contexts/credit-context";
+import BuyCreditsModal from "@/components/buy-credits-modal";
 
 const dashboardNav = [
   { name: "Payments", href: "/dashboard/billing/payment-history" },
@@ -19,6 +20,7 @@ const dashboardNav = [
 const DashboardHeader = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [buyModalOpen, setBuyModalOpen] = useState(false);
   const { remainingCredits } = useCredits();
 
   useEffect(() => {
@@ -69,18 +71,20 @@ const DashboardHeader = () => {
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <Link
-            href="/dashboard/billing/payment-history"
-            aria-label={`${remainingCredits} credits — go to payments`}
+          <button
+            type="button"
+            aria-label={`${remainingCredits} credits — buy more`}
+            onClick={() => setBuyModalOpen(true)}
             className="flex items-center gap-2 rounded-full bg-green px-4 py-2 text-white transition-opacity hover:opacity-90 fb-focus"
-            onClick={() => PaymentHistoryAnalytics.clickPaymentHistoryLink("dashboard_header")}
           >
             <Zap className="h-4 w-4 fill-white" aria-hidden />
             <span className="font-semibold text-sm">{remainingCredits}</span>
             <span className="text-sm font-normal opacity-80">credits</span>
-          </Link>
+          </button>
           <UserDropdown />
         </div>
+
+        <BuyCreditsModal open={buyModalOpen} onOpenChange={setBuyModalOpen} />
 
         <div className="flex items-center gap-2 lg:hidden">
           <GuestMobileSidebar />
