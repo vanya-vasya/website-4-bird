@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   Container,
   Eyebrow,
@@ -23,7 +24,7 @@ const packs = [
     points: 25,
     bonus: 0,
     blurb: "A weekend away or a quick city break.",
-    perks: ["Enough for light maps, chat and email", "Use across any destination"],
+    perks: ["Enough for light maps, chat and email", "Use across any destination", "No expiry on your balance"],
   },
   {
     name: "Traveler",
@@ -87,11 +88,14 @@ const PricingPage = () => (
     </section>
 
     <Section tone="surface">
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-4">
         {packs.map((pack) => (
           <Card
             key={pack.name}
-            className={pack.popular ? "ring-2 ring-gold" : undefined}
+            className={cn(
+              "flex flex-col",
+              pack.popular ? "ring-2 ring-gold" : undefined
+            )}
           >
             <div className="flex items-center justify-between">
               <h2 className="font-heading text-h3 font-medium text-ink">
@@ -109,7 +113,7 @@ const PricingPage = () => (
                 +{pack.bonus} bonus included
               </p>
             )}
-            <ul className="mt-6 space-y-3">
+            <ul className="mt-6 flex-1 space-y-3">
               {pack.perks.map((perk) => (
                 <li key={perk} className="flex items-start gap-3">
                   <Check
@@ -130,9 +134,6 @@ const PricingPage = () => (
             </Button>
           </Card>
         ))}
-      </div>
-
-      <div className="mt-6">
         <CustomTopup />
       </div>
     </Section>
