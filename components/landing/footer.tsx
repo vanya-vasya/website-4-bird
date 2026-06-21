@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram } from "lucide-react";
 import { Container, Logo } from "@/components/fastbird";
 import { footerNav } from "@/constants/nav";
 
@@ -14,13 +13,6 @@ const Footer = () => (
             Travel data that just works — top up, tap, and you&apos;re online in
             minutes.
           </p>
-          <Link
-            href="https://instagram.com"
-            aria-label="FastBird on Instagram"
-            className="mt-6 inline-flex h-10 w-10 items-center justify-center rounded-pill border border-line text-ink-soft transition-colors hover:bg-sand hover:text-ink fb-focus"
-          >
-            <Instagram className="h-5 w-5" />
-          </Link>
         </div>
 
         {footerNav
@@ -46,23 +38,17 @@ const Footer = () => (
           ))}
       </div>
 
-      <div className="mt-14 border-t border-line pt-8">
-        {/* TODO: replace with real legal entity, company number and registered address */}
-        <p className="font-mono text-xs leading-relaxed text-ink-soft/55">
-          FASTBIRD — [Company name], Company No. [____], [registered address],
-          support@myfastbird.com
-        </p>
-
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-14 pt-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-xs text-ink-soft/55">
             © 2026 FastBird. All rights reserved.
           </p>
           <Image
             src="/cards.png"
             alt="Accepted payment methods"
-            width={180}
-            height={28}
-            className="h-7 w-auto object-contain"
+            width={360}
+            height={56}
+            className="h-14 w-auto object-contain bg-surface/90"
           />
         </div>
       </div>
