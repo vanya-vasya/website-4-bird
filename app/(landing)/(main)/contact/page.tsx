@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Mail, Clock, Building2 } from "lucide-react";
+import { Mail, Clock } from "lucide-react";
 import { Container, Eyebrow, Section } from "@/components/fastbird";
 import { ContactForm } from "@/components/landing/contact-form";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Reach the FastBird team for support, billing questions, or Business API enquiries. We reply around the clock.",
+    "Reach the FastBird team for support or billing questions. We reply around the clock.",
 };
 
 type SearchParams = { searchParams: { topic?: string } };
@@ -20,8 +20,8 @@ const ContactPage = ({ searchParams }: SearchParams) => (
           Talk to a human.
         </h1>
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink-soft">
-          Questions about a plan, your balance, or building with our API? Send a
-          note and we&apos;ll get back to you fast.
+          Questions about a plan or your balance? Send a note and we&apos;ll get
+          back to you fast.
         </p>
       </Container>
     </section>
@@ -52,17 +52,6 @@ const ContactPage = ({ searchParams }: SearchParams) => (
             <p className="mt-1 text-sm text-ink-soft">
               Around the clock, in any timezone. Most replies land within a few
               hours.
-            </p>
-          </div>
-
-          <div className="rounded-md border border-line bg-surface-card p-6 shadow-fb-sm">
-            <Building2 className="h-5 w-5 text-green" aria-hidden />
-            <h2 className="mt-3 font-heading text-lg font-medium text-ink">
-              Business API
-            </h2>
-            <p className="mt-1 text-sm text-ink-soft">
-              Reselling or integrating eSIM data? Pick the Business API topic and
-              our partnerships team will reach out.
             </p>
           </div>
 

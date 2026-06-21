@@ -7,7 +7,6 @@ const topics = [
   { value: "general", label: "General question" },
   { value: "billing", label: "Points & billing" },
   { value: "troubleshooting", label: "Troubleshooting" },
-  { value: "business-api", label: "Business API" },
 ];
 
 type Status = "idle" | "submitting" | "success" | "error";

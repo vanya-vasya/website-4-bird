@@ -16,7 +16,6 @@ import {
   Eyebrow,
   Section,
   Card,
-  Badge,
   Accordion,
   DestinationCard,
 } from "@/components/fastbird";
@@ -259,30 +258,7 @@ const HomePage = () => (
       </div>
     </Section>
 
-    {/* 7. Business API teaser */}
-    <Section tone="sand">
-      <Card className="flex flex-col items-start gap-6 p-8 lg:flex-row lg:items-center lg:justify-between lg:p-10">
-        <div className="max-w-2xl">
-          <div className="flex items-center gap-3">
-            <Eyebrow>// FOR TEAMS</Eyebrow>
-            <Badge variant="sage">Business API</Badge>
-          </div>
-          <h2 className="mt-4 font-heading text-h2 font-medium text-ink">
-            Connectivity your customers can build on.
-          </h2>
-          <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
-            Resell eSIM data, bundle it into your product, or keep a fleet of
-            travelers connected. Our API handles provisioning and delivery so you
-            can focus on your offer.
-          </p>
-        </div>
-        <Button href="/contact?topic=business-api" variant="primary" size="lg">
-          Talk to us
-        </Button>
-      </Card>
-    </Section>
-
-    {/* 8. FAQ teaser */}
+    {/* 7. FAQ teaser */}
     <Section tone="surface">
       <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
         <div>

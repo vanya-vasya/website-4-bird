@@ -31,7 +31,7 @@ const sections: LegalSection[] = [
   {
     heading: "Acceptable use",
     body: [
-      "You agree to use plans lawfully and not to resell or misuse the service except where expressly permitted, such as through our Business API.",
+      "You agree to use plans lawfully and not to resell or misuse the service.",
     ],
   },
   {

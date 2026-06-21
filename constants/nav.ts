@@ -44,7 +44,6 @@ export const footerNav: { title: string; links: NavLink[] }[] = [
       { label: "FAQ", href: "/faq" },
       { label: "Contact", href: "/contact" },
       { label: "Payments", href: "/payments" },
-      { label: "Business API", href: "/contact?topic=business-api" },
     ],
   },
   {
