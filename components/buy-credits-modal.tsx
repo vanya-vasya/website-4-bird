@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Zap } from "lucide-react";
 import {
@@ -130,16 +129,6 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
           <Zap className="h-4 w-4 fill-on-dark" aria-hidden />
         </button>
 
-        {/* Payment logos */}
-        <div className="mt-6 flex justify-center">
-          <Image
-            src="/cards.png"
-            alt="Accepted payment methods"
-            width={240}
-            height={36}
-            className="h-9 w-auto object-contain"
-          />
-        </div>
       </DialogContent>
     </Dialog>
   );
