@@ -73,7 +73,7 @@ const DashboardHeader = () => {
             href="/dashboard/billing/payment-history"
             aria-label={`${remainingCredits} credits — go to payments`}
             className="flex items-center gap-2 rounded-full bg-green px-4 py-2 text-white transition-opacity hover:opacity-90 fb-focus"
-            onClick={() => PaymentHistoryAnalytics.clickPaymentHistoryLink("dashboard_header_credits")}
+            onClick={() => PaymentHistoryAnalytics.clickPaymentHistoryLink("dashboard_header")}
           >
             <Zap className="h-4 w-4 fill-white" aria-hidden />
             <span className="font-semibold text-sm">{remainingCredits}</span>
