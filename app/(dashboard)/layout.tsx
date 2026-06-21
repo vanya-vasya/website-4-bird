@@ -39,10 +39,8 @@ export default async function DashboardLayout({
 
         <footer className="border-t border-line bg-surface py-6">
           <div className="container flex flex-col items-center justify-between gap-3 md:flex-row">
-            {/* TODO: replace with real FastBird legal entity once registered */}
             <p className="font-mono text-xs text-ink-soft">
-              FASTBIRD — [Company name], support@myfastbird.com ·{" "}
-              © {new Date().getFullYear()}
+              © {new Date().getFullYear()} FastBird. All rights reserved.
             </p>
             <nav className="flex gap-4" aria-label="Legal">
               {[

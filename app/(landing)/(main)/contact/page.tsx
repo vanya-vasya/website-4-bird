@@ -66,10 +66,6 @@ const ContactPage = ({ searchParams }: SearchParams) => (
             </p>
           </div>
 
-          {/* TODO: replace with the real registered company entity and address */}
-          <p className="font-mono text-xs leading-relaxed text-ink-soft">
-            FASTBIRD — [Company name], Company No. [____], [registered address].
-          </p>
         </aside>
       </div>
     </Section>
