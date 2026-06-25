@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-// import { ClerkProvider } from "@clerk/nextjs"; // temporarily disabled
+import { ClerkProvider } from "@clerk/nextjs";
 import { Newsreader, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
 
@@ -68,23 +68,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={cn(
-          "min-h-screen bg-surface font-sans text-ink antialiased",
-          newsreader.variable,
-          plexSans.variable,
-          plexMono.variable
-        )}
-      >
-        <GoogleAnalytics gaId="G-DYY23NK5V1" />
-        <CurrencyProvider>
-          <ModalProvider />
-          <ToasterProvider />
-          <NextTopLoader color="#3c3c77" showSpinner={false} />
-          {children}
-        </CurrencyProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={cn(
+            "min-h-screen bg-surface font-sans text-ink antialiased",
+            newsreader.variable,
+            plexSans.variable,
+            plexMono.variable
+          )}
+        >
+          <GoogleAnalytics gaId="G-DYY23NK5V1" />
+          <CurrencyProvider>
+            <ModalProvider />
+            <ToasterProvider />
+            <NextTopLoader color="#3c3c77" showSpinner={false} />
+            {children}
+          </CurrencyProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
