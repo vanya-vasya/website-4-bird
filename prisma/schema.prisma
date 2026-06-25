@@ -17,6 +17,8 @@ model User {
   lastName             String?
   usedGenerations      Int               @default(0)
   availableGenerations Int               @default(20)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
   transactions         Transaction[]
   activityLogs         ActivityLog[]
   chefLogs             ChefLog[]
@@ -98,5 +100,11 @@ model Transaction {
   message             String?
   paid_at             DateTime?
   receipt_url         String?
+  createdAt           DateTime  @default(now())
+  reason              String?
+  webhookEventId      String?
   user                User      @relation(fields: [userId], references: [clerkId])
+
+  @@index([userId, createdAt])
+  @@index([webhookEventId])
 }
