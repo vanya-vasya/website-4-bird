@@ -1,9 +1,10 @@
 "use client";
 
-import { Wifi, MapPin, CreditCard, ArrowRight } from "lucide-react";
+import { Wifi, MapPin, CreditCard, ArrowRight, Wallet, SearchX, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/fastbird";
+import { useCredits } from "@/lib/contexts/credit-context";
 
 const container = {
   hidden: { opacity: 0 },
@@ -48,6 +49,7 @@ const quickActions = [
 
 export default function DashboardHomePage() {
   const router = useRouter();
+  const { remainingCredits } = useCredits();
 
   return (
     <div className="space-y-12">
@@ -61,6 +63,45 @@ export default function DashboardHomePage() {
         <p className="max-w-xl text-lg leading-relaxed text-ink-soft">
           Manage your eSIM plans, top up your balance, and stay connected wherever you travel.
         </p>
+      </div>
+
+      {/* Balance + eSIMs overview */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {/* Balance card */}
+        <div className="rounded-2xl bg-white p-6 shadow-sm border border-line">
+          <div className="flex items-center gap-2 text-ink-soft">
+            <Wallet className="h-5 w-5" aria-hidden />
+            <span className="font-medium text-sm">Balance</span>
+          </div>
+          <p className="mt-2 text-4xl font-bold text-ink">
+            {remainingCredits}{" "}
+            <span className="text-3xl font-semibold">Points</span>
+          </p>
+          <div className="mt-5">
+            <Button href="/pricing" variant="accent" size="sm">
+              <Plus className="h-4 w-4 mr-1" aria-hidden />
+              Top up
+            </Button>
+          </div>
+        </div>
+
+        {/* My eSIMs card */}
+        <div className="rounded-2xl bg-white p-6 shadow-sm border border-line">
+          <h2 className="font-heading text-xl font-medium text-ink">My eSIMs</h2>
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-green">
+              <SearchX className="h-8 w-8 text-green" aria-hidden />
+            </div>
+            <p className="mt-4 max-w-[240px] text-sm leading-relaxed text-ink-soft">
+              You don&apos;t have any eSIMs yet. Browse plans and get your first one
+            </p>
+            <div className="mt-5">
+              <Button href="/products" variant="accent" size="sm">
+                Get your eSIM
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <motion.div
