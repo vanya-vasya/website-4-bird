@@ -60,7 +60,6 @@ WHEN YOU'RE READY TO USE DATA
 1. Go to Settings > Cellular and turn this line on
 2. Make sure "Data Roaming" is toggled on and you are selecting the FastBird eSIM for "Cellular Data"
 3. This eSIM is automatically activated / started once you connect to the local network at your destination. Note that some eSIMs are activated / started differently.
-4. You can check your data usage on the FastBird web portal (myfastbird.com/dashboard).
 
 PLEASE NOTE
 The expiry of the plan will not start until the data plan on your eSIM is activated / started.
@@ -150,7 +149,6 @@ const buildHtml = (orderId: string, hasQr: boolean): string => `<!DOCTYPE html>
       <li style="margin-bottom:8px;">Go to Settings &gt; Cellular and turn this line on</li>
       <li style="margin-bottom:8px;">Make sure "Data Roaming" is toggled on and you are selecting the FastBird eSIM for "Cellular Data"</li>
       <li style="margin-bottom:8px;">This eSIM is automatically activated / started once you connect to the local network at your destination. Note that some eSIMs are activated / started differently.</li>
-      <li style="margin-bottom:8px;">You can check your data usage on the <a href="https://myfastbird.com/dashboard" style="color:#625afa;">FastBird web portal</a>.</li>
     </ol>
 
     <div style="background:#f6f8fa;border-radius:6px;padding:12px 16px;margin:0 0 16px;">
