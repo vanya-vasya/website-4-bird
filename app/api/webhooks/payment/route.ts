@@ -18,7 +18,8 @@ function chunkSplit(str: string, length: number) {
 export async function POST(req: Request) {
   try {
     const headersList = headers();
-    const shopPublicKey = PUBLIC_KEY;
+    // Env-first: SECURE_PROCESSOR_PUBLIC_KEY is managed in Vercel; constant kept as legacy fallback
+    const shopPublicKey = process.env.SECURE_PROCESSOR_PUBLIC_KEY || PUBLIC_KEY;
 
     const signature = headersList.get("content-signature");
 

@@ -40,18 +40,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Secure-Processor Pay API credentials and configuration
-    const shopId = process.env.SECURE_PROCESSOR_SHOP_ID || '29959';
-    const secretKey = process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
-    // Use checkout.secure-processor.com - verified working endpoint
+    // Secure-Processor Pay API credentials and configuration (all from environment variables)
+    const shopId = process.env.SECURE_PROCESSOR_SHOP_ID;
+    const secretKey = process.env.SECURE_PROCESSOR_SECRET_KEY;
+
+    if (!shopId || !secretKey) {
+      console.error('❌ SECURE_PROCESSOR_SHOP_ID / SECURE_PROCESSOR_SECRET_KEY are not configured');
+      return NextResponse.json(
+        { error: 'Payment gateway is not configured' },
+        { status: 500 }
+      );
+    }
+
     // Remove /ctp/api/checkouts if it's already in the env variable (avoid duplication)
-    let apiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processor.com';
-    apiUrl = apiUrl.replace(/\/ctp\/api\/checkouts\/?$/, ''); // Strip trailing path if present
-    // Force correct URLs (override old env variables)
-    // Production URLs using custom domain yum-mi.com
-    const returnUrl = 'https://www.yum-mi.com/dashboard';
-    const notificationUrl = 'https://www.yum-mi.com/api/webhooks/secure-processor';
-    const testMode = process.env.SECURE_PROCESSOR_TEST_MODE === 'true'; // Use test mode based on env variable
+    const apiUrl = (process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processor.com')
+      .replace(/\/ctp\/api\/checkouts\/?$/, '');
+    const returnUrl = process.env.SECURE_PROCESSOR_RETURN_URL || 'https://myfastbird.com/payment/success';
+    const cancelUrl = process.env.SECURE_PROCESSOR_CANCEL_URL || 'https://myfastbird.com/payment/cancel';
+    const notificationUrl = process.env.SECURE_PROCESSOR_WEBHOOK_URL || 'https://myfastbird.com/api/webhooks/secure-processor';
+    // Case-insensitive: Vercel stores "TRUE"
+    const testMode = (process.env.SECURE_PROCESSOR_TEST_MODE || '').toLowerCase() === 'true';
     
     console.log('Environment variables:', {
       shopId: shopId ? 'SET' : 'MISSING',
@@ -84,6 +92,7 @@ export async function POST(request: NextRequest) {
         },
         settings: {
           return_url: returnUrl,
+          cancel_url: cancelUrl,
           notification_url: notificationUrl
         }
       }
@@ -187,9 +196,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const shopId = process.env.SECURE_PROCESSOR_SHOP_ID || '29959';
-    const secretKey = process.env.SECURE_PROCESSOR_SECRET_KEY || 'dbfb6f4e977f49880a6ce3c939f1e7be645a5bb2596c04d9a3a7b32d52378950';
-    const apiUrl = process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processor.com'; // API URL
+    const shopId = process.env.SECURE_PROCESSOR_SHOP_ID;
+    const secretKey = process.env.SECURE_PROCESSOR_SECRET_KEY;
+
+    if (!shopId || !secretKey) {
+      return NextResponse.json(
+        { error: 'Payment gateway is not configured' },
+        { status: 500 }
+      );
+    }
+
+    // Remove /ctp/api/checkouts if it's already in the env variable (avoid duplication)
+    const apiUrl = (process.env.SECURE_PROCESSOR_API_URL || 'https://checkout.secure-processor.com')
+      .replace(/\/ctp\/api\/checkouts\/?$/, '');
 
     // Send request to Secure-Processor HPP API for status check
     const secureProcessorResponse = await fetch(`${apiUrl}/ctp/api/checkouts/${token}`, {
