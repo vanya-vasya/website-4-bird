@@ -73,14 +73,29 @@ export async function createUser(user: any) {
     
     // If user already exists (unique constraint), try to return existing
     if (error.code === 'P2002') {
-      console.log('[CREATE_USER] User already exists, fetching...');
+      console.log('[CREATE_USER] Unique conflict, resolving...');
       try {
+        // Duplicate webhook delivery: the row with this clerkId already exists
         const existing = await prismadb.user.findUnique({
           where: { clerkId: user.clerkId },
         });
-        return existing;
-      } catch (findError) {
-        console.error('[CREATE_USER] Could not find existing user:', findError);
+        if (existing) return existing;
+
+        // Same email but different clerkId (Clerk instance was rotated):
+        // relink the existing account to the new clerkId, preserving balance and history
+        const relinked = await prismadb.user.update({
+          where: { email: user.email },
+          data: {
+            clerkId: user.clerkId,
+            photo: user.photo,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          },
+        });
+        console.log('[CREATE_USER] Relinked existing user by email to new clerkId:', user.clerkId);
+        return relinked;
+      } catch (resolveError) {
+        console.error('[CREATE_USER] Could not resolve unique conflict:', resolveError);
       }
     }
     

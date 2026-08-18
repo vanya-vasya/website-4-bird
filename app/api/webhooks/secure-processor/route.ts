@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
           }
           
           // Find user to update token balance
-          const user = await prismadb.user.findUnique({
+          let user = await prismadb.user.findUnique({
             where: { clerkId: userId },
             select: {
               usedGenerations: true,
@@ -167,8 +167,43 @@ export async function POST(request: NextRequest) {
             },
           });
 
+          // Self-healing: after a Clerk instance rotation the same person gets a new
+          // clerkId while the DB row still holds the old one — relink the account by
+          // email so balance and history are preserved
+          if (!user && email) {
+            const userByEmail = await prismadb.user.findUnique({
+              where: { email },
+              select: {
+                usedGenerations: true,
+                availableGenerations: true,
+                email: true,
+              },
+            });
+
+            if (userByEmail) {
+              await prismadb.user.update({
+                where: { email },
+                data: { clerkId: userId },
+              });
+              console.log(`   🔗 Relinked existing account ${email} to new clerkId ${userId}`);
+              user = userByEmail;
+            } else {
+              await prismadb.user.create({
+                data: {
+                  clerkId: userId,
+                  email,
+                  photo: '',
+                  availableGenerations: 0,
+                  usedGenerations: 0,
+                },
+              });
+              console.log(`   🆕 Provisioned missing user ${userId} (${email}) from payment webhook`);
+              user = { usedGenerations: 0, availableGenerations: 0, email };
+            }
+          }
+
           if (!user) {
-            console.error(`❌ User not found: ${userId}`);
+            console.error(`❌ User not found and webhook has no email: ${userId}`);
             return NextResponse.json(
               { error: 'User not found' },
               { status: 404 }
