@@ -5,23 +5,18 @@ import {
   Text,
   View,
   StyleSheet,
-  Image,
   Link,
-  Font,
 } from "@react-pdf/renderer";
 
+// Built-in Helvetica only: custom font/logo files are not bundled into
+// Vercel serverless functions, and fs reads there crash PDF generation
 const colors = {
   background: "#ffffff",
-  textColor1: "#ffffff",
-  textColor2: "#a1aac0",
+  textColor1: "#30313d",
+  textColor2: "#687385",
   textColor3: "#525f7f",
   textColor4: "#687385",
 };
-
-Font.register({
-  family: "Nunito",
-  src: `./public/assets/fonts/Nunito-Regular.ttf`,
-});
 
 const styles = StyleSheet.create({
   page: {
@@ -30,7 +25,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     padding: 40,
     fontSize: 12,
-    fontFamily: "Nunito",
+    fontFamily: "Helvetica",
   },
   header: {
     display: "flex",
@@ -40,8 +35,11 @@ const styles = StyleSheet.create({
     padding: 0,
     height: 100,
   },
-  headerImage: {
-    width: 300,
+  headerBrand: {
+    fontSize: 32,
+    fontFamily: "Helvetica-Bold",
+    color: colors.textColor1,
+    letterSpacing: 1,
   },
   titleSection: {
     marginTop: 48,
@@ -135,12 +133,11 @@ const styles = StyleSheet.create({
 });
 
 const company = {
-  name: "Yum-mi",
+  name: "FastBird",
   company: "QUICK FIT LTD",
   address: "DEPT 2, 43 OWSTON ROAD, CARCROFT, DONCASTER, UNITED KINGDOM, DN6 8DA",
-  website: "yum-mi.com",
-  email: "support@yum-mi.com",
-  logo: "./public/logos/yum-mi-onigiri-logo.png", // Official company logo
+  website: "myfastbird.com",
+  email: "support@myfastbird.com",
   companyNumber: "15995367",
 };
 
@@ -165,8 +162,7 @@ const Receipt = ({
     <Page size="A4" style={styles.page}>
       <View>
         <View style={styles.header}>
-          {/* eslint-disable-next-line jsx-a11y/alt-text */}
-          <Image src={company.logo} style={styles.headerImage} />
+          <Text style={styles.headerBrand}>{company.name}</Text>
         </View>
 
         <View style={styles.titleSection}>

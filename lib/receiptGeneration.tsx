@@ -1,5 +1,6 @@
 "use server";
 
+import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
 import Receipt from "@/components/pdf/receipt";
 

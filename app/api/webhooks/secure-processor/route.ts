@@ -287,21 +287,19 @@ export async function POST(request: NextRequest) {
             await transporter.sendMail({
               from: process.env.OUTBOX_EMAIL,
               to: email,
-              subject: `Receipt #${transactionId} - Yum-Mi Tokens Purchase`,
+              subject: `Receipt #${transactionId} - FastBird Tokens Purchase`,
               text: `Hi there,
 
-We're excited to welcome you to Yum-Mi — thanks so much for your recent order on yum-mi.com!
+We're excited to welcome you to FastBird — thanks so much for your recent order on myfastbird.com!
 
 You'll find your transaction receipt attached to this message. Be sure to keep it in case you need it later.
 
-If you run into any issues, have questions about your token usage, or need guidance, our support team is just an email away at support@yum-mi.com. We're always ready to help.
-
-We're honored to be part of your creative journey.
+If you run into any issues, have questions about your token usage, or need guidance, our support team is just an email away at support@myfastbird.com. We're always ready to help.
 
 With appreciation,
-The Yum-Mi Team
-yum-mi.com
-support@yum-mi.com`,
+The FastBird Team
+myfastbird.com
+support@myfastbird.com`,
               attachments: [
                 {
                   filename: `receipt-${transactionId}.pdf`,
