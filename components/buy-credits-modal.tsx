@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { Loader2, Zap } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { useAuth, useUser } from "@clerk/nextjs";
 import {
   Dialog,
   DialogContent,
@@ -16,9 +18,19 @@ interface BuyCreditsModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface CreateCheckoutResponse {
+  success?: boolean;
+  redirect_url?: string;
+  error?: string;
+  details?: string;
+}
+
 const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
+  const { userId } = useAuth();
+  const { user } = useUser();
   const [tokenAmount, setTokenAmount] = useState(0);
   const [agreed, setAgreed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const gbpTotal = (tokenAmount * RATE_PER_TOKEN).toFixed(2);
 
@@ -27,6 +39,49 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value, 10);
     setTokenAmount(isNaN(val) || val < 0 ? 0 : val);
+  };
+
+  const handleBuyTokens = async () => {
+    if (!agreed || tokenAmount === 0 || isSubmitting) return;
+
+    if (!userId) {
+      toast.error("Please sign in to buy tokens");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/payment/secure-processor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: tokenAmount * RATE_PER_TOKEN,
+          currency: "GBP",
+          // Format matters: the webhook parses the Clerk id back out of "gen_<clerkId>_<ts>"
+          orderId: `gen_${userId}_${Date.now()}`,
+          // Format matters: the webhook extracts the token count from "(N Tokens)"
+          description: `FastBird Tokens Purchase (${tokenAmount} Tokens)`,
+          customerEmail: user?.primaryEmailAddress?.emailAddress ?? "",
+        }),
+      });
+
+      const data: CreateCheckoutResponse = await response.json();
+
+      if (!response.ok || !data.success || !data.redirect_url) {
+        console.error("Checkout creation failed:", data);
+        toast.error(data.error || "Failed to start payment. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Redirect to the Secure-Processor hosted payment page
+      window.location.href = data.redirect_url;
+    } catch (error) {
+      console.error("Checkout request error:", error);
+      toast.error("Server connection error. Please try again.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -122,11 +177,22 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
         {/* CTA */}
         <button
           type="button"
-          disabled={!agreed || tokenAmount === 0}
+          onClick={handleBuyTokens}
+          disabled={!agreed || tokenAmount === 0 || isSubmitting}
+          aria-label="Buy tokens and proceed to payment"
           className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-xl bg-ink py-4 font-heading text-base font-semibold text-on-dark transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Buy Tokens
-          <Zap className="h-4 w-4 fill-on-dark" aria-hidden />
+          {isSubmitting ? (
+            <>
+              Redirecting to payment
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            </>
+          ) : (
+            <>
+              Buy Tokens
+              <Zap className="h-4 w-4 fill-on-dark" aria-hidden />
+            </>
+          )}
         </button>
 
       </DialogContent>
