@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import prismadb from '@/lib/prismadb';
 import { transporter } from '@/config/nodemailer';
 import { generatePdfReceipt } from '@/lib/receiptGeneration';
+import { buildEsimInstallEmail } from '@/lib/esim-install-email';
 
 // Функция для верификации подписи webhook согласно документации Secure-Processor
 function verifyWebhookSignature(data: Record<string, any>, signature: string, secretKey: string): boolean {
@@ -284,31 +285,31 @@ export async function POST(request: NextRequest) {
               currency
             );
 
-            await transporter.sendMail({
-              from: process.env.OUTBOX_EMAIL,
-              to: email,
-              subject: `Receipt #${transactionId} - FastBird Tokens Purchase`,
-              text: `Hi there,
+            // QR lives in public/ which is CDN-served but not bundled into the
+            // serverless function, so it has to be fetched over HTTP
+            let qrPng: Buffer | null = null;
+            try {
+              const qrResponse = await fetch('https://myfastbird.com/esim/install-qr.png');
+              if (qrResponse.ok) {
+                qrPng = Buffer.from(await qrResponse.arrayBuffer());
+              } else {
+                console.error(`   ⚠️ QR code fetch returned ${qrResponse.status}, sending email without inline QR`);
+              }
+            } catch (qrError) {
+              console.error('   ⚠️ Failed to fetch QR code image, sending email without inline QR:', qrError);
+            }
 
-We're excited to welcome you to FastBird — thanks so much for your recent order on myfastbird.com!
-
-You'll find your transaction receipt attached to this message. Be sure to keep it in case you need it later.
-
-If you run into any issues, have questions about your token usage, or need guidance, our support team is just an email away at support@myfastbird.com. We're always ready to help.
-
-With appreciation,
-The FastBird Team
-myfastbird.com
-support@myfastbird.com`,
-              attachments: [
-                {
-                  filename: `receipt-${transactionId}.pdf`,
-                  content: pdfBuffer,
-                  contentType: 'application/pdf',
-                },
-              ],
-            });
-            console.log(`   ✅ Receipt email sent to ${email}`);
+            await transporter.sendMail(
+              buildEsimInstallEmail({
+                to: email,
+                from: process.env.OUTBOX_EMAIL as string,
+                orderId: token || savedTransaction.id,
+                receiptId: transactionId,
+                receiptPdf: pdfBuffer,
+                qrPng,
+              })
+            );
+            console.log(`   ✅ eSIM installation email sent to ${email}`);
           } catch (emailError) {
             console.error('   ⚠️ Failed to send receipt email:', emailError);
             // Don't fail the webhook if email fails
