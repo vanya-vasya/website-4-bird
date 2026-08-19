@@ -115,6 +115,14 @@ const Header = () => {
               {item.label}
             </Link>
           ))}
+          {isLoaded && isSignedIn && (
+            <Link
+              href="/dashboard"
+              className="font-sans text-[15px] text-ink-soft transition-colors hover:text-ink fb-focus rounded-sm"
+            >
+              Dashboard
+            </Link>
+          )}
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
