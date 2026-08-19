@@ -14,7 +14,7 @@ import BuyCreditsModal from "@/components/buy-credits-modal";
 
 const dashboardNav = [
   { name: "Payments", href: "/dashboard/billing/payment-history" },
-  { name: "Activities", href: "/dashboard/activity-history" },
+  { name: "Dashboard", href: "/dashboard" },
 ];
 
 const DashboardHeader = () => {
