@@ -26,6 +26,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/activity-history",
+        destination: "/dashboard/activity",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

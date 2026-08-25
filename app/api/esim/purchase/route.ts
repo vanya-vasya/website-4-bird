@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         data: { usedGenerations: { increment: pointsCost } },
       });
 
-      return tx.transaction.create({
+      const createdTransaction = await tx.transaction.create({
         data: {
           tracking_id: `esim_${userId}_${Date.now()}`,
           userId,
@@ -92,6 +92,21 @@ export async function POST(request: NextRequest) {
           receipt_url: null,
         },
       });
+
+      // Track the purchased eSIM per user — feeds /dashboard/activity
+      await tx.activity.create({
+        data: {
+          userId,
+          destination: destination.name,
+          destinationSlug: destination.slug,
+          planData: plan.data,
+          validityDays: plan.validityDays,
+          points: pointsCost,
+          transactionId: createdTransaction.id,
+        },
+      });
+
+      return createdTransaction;
     });
 
     console.log(

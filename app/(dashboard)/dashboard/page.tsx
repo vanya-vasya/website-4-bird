@@ -1,6 +1,6 @@
 "use client";
 
-import { Wifi, MapPin, CreditCard, ArrowRight, Wallet, SearchX, Plus } from "lucide-react";
+import { Wifi, MapPin, CreditCard, ArrowRight, Wallet, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/fastbird";
@@ -36,7 +36,7 @@ const quickActions = [
     label: "Active Plans",
     icon: Wifi,
     description: "View and manage your currently active eSIM plans and data usage.",
-    href: "/dashboard/activity-history",
+    href: "/dashboard/activity",
   },
   {
     id: "billing",
@@ -65,9 +65,8 @@ export default function DashboardHomePage() {
         </p>
       </div>
 
-      {/* Balance + eSIMs overview */}
+      {/* Balance overview */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Balance card */}
         <div className="rounded-2xl bg-white p-6 shadow-sm border border-line">
           <div className="flex items-center gap-2 text-ink-soft">
             <Wallet className="h-5 w-5" aria-hidden />
@@ -82,24 +81,6 @@ export default function DashboardHomePage() {
               <Plus className="h-4 w-4 mr-1" aria-hidden />
               Top up
             </Button>
-          </div>
-        </div>
-
-        {/* My eSIMs card */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm border border-line">
-          <h2 className="font-heading text-xl font-medium text-ink">My eSIMs</h2>
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-green">
-              <SearchX className="h-8 w-8 text-green" aria-hidden />
-            </div>
-            <p className="mt-4 max-w-[240px] text-sm leading-relaxed text-ink-soft">
-              You don&apos;t have any eSIMs yet. Browse plans and get your first one
-            </p>
-            <div className="mt-5">
-              <Button href="/products" variant="accent" size="sm">
-                Get your eSIM
-              </Button>
-            </div>
           </div>
         </div>
       </div>

@@ -21,9 +21,28 @@ model User {
   updatedAt            DateTime          @updatedAt
   transactions         Transaction[]
   activityLogs         ActivityLog[]
+  activities           Activity[]
   chefLogs             ChefLog[]
   nutritionistLogs     NutritionistLog[]
   trackerLogs          TrackerLog[]
+}
+
+// eSIM purchases per user — one row per bought eSIM, matched by the
+// user's unique clerkId. Feeds the /dashboard/activity page.
+model Activity {
+  id              String   @id @default(cuid())
+  userId          String
+  destination     String // e.g. "Japan"
+  destinationSlug String // e.g. "japan", used to render the flag
+  planData        String // e.g. "5 GB"
+  validityDays    Int
+  points          Int // Points deducted for this purchase
+  transactionId   String?  @unique // linked Transaction row
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [clerkId])
+
+  @@index([userId, createdAt])
 }
 
 // Your Own Chef — recipe generation logs
