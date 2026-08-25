@@ -42,7 +42,7 @@ export function UsageProgress({
                 <Coins className="w-3 h-3 text-white" />
               </div>
             </div>
-            <span className="font-medium">Credits</span>
+            <span className="font-medium">Points</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-black">
@@ -52,7 +52,7 @@ export function UsageProgress({
               onClick={handleRefresh}
               disabled={isLoading}
               className="p-0.5 hover:bg-black/5 rounded transition-colors disabled:opacity-50"
-              title="Refresh credits"
+              title="Refresh points"
             >
               <RefreshCw className={`w-3 h-3 text-gray-600 ${isLoading ? 'animate-spin' : ''}`} />
             </button>

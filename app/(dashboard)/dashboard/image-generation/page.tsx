@@ -35,7 +35,7 @@ import { MODEL_GENERATIONS_PRICE } from "@/constants";
 const toolConfigs = {
   'image-generation': {
     title: 'Image Generation',
-    description: `Turn your prompt into an image using our advanced AI model\nPrice: ${MODEL_GENERATIONS_PRICE.imageGeneration} credits`,
+    description: `Turn your prompt into an image using our advanced AI model\nPrice: ${MODEL_GENERATIONS_PRICE.imageGeneration} points`,
     iconName: 'Image',
     iconColor: 'text-orange-700',
     bgColor: 'bg-orange-700/10',
@@ -44,7 +44,7 @@ const toolConfigs = {
 
   'social-graphics': {
     title: 'Social Graphics',
-    description: `Create eye-catching graphics for your social media platforms\nPrice: ${MODEL_GENERATIONS_PRICE.imageGeneration} credits`,
+    description: `Create eye-catching graphics for your social media platforms\nPrice: ${MODEL_GENERATIONS_PRICE.imageGeneration} points`,
     iconName: 'Share2',
     iconColor: 'text-green-600',
     bgColor: 'bg-green-600/10',

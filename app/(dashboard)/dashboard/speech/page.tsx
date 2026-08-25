@@ -25,7 +25,7 @@ import { MODEL_GENERATIONS_PRICE } from "@/constants";
 const toolConfigs = {
   'speech-generation': {
     title: 'Speech Generation',
-    description: `Turn your prompt into speech. Generation can take from 1 to 5 minutes\nPrice: ${MODEL_GENERATIONS_PRICE.speecGeneration} credits`,
+    description: `Turn your prompt into speech. Generation can take from 1 to 5 minutes\nPrice: ${MODEL_GENERATIONS_PRICE.speecGeneration} points`,
     iconName: 'Mic',
     iconColor: 'text-fuchsia-600',
     bgColor: 'bg-fuchsia-600/10',

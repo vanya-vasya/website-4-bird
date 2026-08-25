@@ -131,7 +131,7 @@ export function useAIGeneration() {
       });
       return {
         success: false,
-        error: `Insufficient credits. Need ${tokenCost}, have ${remainingCredits}.`,
+        error: `Insufficient points. Need ${tokenCost}, have ${remainingCredits}.`,
       };
     }
 

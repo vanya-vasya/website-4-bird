@@ -32,7 +32,7 @@ import { MODEL_GENERATIONS_PRICE } from "@/constants";
 const toolConfigs = {
   'music-generation': {
     title: 'Music Generation',
-    description: `Turn your prompt into music. Generation can take from 1 to 5 minutes\nPrice: ${MODEL_GENERATIONS_PRICE.musicGeneration} credits`,
+    description: `Turn your prompt into music. Generation can take from 1 to 5 minutes\nPrice: ${MODEL_GENERATIONS_PRICE.musicGeneration} points`,
     iconName: 'Music',
     iconColor: 'text-violet-500',
     bgColor: 'bg-violet-500/10',

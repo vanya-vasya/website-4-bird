@@ -23,7 +23,7 @@ const ImageObjectRecolorPage = async () => {
     <div className="bg-white">
       <FeatureContainer
       title="Object Recolor"
-      description={`Easily change the color of objects to match your vision\nPrice: ${MODEL_GENERATIONS_PRICE.imageObjectRecolor} credits`}
+      description={`Easily change the color of objects to match your vision\nPrice: ${MODEL_GENERATIONS_PRICE.imageObjectRecolor} points`}
       iconName={"Brush"}
     >
       <div className={contentStyles.base}>

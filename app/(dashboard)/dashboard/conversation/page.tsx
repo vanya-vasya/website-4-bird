@@ -228,7 +228,7 @@ const ConversationPage = () => {
     
     // Check credit balance before proceeding (skip for free tools)
     if (hasInsufficientCredits && toolPrice > 0) {
-      toast.error(`Insufficient credits. You need ${toolPrice} credits but only have ${availableCredits} available.`);
+      toast.error(`Insufficient points. You need ${toolPrice} points but only have ${availableCredits} available.`);
       proModal.onOpen();
       return;
     }
@@ -522,7 +522,7 @@ const ConversationPage = () => {
                 <div className="text-sm text-gray-600 text-center">
                   <span className="flex items-center justify-center gap-2">
                     <Activity className="h-4 w-4" />
-                    Credits: {availableCredits} available | {toolPrice === 0 ? 'Free' : `${toolPrice} required`}
+                    Points: {availableCredits} available | {toolPrice === 0 ? 'Free' : `${toolPrice} required`}
                   </span>
                 </div>
               )}
@@ -550,12 +550,12 @@ const ConversationPage = () => {
                   </TooltipTrigger>
                   <TooltipContent>
                     {isLoadingCredits ? (
-                      <p>Loading credit balance...</p>
+                      <p>Loading points balance...</p>
                     ) : toolId === 'master-nutritionist' ? (
                       !description.trim() ? (
                         <p>Please enter your challenge description</p>
                       ) : hasInsufficientCredits ? (
-                        <p>Insufficient credits. You need {toolPrice} but have {availableCredits} available.</p>
+                        <p>Insufficient points. You need {toolPrice} but have {availableCredits} available.</p>
                       ) : toolPrice === 0 ? (
                         <p>Click to generate nutritional analysis (Free tool)</p>
                       ) : (
@@ -565,7 +565,7 @@ const ConversationPage = () => {
                       !uploadedImage ? (
                         <p>Please upload an image first</p>
                       ) : hasInsufficientCredits ? (
-                        <p>Insufficient credits. You need {toolPrice} but have {availableCredits} available.</p>
+                        <p>Insufficient points. You need {toolPrice} but have {availableCredits} available.</p>
                       ) : toolPrice === 0 ? (
                         <p>Click to generate AI analysis (Free tool)</p>
                       ) : (

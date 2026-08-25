@@ -30,7 +30,7 @@ const ArtStyleTransferPage = async () => {
     <div className="bg-white">
       <FeatureContainer
       title="Art Style Transfer"
-      description={`Transform your artworks with different artistic styles and techniques using GPT Image\nPrice: ${MODEL_GENERATIONS_PRICE.imageObjectRecolor} credits`}
+      description={`Transform your artworks with different artistic styles and techniques using GPT Image\nPrice: ${MODEL_GENERATIONS_PRICE.imageObjectRecolor} points`}
       iconName={"Wand2"}
 
     >

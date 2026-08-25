@@ -73,13 +73,13 @@ const DashboardHeader = () => {
         <div className="hidden items-center gap-4 lg:flex">
           <button
             type="button"
-            aria-label={`${remainingCredits} credits — buy more`}
+            aria-label={`${remainingCredits} points — buy more`}
             onClick={() => setBuyModalOpen(true)}
             className="flex items-center gap-2 rounded-full bg-green px-4 py-2 text-white transition-opacity hover:opacity-90 fb-focus"
           >
             <Zap className="h-4 w-4 fill-white" aria-hidden />
             <span className="font-semibold text-sm">{remainingCredits}</span>
-            <span className="text-sm font-normal opacity-80">credits</span>
+            <span className="text-sm font-normal opacity-80">points</span>
           </button>
           <UserDropdown />
         </div>
