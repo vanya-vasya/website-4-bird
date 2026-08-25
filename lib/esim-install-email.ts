@@ -22,16 +22,20 @@ interface EsimInstallEmailParams {
   receiptId: string;
   receiptPdf: Buffer;
   qrPng: Buffer | null;
+  /** Purchased plan size, e.g. "5 GB". Defaults to the supplier plan. */
+  size?: string;
+  /** Purchased plan validity, e.g. "30 DAY". Defaults to the supplier plan. */
+  validity?: string;
 }
 
-const buildText = (orderId: string): string => `How to Install Your FastBird eSIM
+const buildText = (orderId: string, size: string, validity: string): string => `How to Install Your FastBird eSIM
 
 Hi!
 
 Thank you for your purchase of the following eSIM plan:
 
-Size: ${ESIM_PLAN.size}
-Validity: ${ESIM_PLAN.validity}
+Size: ${size}
+Validity: ${validity}
 ICCID: ${ESIM_PLAN.iccid}
 
 You can find your order confirmation in the attachment.
@@ -87,7 +91,12 @@ const sectionTitle = (title: string): string =>
 const codeBox = (code: string): string =>
   `<div style="background:#f6f8fa;border:1px solid #e6ebf1;border-radius:6px;padding:10px 14px;font-family:SFMono-Regular,Consolas,Menlo,monospace;font-size:13px;color:#30313d;word-break:break-all;">${code}</div>`;
 
-const buildHtml = (orderId: string, hasQr: boolean): string => `<!DOCTYPE html>
+const buildHtml = (
+  orderId: string,
+  hasQr: boolean,
+  size: string,
+  validity: string
+): string => `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" /></head>
 <body style="margin:0;padding:0;background:#f6f8fa;">
@@ -101,11 +110,11 @@ const buildHtml = (orderId: string, hasQr: boolean): string => `<!DOCTYPE html>
     <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
       <tr>
         <td style="padding:8px 0;border-bottom:1px solid #e6ebf1;color:#687385;width:35%;">Size:</td>
-        <td style="padding:8px 0;border-bottom:1px solid #e6ebf1;font-weight:bold;">${ESIM_PLAN.size}</td>
+        <td style="padding:8px 0;border-bottom:1px solid #e6ebf1;font-weight:bold;">${size}</td>
       </tr>
       <tr>
         <td style="padding:8px 0;border-bottom:1px solid #e6ebf1;color:#687385;">Validity:</td>
-        <td style="padding:8px 0;border-bottom:1px solid #e6ebf1;font-weight:bold;">${ESIM_PLAN.validity}</td>
+        <td style="padding:8px 0;border-bottom:1px solid #e6ebf1;font-weight:bold;">${validity}</td>
       </tr>
       <tr>
         <td style="padding:8px 0;border-bottom:1px solid #e6ebf1;color:#687385;">ICCID:</td>
@@ -184,6 +193,8 @@ export const buildEsimInstallEmail = ({
   receiptId,
   receiptPdf,
   qrPng,
+  size = ESIM_PLAN.size,
+  validity = ESIM_PLAN.validity,
 }: EsimInstallEmailParams): SendMailOptions => {
   const attachments: SendMailOptions["attachments"] = [
     {
@@ -206,8 +217,8 @@ export const buildEsimInstallEmail = ({
     from,
     to,
     subject: "How to Install Your FastBird eSIM",
-    text: buildText(orderId),
-    html: buildHtml(orderId, Boolean(qrPng)),
+    text: buildText(orderId, size, validity),
+    html: buildHtml(orderId, Boolean(qrPng), size, validity),
     attachments,
   };
 };

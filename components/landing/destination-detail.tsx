@@ -3,7 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { toast } from "react-hot-toast";
+import { Check, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge, Button, DestinationCard } from "@/components/fastbird";
 import {
@@ -36,11 +39,54 @@ export const DestinationDetail = ({
   destination,
   nearby,
 }: DestinationDetailProps) => {
+  const router = useRouter();
+  const { isSignedIn } = useAuth();
   const plans = buildPlans(destination);
   const [selectedId, setSelectedId] = useState(
     plans.find((p) => p.popular)?.id ?? plans[0].id
   );
+  const [isPurchasing, setIsPurchasing] = useState(false);
   const selected = plans.find((p) => p.id === selectedId) ?? plans[0];
+
+  const handleBuyNow = async () => {
+    if (isPurchasing) return;
+
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+
+    setIsPurchasing(true);
+
+    try {
+      const response = await fetch("/api/esim/purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          destinationSlug: destination.slug,
+          planId: selected.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        toast.error(data.error || "Purchase failed. Please try again.");
+        setIsPurchasing(false);
+        return;
+      }
+
+      toast.success(
+        `eSIM purchased! Installation instructions are on their way to your email. ${data.remainingPoints} Points left.`,
+        { duration: 6000 }
+      );
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("eSIM purchase request error:", error);
+      toast.error("Server connection error. Please try again.");
+      setIsPurchasing(false);
+    }
+  };
 
   return (
     <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr]">
@@ -191,17 +237,23 @@ export const DestinationDetail = ({
 
           <div className="mt-6 flex flex-col gap-3">
             <Button
-              href={`/dashboard/esims?buy=${destination.slug}&plan=${selected.id}`}
+              type="button"
               variant="accent"
               size="lg"
+              onClick={handleBuyNow}
+              disabled={isPurchasing}
+              aria-label={`Buy ${selected.data} plan for ${destination.name} for ${selected.points} Points`}
             >
-              Buy now
+              {isPurchasing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                  Processing…
+                </>
+              ) : (
+                "Buy now"
+              )}
             </Button>
-            <Button
-              href={`/dashboard/wallet?add=${selected.points}`}
-              variant="secondary"
-              size="md"
-            >
+            <Button href="/dashboard" variant="secondary" size="md">
               Top up Points
             </Button>
           </div>

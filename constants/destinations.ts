@@ -125,7 +125,9 @@ export const destinations: Destination[] = [
   d("Global", "un", "Regional", 0.95),
 ];
 
-const round = (n: number) => Math.round(n * 100) / 100;
+// Points are whole numbers: user balances are stored as integers, so plan
+// prices must be integers too for exact deduction at purchase time
+const toPoints = (n: number) => Math.max(1, Math.round(n));
 
 /** Derive the plan ladder for a destination from its base factor. */
 export const buildPlans = (dest: Destination): Plan[] => {
@@ -140,13 +142,17 @@ export const buildPlans = (dest: Destination): Plan[] => {
     id: `${dest.slug}-${i}`,
     data: t.data,
     validityDays: t.validityDays,
-    points: round(dest.base * t.mult),
+    points: toPoints(dest.base * t.mult),
     popular: t.popular,
   }));
 };
 
 export const startingPoints = (dest: Destination): number =>
-  round(dest.base);
+  toPoints(dest.base);
+
+/** Find a plan by its id (format: "<slug>-<tierIndex>") within a destination. */
+export const getPlan = (dest: Destination, planId: string): Plan | undefined =>
+  buildPlans(dest).find((p) => p.id === planId);
 
 export const flagUrl = (code: string, width = 80): string =>
   `https://flagcdn.com/w${width}/${code}.png`;
