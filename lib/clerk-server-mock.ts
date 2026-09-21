@@ -21,3 +21,15 @@ export const currentUser = async () => MOCK_USER;
 export const clerkMiddleware = (handler?: unknown) => handler;
 
 export const createRouteMatcher = (_patterns: string[]) => (_req: unknown) => false;
+
+export const clerkClient = {
+  users: {
+    updateUserMetadata: async () => MOCK_USER,
+    getUser: async () => MOCK_USER,
+  },
+};
+
+export type WebhookEvent = {
+  type: string;
+  data: Record<string, any>;
+};
