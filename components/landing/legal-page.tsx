@@ -37,7 +37,7 @@ export const LegalPage = ({
     <section className="bg-surface py-14 lg:py-20">
       <Container className="max-w-measure">
         {/* TODO: this is scaffolding copy — have it reviewed by legal counsel
-            and insert the registered FastBird entity details before launch. */}
+            before launch. */}
         <div className="space-y-10">
           {sections.map((section, i) => (
             <div key={section.heading}>
@@ -63,7 +63,8 @@ export const LegalPage = ({
 
         <p className="mt-12 rounded-md border border-line bg-sand p-5 font-mono text-xs leading-relaxed text-ink-soft">
           Questions about this policy? Email support@myfastbird.com. FASTBIRD —
-          [Company name], Company No. [____], [registered address].
+          Quantallin OÜ, Registrite ja Infosüsteemide Keskus EUIDEEARIREG.
+          17505394, Vesivärava tn 50-201, EE-10152 Tallinn.
         </p>
       </Container>
     </section>

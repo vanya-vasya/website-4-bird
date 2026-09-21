@@ -134,11 +134,11 @@ const styles = StyleSheet.create({
 
 const company = {
   name: "FastBird",
-  company: "QUICK FIT LTD",
-  address: "DEPT 2, 43 OWSTON ROAD, CARCROFT, DONCASTER, UNITED KINGDOM, DN6 8DA",
+  company: "Quantallin OÜ",
+  registration: "Registrite ja Infosüsteemide Keskus EUIDEEARIREG. 17505394",
+  address: "Vesivärava tn 50-201, EE-10152 Tallinn",
   website: "myfastbird.com",
   email: "support@myfastbird.com",
-  companyNumber: "15995367",
 };
 
 const Receipt = ({
@@ -228,7 +228,7 @@ const Receipt = ({
       </View>
       <Text style={styles.companyInfo}>
         <Text>
-          {company.name} | {company.company} | {company.companyNumber}
+          {company.name} | {company.company} | {company.registration}
           {"\n"}
           {company.address}
           {"\n"}
