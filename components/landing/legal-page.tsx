@@ -1,5 +1,4 @@
 import { Container, Eyebrow } from "@/components/fastbird";
-import { company } from "@/constants/company";
 
 export type LegalSection = {
   heading: string;
@@ -32,22 +31,6 @@ export const LegalPage = ({
         <p className="mt-6 font-mono text-xs uppercase tracking-[0.06em] text-ink-soft">
           Last updated: {lastUpdated}
         </p>
-        <dl className="mt-6 space-y-1 font-mono text-xs text-ink-soft">
-          <div className="flex flex-wrap gap-x-2">
-            <dt className="uppercase tracking-[0.06em] text-ink">Name:</dt>
-            <dd>{company.name}</dd>
-          </div>
-          <div className="flex flex-wrap gap-x-2">
-            <dt className="uppercase tracking-[0.06em] text-ink">
-              Identification:
-            </dt>
-            <dd>{company.identification}</dd>
-          </div>
-          <div className="flex flex-wrap gap-x-2">
-            <dt className="uppercase tracking-[0.06em] text-ink">Address:</dt>
-            <dd>{company.address}</dd>
-          </div>
-        </dl>
       </Container>
     </section>
 

@@ -13,6 +13,13 @@ const Footer = () => (
             Travel data that just works — top up, tap, and you&apos;re online in
             minutes.
           </p>
+          <address className="mt-4 not-italic font-mono text-xs leading-relaxed text-ink-soft/70">
+            <span className="text-ink-soft">{company.name}</span>
+            <br />
+            {company.identification}
+            <br />
+            {company.address}
+          </address>
         </div>
 
         {footerNav
@@ -39,14 +46,7 @@ const Footer = () => (
       </div>
 
       <div className="mt-14 border-t border-line pt-8">
-        <address className="not-italic font-mono text-xs leading-relaxed text-ink-soft/70">
-          <span className="text-ink-soft">{company.name}</span>
-          <br />
-          {company.identification}
-          <br />
-          {company.address}
-        </address>
-        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-xs text-ink-soft/55">
             © 2026 {company.name}. All rights reserved.
           </p>
