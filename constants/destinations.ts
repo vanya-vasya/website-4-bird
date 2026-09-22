@@ -130,7 +130,7 @@ export const destinations: Destination[] = [
 const planTiers = [
   { data: "1 GB", validityDays: 7, points: 20 },
   { data: "3 GB", validityDays: 15, points: 30 },
-  { data: "5 GB", validityDays: 30, points: 50, popular: true },
+  { data: "5 GB", validityDays: 30, points: 60, popular: true },
   { data: "10 GB", validityDays: 30, points: 100 },
   { data: "20 GB", validityDays: 30, points: 200 },
 ];
