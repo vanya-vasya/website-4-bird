@@ -38,10 +38,17 @@ const Footer = () => (
       </div>
 
       <div className="mt-14 pt-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <p className="font-mono text-xs text-ink-soft/55">
             © 2026 FastBird. All rights reserved.
           </p>
+          <address className="font-mono text-xs not-italic leading-relaxed text-ink-soft/55 sm:text-right">
+            Quantallin OÜ
+            <br />
+            Registrite ja Infosüsteemide Keskus EUIDEEARIREG. 17505394
+            <br />
+            Vesivärava tn 50-201, EE-10152 Tallinn
+          </address>
         </div>
       </div>
     </Container>

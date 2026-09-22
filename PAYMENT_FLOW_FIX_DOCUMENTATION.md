@@ -307,9 +307,9 @@ Payment Method: Card Payment
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-QUICK FIT LTD (№15995367)
-DEPT 2, 43 OWSTON ROAD, CARCROFT, DONCASTER,
-UNITED KINGDOM, DN6 8DA
+Quantallin OÜ (Registrite ja Infosüsteemide Keskus
+EUIDEEARIREG. 17505394)
+Vesivärava tn 50-201, EE-10152 Tallinn
 Email: support@yum-mi.com
 
 Thank you for your purchase!
