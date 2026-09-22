@@ -7,10 +7,10 @@ import {
   Section,
   Card,
   Badge,
-  Button,
   Accordion,
 } from "@/components/fastbird";
 import { CustomTopup } from "@/components/landing/custom-topup";
+import { TopUpButton } from "@/components/top-up-button";
 
 export const metadata: Metadata = {
   title: "Pricing & Points",
@@ -124,14 +124,15 @@ const PricingPage = () => (
                 </li>
               ))}
             </ul>
-            <Button
-              href={`/dashboard/wallet?add=${pack.points}`}
+            <TopUpButton
+              points={pack.points + pack.bonus}
+              chargePoints={pack.points}
               variant={pack.popular ? "accent" : "secondary"}
               size="md"
               className="mt-7 w-full"
             >
               Top up {pack.points} Points
-            </Button>
+            </TopUpButton>
           </Card>
         ))}
         <CustomTopup />

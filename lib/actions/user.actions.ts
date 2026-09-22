@@ -34,7 +34,7 @@ export async function createOrGetUser(clerkUser: {
         firstName: clerkUser.firstName,
         lastName: clerkUser.lastName,
         photo: clerkUser.photo,
-        availableGenerations: 10,
+        availableGenerations: 0,
         usedGenerations: 0,
       },
     });

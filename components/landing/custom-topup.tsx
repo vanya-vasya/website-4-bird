@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { toast } from "react-hot-toast";
+import { Check, Loader2 } from "lucide-react";
 import { Button, Card } from "@/components/fastbird";
+import { startTopUpCheckout } from "@/lib/checkout";
 import { cn } from "@/lib/utils";
 
 const customPerks = [
@@ -14,15 +17,40 @@ const customPerks = [
 
 export const CustomTopup = ({ className }: { className?: string }) => {
   const router = useRouter();
+  const { userId } = useAuth();
+  const { user } = useUser();
   const [amount, setAmount] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const value = Number(amount);
   const valid = Number.isFinite(value) && value >= 5;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!valid) return;
-    router.push(`/dashboard/wallet?add=${value}`);
+    if (!valid || isSubmitting) return;
+
+    if (!userId) {
+      router.push("/sign-in");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const redirectUrl = await startTopUpCheckout({
+        userId,
+        email: user?.primaryEmailAddress?.emailAddress,
+        points: value,
+      });
+      window.location.href = redirectUrl;
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Server connection error. Please try again."
+      );
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -70,9 +98,16 @@ export const CustomTopup = ({ className }: { className?: string }) => {
           variant="secondary"
           size="md"
           className="mt-7 w-full"
-          disabled={!valid}
+          disabled={!valid || isSubmitting}
         >
-          Top up {valid ? `${value} Points` : "Points"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+              Redirecting…
+            </>
+          ) : (
+            `Top up ${valid ? `${value} Points` : "Points"}`
+          )}
         </Button>
       </form>
     </Card>

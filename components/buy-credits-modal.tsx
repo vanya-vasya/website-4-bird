@@ -10,8 +10,9 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { PAYMENT_CURRENCY, TOKEN_RATE } from "@/constants/pricing";
 
-const RATE_PER_TOKEN = 0.2; // £0.20 per token
+const RATE_PER_TOKEN = TOKEN_RATE; // price per token in PAYMENT_CURRENCY (EUR)
 
 interface BuyCreditsModalProps {
   open: boolean;
@@ -32,7 +33,7 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const gbpTotal = (tokenAmount * RATE_PER_TOKEN).toFixed(2);
+  const total = (tokenAmount * RATE_PER_TOKEN).toFixed(2);
 
   const handleIncrement = () => setTokenAmount((v) => v + 1);
   const handleDecrement = () => setTokenAmount((v) => Math.max(0, v - 1));
@@ -57,7 +58,7 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: tokenAmount * RATE_PER_TOKEN,
-          currency: "GBP",
+          currency: PAYMENT_CURRENCY,
           // Format matters: the webhook parses the Clerk id back out of "gen_<clerkId>_<ts>"
           orderId: `gen_${userId}_${Date.now()}`,
           // Format matters: the webhook extracts the token count from "(N Tokens)"
@@ -94,10 +95,12 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
         {/* Currency + amount */}
         <div className="mt-6 flex items-center justify-center gap-4">
           <div className="rounded-xl border-2 border-ink px-5 py-2.5">
-            <span className="font-mono text-sm font-semibold text-ink">GBP</span>
+            <span className="font-mono text-sm font-semibold text-ink">
+              {PAYMENT_CURRENCY}
+            </span>
           </div>
           <span className="font-heading text-5xl font-bold text-ink tracking-tight">
-            {gbpTotal}
+            {total}
           </span>
         </div>
 

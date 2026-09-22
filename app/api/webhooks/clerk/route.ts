@@ -75,7 +75,7 @@ export async function POST(req: Request) {
       firstName: first_name,
       lastName: last_name,
       photo: image_url,
-      availableGenerations: 10, // Initialize new users with 10 tokens
+      availableGenerations: 0, // New users start with no free tokens
     };
 
     console.log('[WEBHOOK] Creating user:', { clerkId: id, email: user.email });
