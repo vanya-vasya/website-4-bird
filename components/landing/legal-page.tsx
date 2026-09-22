@@ -1,4 +1,5 @@
 import { Container, Eyebrow } from "@/components/fastbird";
+import { company } from "@/constants/company";
 
 export type LegalSection = {
   heading: string;
@@ -31,13 +32,27 @@ export const LegalPage = ({
         <p className="mt-6 font-mono text-xs uppercase tracking-[0.06em] text-ink-soft">
           Last updated: {lastUpdated}
         </p>
+        <dl className="mt-6 space-y-1 font-mono text-xs text-ink-soft">
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="uppercase tracking-[0.06em] text-ink">Name:</dt>
+            <dd>{company.name}</dd>
+          </div>
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="uppercase tracking-[0.06em] text-ink">
+              Identification:
+            </dt>
+            <dd>{company.identification}</dd>
+          </div>
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="uppercase tracking-[0.06em] text-ink">Address:</dt>
+            <dd>{company.address}</dd>
+          </div>
+        </dl>
       </Container>
     </section>
 
     <section className="bg-surface py-14 lg:py-20">
       <Container className="max-w-measure">
-        {/* TODO: this is scaffolding copy — have it reviewed by legal counsel
-            and insert the registered FastBird entity details before launch. */}
         <div className="space-y-10">
           {sections.map((section, i) => (
             <div key={section.heading}>
@@ -60,11 +75,6 @@ export const LegalPage = ({
             </div>
           ))}
         </div>
-
-        <p className="mt-12 rounded-md border border-line bg-sand p-5 font-mono text-xs leading-relaxed text-ink-soft">
-          Questions about this policy? Email support@myfastbird.com. FASTBIRD —
-          [Company name], Company No. [____], [registered address].
-        </p>
       </Container>
     </section>
   </>
