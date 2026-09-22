@@ -125,30 +125,28 @@ export const destinations: Destination[] = [
   d("Global", "un", "Regional", 0.95),
 ];
 
-// Points are whole numbers: user balances are stored as integers, so plan
-// prices must be integers too for exact deduction at purchase time
-const toPoints = (n: number) => Math.max(1, Math.round(n));
+// Flat Points pricing per data tier, applied to every destination. Points are
+// whole numbers because user balances are stored as integers.
+const planTiers = [
+  { data: "1 GB", validityDays: 7, points: 20 },
+  { data: "3 GB", validityDays: 15, points: 30 },
+  { data: "5 GB", validityDays: 30, points: 50, popular: true },
+  { data: "10 GB", validityDays: 30, points: 100 },
+  { data: "20 GB", validityDays: 30, points: 200 },
+];
 
-/** Derive the plan ladder for a destination from its base factor. */
-export const buildPlans = (dest: Destination): Plan[] => {
-  const tiers = [
-    { data: "1 GB", validityDays: 7, mult: 1 },
-    { data: "3 GB", validityDays: 15, mult: 2.4 },
-    { data: "5 GB", validityDays: 30, mult: 3.6, popular: true },
-    { data: "10 GB", validityDays: 30, mult: 6.2 },
-    { data: "20 GB", validityDays: 30, mult: 10.5 },
-  ];
-  return tiers.map((t, i) => ({
+/** Build the plan ladder for a destination. Pricing is flat across destinations. */
+export const buildPlans = (dest: Destination): Plan[] =>
+  planTiers.map((t, i) => ({
     id: `${dest.slug}-${i}`,
     data: t.data,
     validityDays: t.validityDays,
-    points: toPoints(dest.base * t.mult),
+    points: t.points,
     popular: t.popular,
   }));
-};
 
 export const startingPoints = (dest: Destination): number =>
-  toPoints(dest.base);
+  Math.min(...buildPlans(dest).map((p) => p.points));
 
 /** Find a plan by its id (format: "<slug>-<tierIndex>") within a destination. */
 export const getPlan = (dest: Destination, planId: string): Plan | undefined =>
