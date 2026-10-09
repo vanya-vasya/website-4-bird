@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Zap } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";  
+import { company as companyInfo } from "@/constants/company";
 import {
   Dialog,
   DialogContent,
@@ -364,7 +365,7 @@ export const ProModal = () => {
               height={394}
             />
             <Label className="text-center text-black mb-2 block" style={{fontFamily: 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'}}>
-            QUICK FIT LTD - DEPT 2, 43 OWSTON ROAD, CARCROFT, DONCASTER, UNITED KINGDOM, DN6 8DA
+            {companyInfo.name} - {companyInfo.identification} - {companyInfo.address}
             </Label>
           </>
         )}

@@ -145,7 +145,7 @@ describe('Footer Navigation Integration Tests', () => {
       expect(screen.getByAltText('Yum-mi Logo')).toBeInTheDocument();
 
       // Test company details
-      expect(screen.getByText(/QUICK FIT LTD/)).toBeInTheDocument();
+      expect(screen.getByText(/Quantallin OÜ/)).toBeInTheDocument();
       expect(screen.getByText(/support@yum-mi\.com/)).toBeInTheDocument();
     });
 
