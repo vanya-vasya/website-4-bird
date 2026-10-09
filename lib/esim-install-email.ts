@@ -1,4 +1,5 @@
 import type { SendMailOptions } from "nodemailer";
+import { company } from "@/constants/company";
 
 // Current single eSIM offering. Values provided by the plan supplier;
 // replace with per-order values when eSIM provisioning becomes dynamic.
@@ -13,7 +14,7 @@ export const ESIM_PLAN = {
 
 const LPA_CODE = `LPA:1$${ESIM_PLAN.smDpAddress}$${ESIM_PLAN.activationCode}`;
 
-const SUPPORT_EMAIL = "support@myfastbird.com";
+const SUPPORT_EMAIL = company.email;
 
 interface EsimInstallEmailParams {
   to: string;

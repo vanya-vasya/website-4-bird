@@ -187,7 +187,7 @@ const Receipt = ({
           </View>
           <View style={styles.infoBlock}>
             <Text style={styles.label}>Payment method</Text>
-            <Text style={styles.value}>Paid by Card</Text>
+            <Text style={styles.value}>Paid with FastBird points</Text>
           </View>
         </View>
 
