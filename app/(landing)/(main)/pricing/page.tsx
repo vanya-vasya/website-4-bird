@@ -136,6 +136,10 @@ const PricingPage = () => (
           </Card>
         ))}
         <CustomTopup />
+
+        <p className="lg:col-span-4 font-mono text-xs text-ink-soft/70">
+          * 5 Points = 1 EUR
+        </p>
       </div>
     </Section>
 
