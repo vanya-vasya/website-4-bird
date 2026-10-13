@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import prismadb from '@/lib/prismadb';
 import { transporter } from '@/config/nodemailer';
 import { generatePdfReceipt } from '@/lib/receiptGeneration';
+import { company } from '@/constants/company';
 
 // Функция для верификации подписи webhook согласно документации Secure-Processor
 function verifyWebhookSignature(data: Record<string, any>, signature: string, secretKey: string): boolean {
@@ -300,12 +301,16 @@ We're excited to welcome you to FastBird — thanks so much for your recent orde
 
 You'll find your transaction receipt attached to this message. Be sure to keep it in case you need it later.
 
-If you run into any issues, have questions about your balance or usage, or need guidance, our support team is just an email away at support@myfastbird.com. We're always ready to help.
+If you run into any issues, have questions about your balance or usage, or need guidance, our support team is just an email away at ${company.email}. We're always ready to help.
 
 With appreciation,
 The FastBird Team
 myfastbird.com
-support@myfastbird.com`,
+${company.email}
+
+${company.name}
+${company.identification}
+${company.address}`,
               attachments: [
                 {
                   filename: `receipt-${transactionId}.pdf`,

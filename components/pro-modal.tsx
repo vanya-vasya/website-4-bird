@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Zap } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";  
+import { company as companyInfo } from "@/constants/company";
 import {
   Dialog,
   DialogContent,
@@ -360,7 +361,7 @@ export const ProModal = () => {
               height={394}
             />
             <Label className="text-center text-black mb-2 block" style={{fontFamily: 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'}}>
-            Quantallin OÜ - Registrite ja Infosüsteemide Keskus, EUID EEARIREG.17505394 - Vesivärava tn 50-201, EE-10152 Tallinn
+{companyInfo.name} - {companyInfo.identification} - {companyInfo.address}
             </Label>
           </>
         )}

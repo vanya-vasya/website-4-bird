@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Link,
 } from "@react-pdf/renderer";
+import { company as companyInfo } from "@/constants/company";
 
 // Built-in Helvetica only: custom font/logo files are not bundled into
 // Vercel serverless functions, and fs reads there crash PDF generation
@@ -132,13 +133,9 @@ const styles = StyleSheet.create({
   },
 });
 
-const company = {
+const brand = {
   name: "FastBird",
-  company: "QUICK FIT LTD",
-  address: "DEPT 2, 43 OWSTON ROAD, CARCROFT, DONCASTER, UNITED KINGDOM, DN6 8DA",
   website: "myfastbird.com",
-  email: "support@myfastbird.com",
-  companyNumber: "15995367",
 };
 
 const Receipt = ({
@@ -162,11 +159,11 @@ const Receipt = ({
     <Page size="A4" style={styles.page}>
       <View>
         <View style={styles.header}>
-          <Text style={styles.headerBrand}>{company.name}</Text>
+          <Text style={styles.headerBrand}>{brand.name}</Text>
         </View>
 
         <View style={styles.titleSection}>
-          <Text style={styles.title}>Receipt from {company.name}</Text>
+          <Text style={styles.title}>Receipt from {brand.name}</Text>
           <Text style={styles.subtitle}>Receipt #{receiptId}</Text>
         </View>
 
@@ -190,7 +187,7 @@ const Receipt = ({
           </View>
           <View style={styles.infoBlock}>
             <Text style={styles.label}>Payment method</Text>
-            <Text style={styles.value}>Paid from FastBird balance</Text>
+<Text style={styles.value}>Paid from FastBird balance</Text>
           </View>
         </View>
 
@@ -215,30 +212,30 @@ const Receipt = ({
 
         <Text style={styles.footer}>
           If you have any questions contact us at{" "}
-          <Link style={styles.link} src={`mailto:${company.email}`}>
-            {company.email}
+          <Link style={styles.link} src={`mailto:${companyInfo.email}`}>
+            {companyInfo.email}
           </Link>
           .
         </Text>
 
         <Text style={styles.legal}>
           You&apos;re receiving this email because you made a purchase at{" "}
-          {company.name}.
+          {brand.name}.
         </Text>
       </View>
       <Text style={styles.companyInfo}>
         <Text>
-          {company.name} | {company.company} | {company.companyNumber}
+          {brand.name} | {companyInfo.name} | {companyInfo.identification}
           {"\n"}
-          {company.address}
+          {companyInfo.address}
           {"\n"}
           Website:{" "}
-          <Link style={styles.link} src={`https://${company.website}`}>
-            {company.website}
+          <Link style={styles.link} src={`https://${brand.website}`}>
+            {brand.website}
           </Link>{" "}
           | Email:{" "}
-          <Link style={styles.link} src={`mailto:${company.email}`}>
-            {company.email}
+          <Link style={styles.link} src={`mailto:${companyInfo.email}`}>
+            {companyInfo.email}
           </Link>
         </Text>
       </Text>

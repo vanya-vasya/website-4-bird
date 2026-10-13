@@ -307,10 +307,10 @@ Payment Method: Card Payment
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-QUICK FIT LTD (№15995367)
-DEPT 2, 43 OWSTON ROAD, CARCROFT, DONCASTER,
-UNITED KINGDOM, DN6 8DA
-Email: support@yum-mi.com
+Quantallin OÜ (Registrite ja Infosüsteemide Keskus,
+EUID EEARIREG.17505394)
+Vesivärava tn 50-201, EE-10152 Tallinn
+Email: support@myfastbird.com
 
 Thank you for your purchase!
 
