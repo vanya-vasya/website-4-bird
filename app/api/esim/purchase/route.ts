@@ -5,9 +5,10 @@ import { transporter } from '@/config/nodemailer';
 import { generatePdfReceipt } from '@/lib/receiptGeneration';
 import { buildEsimInstallEmail } from '@/lib/esim-install-email';
 import { getDestination, getPlan } from '@/constants/destinations';
+import { formatEurFromPoints, TOKEN_RATE } from '@/constants/pricing';
 
-// POST - Buy an eSIM plan with Points ("Buy now" button).
-// Deducts the plan price from the user's Points balance and sends the
+// POST - Buy an eSIM plan with the prepaid balance ("Buy now" button).
+// Deducts the plan price from the user's balance and sends the
 // eSIM activation email (QR code + manual installation codes).
 export async function POST(request: NextRequest) {
   try {
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (remainingPoints < pointsCost) {
       return NextResponse.json(
         {
-          error: `Insufficient points. You need ${pointsCost} points but only have ${remainingPoints} available.`,
+          error: `Insufficient balance. You need ${formatEurFromPoints(pointsCost)} EUR for this plan but only have ${formatEurFromPoints(remainingPoints)} EUR available.`,
           required: pointsCost,
           available: remainingPoints,
         },
@@ -80,14 +81,14 @@ export async function POST(request: NextRequest) {
           tracking_id: `esim_${userId}_${Date.now()}`,
           userId,
           status: 'completed',
-          // Points are worth £0.20 each; store the GBP equivalent in pence
+          // Balance is denominated in Points; store the EUR equivalent in cents
           // as a negative amount so the Payments page shows the deduction
-          amount: -pointsCost * 20,
-          currency: 'GBP',
-          description: `FastBird eSIM — ${planLabel} (${pointsCost} Points)`,
+          amount: -Math.round(pointsCost * TOKEN_RATE * 100),
+          currency: 'EUR',
+          description: `FastBird eSIM — ${planLabel} (${formatEurFromPoints(pointsCost)} EUR)`,
           type: 'esim_purchase',
           payment_method_type: 'points',
-          message: `${pointsCost} Points deducted for eSIM purchase`,
+          message: `${formatEurFromPoints(pointsCost)} EUR deducted from balance for eSIM purchase`,
           paid_at: new Date(),
           receipt_url: null,
         },
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
     });
 
     console.log(
-      `✅ eSIM purchased: ${planLabel} for ${pointsCost} Points by ${userId} (tx ${savedTransaction.id})`
+      `✅ eSIM purchased: ${planLabel} for ${formatEurFromPoints(pointsCost)} EUR by ${userId} (tx ${savedTransaction.id})`
     );
 
     // Send the eSIM activation email (non-blocking for the purchase itself)
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
     try {
       const receiptId = savedTransaction.id.slice(-8);
 
-      // Order confirmation PDF priced in Points (no money changed hands here)
+      // Order confirmation PDF priced in EUR (paid from the prepaid balance)
       const pdfBuffer = await generatePdfReceipt(
         receiptId,
         user.email,
@@ -129,8 +130,8 @@ export async function POST(request: NextRequest) {
         }),
         pointsCost,
         `FastBird eSIM — ${planLabel}`,
-        pointsCost * 100,
-        'Points'
+        Math.round(pointsCost * TOKEN_RATE * 100),
+        'EUR'
       );
 
       // QR lives in public/ which is CDN-served but not bundled into the

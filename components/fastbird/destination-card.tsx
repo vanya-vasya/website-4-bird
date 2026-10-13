@@ -6,6 +6,7 @@ import {
   startingPoints,
   type Destination,
 } from "@/constants/destinations";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 type DestinationCardProps = {
   destination: Destination;
@@ -30,7 +31,7 @@ export const DestinationCard = ({ destination }: DestinationCardProps) => (
         {destination.name}
       </span>
       <span className="font-mono text-xs text-ink-soft">
-        Starts at {startingPoints(destination)} Points
+        Starts at {formatEurFromPoints(startingPoints(destination))} EUR
       </span>
     </span>
     <ArrowUpRight className="h-4 w-4 shrink-0 text-ink-soft transition-colors group-hover:text-green" />

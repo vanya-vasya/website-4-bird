@@ -52,7 +52,7 @@ const steps = [
   {
     n: "01",
     title: "Top up your balance",
-    body: "Add Points to your wallet once. Use them on any destination, any time.",
+    body: "Top up your wallet with EUR once. Use it on any destination, any time.",
     img: "/images/spots/step-topup.webp",
   },
   {
@@ -293,8 +293,8 @@ const HomePage = () => (
           <Button href="/products" variant="accent" size="lg">
             Get your eSIM
           </Button>
-          <Button href="/pricing" variant="outlineOnDark" size="lg">
-            See pricing
+          <Button href="/payments" variant="outlineOnDark" size="lg">
+            How payments work
           </Button>
         </div>
       </div>

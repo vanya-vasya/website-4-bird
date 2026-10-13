@@ -4,14 +4,14 @@ import { LegalPage, type LegalSection } from "@/components/landing/legal-page";
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
-    "The terms that govern your use of FastBird's eSIM data plans, prepaid Points balance, refunds, and website.",
+    "The terms that govern your use of FastBird's eSIM data plans, prepaid EUR balance, refunds, and website.",
 };
 
 const sections: LegalSection[] = [
   {
     heading: "Agreement",
     body: [
-      "These Terms & Conditions form a binding agreement between you and FastBird. By creating a FastBird account, topping up Points, or buying a plan, you confirm that you have read, understood, and agree to these terms. If you do not agree, please do not use the service.",
+      "These Terms & Conditions form a binding agreement between you and FastBird. By creating a FastBird account, topping up your balance, or buying a plan, you confirm that you have read, understood, and agree to these terms. If you do not agree, please do not use the service.",
       "You must be old enough to enter into a binding contract in your country of residence to use FastBird.",
     ],
   },
@@ -23,18 +23,18 @@ const sections: LegalSection[] = [
     ],
   },
   {
-    heading: "Points and payment",
+    heading: "Balance and payment",
     body: [
-      "Points are a prepaid balance. You buy Points using a supported payment method and then spend them on eSIM data plans. The price in Points and any conditions are shown before you confirm a purchase.",
+      "Your balance is prepaid in EUR. You top it up using a supported payment method and then spend it on eSIM data plans. The price in EUR and any conditions are shown before you confirm a purchase.",
       "Payments are handled by our third-party payment providers. FastBird does not store your full card details. You are responsible for ensuring you have authority to use the chosen payment method.",
       "You are responsible for keeping your account credentials secure and for all activity that takes place under your account.",
     ],
   },
   {
-    heading: "Refunds, Points, and the eSIM return window",
+    heading: "Refunds, your balance, and the eSIM return window",
     body: [
-      "Refunds of money are always issued to the original payment method used to top up your Points balance — never to a different card, account, or person.",
-      "Because the service is prepaid, any refund resets your Points balance to zero: when a refund is approved, all remaining Points on your account are voided and cannot be used, transferred, or reinstated.",
+      "Refunds of money are always issued to the original payment method used to top up your EUR balance — never to a different card, account, or person.",
+      "Because the service is prepaid, any refund resets your EUR balance to zero: when a refund is approved, all remaining balance on your account is voided and cannot be used, transferred, or reinstated.",
       "If you have a problem with an eSIM, you may request a return or refund within 4 hours of the eSIM being delivered to your account; after that window the eSIM is treated as accepted and is no longer refundable. All refund and return requests must be sent by email to support@myfastbird.com. Full details are in our Refund & Return Policy.",
     ],
   },
@@ -77,7 +77,7 @@ const sections: LegalSection[] = [
 const TermsPage = () => (
   <LegalPage
     title="Terms & Conditions"
-    intro="The straightforward terms for using FastBird — including how Points, refunds, and the 4-hour eSIM return window work. Plain language, no traps."
+    intro="The straightforward terms for using FastBird — including how Balance, refunds, and the 4-hour eSIM return window work. Plain language, no traps."
     lastUpdated="September 2026"
     sections={sections}
   />

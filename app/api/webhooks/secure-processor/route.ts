@@ -210,19 +210,24 @@ export async function POST(request: NextRequest) {
             );
           }
 
-          // Extract token count from description (e.g., "Payment for 100 Tokens (100 Tokens)" or "Yum-mi Tokens Purchase (20 Tokens)")
+          // Extract the credited amount from the description. Current format is
+          // "FastBird Top-up (N EUR)" — credited Points are N × 5. Legacy
+          // "(N Tokens)" descriptions still credit N directly.
           const desc = description || '';
-          const match = desc.match(/\((\d+)\s+Tokens\)/i);
-          
-          if (!match) {
-            console.error(`❌ Cannot extract token count from description: ${desc}`);
+          const eurMatch = desc.match(/\(([\d.]+)\s+EUR\)/i);
+          const legacyTokenMatch = !eurMatch && desc.match(/\((\d+)\s+Tokens\)/i);
+
+          if (!eurMatch && !legacyTokenMatch) {
+            console.error(`❌ Cannot extract amount from description: ${desc}`);
             return NextResponse.json(
               { error: 'Invalid description format' },
               { status: 400 }
             );
           }
-          
-          const tokens = parseInt(match[1]);
+
+          const tokens = eurMatch
+            ? Math.round(parseFloat(eurMatch[1]) * 5)
+            : parseInt(legacyTokenMatch![1]);
           console.log(`   📝 Extracted tokens: ${tokens}`);
 
           // Update user token balance
@@ -288,14 +293,14 @@ export async function POST(request: NextRequest) {
             await transporter.sendMail({
               from: process.env.OUTBOX_EMAIL,
               to: email,
-              subject: `Receipt #${transactionId} - FastBird Points Purchase`,
+              subject: `Receipt #${transactionId} - FastBird Top-up`,
               text: `Hi there,
 
 We're excited to welcome you to FastBird — thanks so much for your recent order on myfastbird.com!
 
 You'll find your transaction receipt attached to this message. Be sure to keep it in case you need it later.
 
-If you run into any issues, have questions about your points usage, or need guidance, our support team is just an email away at support@myfastbird.com. We're always ready to help.
+If you run into any issues, have questions about your balance or usage, or need guidance, our support team is just an email away at support@myfastbird.com. We're always ready to help.
 
 With appreciation,
 The FastBird Team

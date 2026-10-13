@@ -7,6 +7,7 @@ import { Wifi } from "lucide-react";
 import prismadb from "@/lib/prismadb";
 import { Eyebrow } from "@/components/fastbird";
 import { getDestination, flagUrl } from "@/constants/destinations";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 const formatDate = (date: Date): string =>
   new Intl.DateTimeFormat("en-GB", {
@@ -38,7 +39,7 @@ const ActivityPage = async () => {
           <h1 className="font-heading text-h1 font-medium text-ink">My eSIMs</h1>
         </div>
         <p className="text-[15px] text-ink-soft">
-          Every eSIM you&apos;ve purchased — destination, plan, and Points spent.
+          Every eSIM you&apos;ve purchased — destination, plan, and EUR spent.
         </p>
       </div>
 
@@ -61,7 +62,7 @@ const ActivityPage = async () => {
             <table className="min-w-full divide-y divide-line">
               <thead className="bg-sand">
                 <tr>
-                  {["Destination", "Plan", "Validity", "Points", "Purchase Date"].map(
+                  {["Destination", "Plan", "Validity", "Price", "Purchase Date"].map(
                     (h) => (
                       <th
                         key={h}
@@ -107,7 +108,7 @@ const ActivityPage = async () => {
                         {activity.validityDays} days
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-ink">
-                        {activity.points}
+                        {formatEurFromPoints(activity.points)} EUR
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 font-sans text-sm text-ink-soft">
                         {formatDate(activity.createdAt)}

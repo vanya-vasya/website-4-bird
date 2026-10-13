@@ -5,7 +5,7 @@ import { faqCategories } from "@/constants/faq";
 export const metadata: Metadata = {
   title: "FAQ",
   description:
-    "Answers on eSIM basics, device compatibility, buying and activation, Points and billing, and troubleshooting.",
+    "Answers on eSIM basics, device compatibility, buying and activation, top-ups and billing, and troubleshooting.",
 };
 
 const FaqPage = () => (

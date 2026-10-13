@@ -34,6 +34,7 @@ import { getFormSchema } from "./constants";
 import { N8nWebhookClient } from "@/lib/n8n-webhook";
 import { useCredits } from "@/lib/contexts/credit-context";
 import { NutritionReport, parseNutritionReport } from "@/lib/nutrition-report-types";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 // Define ChatCompletionRequestMessage type locally with friendly response support
 type ChatCompletionRequestMessage = {
@@ -115,7 +116,7 @@ const parseRecipeResponse = (response: string): { text: string; recipe?: Recipe 
 const toolConfigs = {
   'master-chef': {
     title: 'Your Own Chef',
-    description: 'Snap your ingredients. We will turn them into nourishing recipes, complete with a full nutritional breakdown. Because eating well should be that simple\nPrice: 10 tokens per generation',
+    description: 'Snap your ingredients. We will turn them into nourishing recipes, complete with a full nutritional breakdown. Because eating well should be that simple\nPrice: 2 EUR per generation',
     iconName: 'Crown',
     iconColor: 'text-amber-600',
     bgColor: 'bg-amber-600/10',
@@ -125,7 +126,7 @@ const toolConfigs = {
   },
   'master-nutritionist': {
     title: 'Your Own Nutritionist',
-    description: 'Advanced nutritional analysis and meal optimization with scientific precision, macro tracking, and health goal alignment\nPrice: 15 tokens per generation',
+    description: 'Advanced nutritional analysis and meal optimization with scientific precision, macro tracking, and health goal alignment\nPrice: 3 EUR per generation',
     iconName: 'Activity',
     iconColor: 'text-emerald-600',
     bgColor: 'bg-emerald-600/10',
@@ -135,7 +136,7 @@ const toolConfigs = {
   },
   'cal-tracker': {
     title: 'Your Own Tracker',
-    description: 'Intelligent calorie and nutrient tracking\nPrice: 5 tokens per generation',
+    description: 'Intelligent calorie and nutrient tracking\nPrice: 1 EUR per generation',
     iconName: 'Target',
     iconColor: 'text-blue-600',
     bgColor: 'bg-blue-600/10',
@@ -228,7 +229,7 @@ const ConversationPage = () => {
     
     // Check credit balance before proceeding (skip for free tools)
     if (hasInsufficientCredits && toolPrice > 0) {
-      toast.error(`Insufficient points. You need ${toolPrice} points but only have ${availableCredits} available.`);
+      toast.error(`Insufficient balance. You need ${formatEurFromPoints(toolPrice)} EUR but only have ${formatEurFromPoints(availableCredits)} EUR available.`);
       proModal.onOpen();
       return;
     }
@@ -522,7 +523,7 @@ const ConversationPage = () => {
                 <div className="text-sm text-gray-600 text-center">
                   <span className="flex items-center justify-center gap-2">
                     <Activity className="h-4 w-4" />
-                    Points: {availableCredits} available | {toolPrice === 0 ? 'Free' : `${toolPrice} required`}
+                    Balance: {formatEurFromPoints(availableCredits)} EUR available | {toolPrice === 0 ? 'Free' : `${formatEurFromPoints(toolPrice)} EUR required`}
                   </span>
                 </div>
               )}

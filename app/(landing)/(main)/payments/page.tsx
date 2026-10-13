@@ -6,7 +6,7 @@ import { Container, Eyebrow, Section, Card, Button } from "@/components/fastbird
 export const metadata: Metadata = {
   title: "Payments",
   description:
-    "How FastBird payments and Points top-ups work — accepted methods, security, receipts, and refunds.",
+    "How FastBird payments and balance top-ups work — accepted methods, security, receipts, and refunds.",
 };
 
 const methods = ["Visa", "Mastercard", "Amex", "Apple Pay", "Google Pay"];
@@ -38,7 +38,7 @@ const PaymentsPage = () => (
           Top up with confidence.
         </h1>
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink-soft">
-          Add Points with the card or wallet you already use. Here&apos;s exactly
+          Top up with the card or wallet you already use. Here&apos;s exactly
           how payment works and how we keep it secure.
         </p>
       </Container>
@@ -49,16 +49,15 @@ const PaymentsPage = () => (
         <Card>
           <Coins className="h-6 w-6 text-green" aria-hidden />
           <h2 className="mt-4 font-heading text-h3 font-medium text-ink">
-            How top-ups become Points
+            How top-ups work
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
-            Choose a top-up pack or a custom amount, pay once, and your balance
-            updates instantly. Points sit in your wallet until you spend them on a
+            Choose a custom amount, pay once, and your balance
+            updates instantly. Your EUR sits in your wallet until you spend it on a
             destination plan — there&apos;s no per-purchase card juggling.
           </p>
           <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
-            The exact conversion between your currency and Points is always shown
-            before you confirm.
+            The final price in EUR is always shown before you confirm.
           </p>
         </Card>
 
@@ -112,7 +111,7 @@ const PaymentsPage = () => (
           <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-ink-soft">
             If a plan can&apos;t be delivered or activated, contact support and
             we&apos;ll resolve it — whether that&apos;s a fix or a refund of the
-            Points involved. Full eligibility and timelines are in our Refund
+            amount involved. Full eligibility and timelines are in our Refund
             Policy.
           </p>
         </div>

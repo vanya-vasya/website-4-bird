@@ -8,10 +8,11 @@ import { Check, Loader2 } from "lucide-react";
 import { Button, Card } from "@/components/fastbird";
 import { startTopUpCheckout } from "@/lib/checkout";
 import { cn } from "@/lib/utils";
+import { pointsFromEur } from "@/constants/pricing";
 
 const customPerks = [
   "Choose exactly what you need",
-  "Minimum 5 Points to top up",
+  "Minimum top-up is 1 EUR",
   "Valid for any destination",
 ];
 
@@ -23,10 +24,11 @@ export const CustomTopup = ({ className }: { className?: string }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const value = Number(amount);
-  const valid = Number.isFinite(value) && value >= 5;
+  const valid = Number.isFinite(value) && value >= 1;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!valid || isSubmitting) return;
 
     if (!userId) {
@@ -36,21 +38,22 @@ export const CustomTopup = ({ className }: { className?: string }) => {
 
     setIsSubmitting(true);
 
-    try {
-      const redirectUrl = await startTopUpCheckout({
-        userId,
-        email: user?.primaryEmailAddress?.emailAddress,
-        points: value,
+    startTopUpCheckout({
+      userId,
+      email: user?.primaryEmailAddress?.emailAddress,
+      points: pointsFromEur(value),
+    })
+      .then((redirectUrl) => {
+        window.location.href = redirectUrl;
+      })
+      .catch((error) => {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Server connection error. Please try again."
+        );
+        setIsSubmitting(false);
       });
-      window.location.href = redirectUrl;
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Server connection error. Please try again."
-      );
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -71,17 +74,17 @@ export const CustomTopup = ({ className }: { className?: string }) => {
               id="custom-amount"
               type="number"
               inputMode="decimal"
-              min={5}
+              min={1}
               step={1}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0"
-              aria-label="Points to add"
+              aria-label="Amount to add in EUR"
               className="w-28 bg-transparent font-heading text-stat font-medium text-ink placeholder:text-ink/30 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
-            <span className="font-mono text-sm text-ink-soft">Points</span>
+            <span className="font-mono text-sm text-ink-soft">EUR</span>
           </div>
-          <p className="mt-1 font-mono text-xs text-ink-soft">minimum 5</p>
+          <p className="mt-1 font-mono text-xs text-ink-soft">minimum 1 EUR</p>
         </div>
 
         <ul className="mt-6 flex-1 space-y-3">
@@ -106,7 +109,7 @@ export const CustomTopup = ({ className }: { className?: string }) => {
               Redirecting…
             </>
           ) : (
-            `Top up ${valid ? `${value} Points` : "Points"}`
+            `Top up ${valid ? `${value} EUR` : "balance"}`
           )}
         </Button>
       </form>

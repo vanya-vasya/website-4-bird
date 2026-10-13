@@ -59,7 +59,7 @@ const StoryPage = () => (
           </p>
           <p>
             So we built something simpler. A prepaid balance you top up once.
-            Plans by destination, priced in plain Points. A QR code that arrives
+            Plans by destination, priced in plain EUR. A QR code that arrives
             the instant you pay, ready to scan before you&apos;ve even left for
             the airport.
           </p>

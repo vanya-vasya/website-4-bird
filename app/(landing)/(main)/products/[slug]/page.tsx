@@ -10,6 +10,7 @@ import {
   flagUrl,
   startingPoints,
 } from "@/constants/destinations";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 type Params = { params: { slug: string } };
 
@@ -21,9 +22,9 @@ export const generateMetadata = ({ params }: Params): Metadata => {
   if (!dest) return { title: "Destination not found" };
   return {
     title: `${dest.name} eSIM`,
-    description: `Instant eSIM data plans for ${dest.name}. From ${startingPoints(
-      dest
-    )} Points — get your QR and connect in minutes.`,
+    description: `Instant eSIM data plans for ${dest.name}. From ${formatEurFromPoints(
+      startingPoints(dest)
+    )} EUR — get your QR and connect in minutes.`,
   };
 };
 
@@ -67,7 +68,7 @@ const DestinationPage = ({ params }: Params) => {
                 {destination.name}
               </h1>
               <p className="mt-1 font-mono text-sm text-ink-soft">
-                Travel data from {startingPoints(destination)} Points
+                Travel data from {formatEurFromPoints(startingPoints(destination))} EUR
               </p>
             </div>
           </div>

@@ -26,7 +26,7 @@ const sections: LegalSection[] = [
     heading: "Cookies, purchases, and refunds",
     body: [
       "Essential cookies help secure the payment and top-up process and let us link your session to the correct order. This is important for support and for handling any refund request accurately.",
-      "Cookies themselves do not store your card details or process refunds. Refund decisions and payments are handled through your account and our payment providers, not through cookies. Refunds are always returned to the original payment method used for the top-up, and, because our service is prepaid, an approved refund resets your Points balance to zero. eSIM problems must be reported within 4 hours of delivery by emailing support@myfastbird.com — see our Refund & Return Policy for full details.",
+      "Cookies themselves do not store your card details or process refunds. Refund decisions and payments are handled through your account and our payment providers, not through cookies. Refunds are always returned to the original payment method used for the top-up, and, because our service is prepaid, an approved refund resets your EUR balance to zero. eSIM problems must be reported within 4 hours of delivery by emailing support@myfastbird.com — see our Refund & Return Policy for full details.",
     ],
   },
   {

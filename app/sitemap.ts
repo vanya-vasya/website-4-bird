@@ -7,7 +7,6 @@ const sitemap = (): MetadataRoute.Sitemap => {
   const staticRoutes = [
     "",
     "/products",
-    "/pricing",
     "/story",
     "/faq",
     "/contact",

@@ -65,7 +65,7 @@ const PaymentHistoryPage = async () => {
                           const amount = transaction.amount ?? 0;
                           const absAmount = Math.abs(amount) / 100;
                           const sign = amount < 0 ? "-" : "";
-                          return `${sign}£${absAmount.toFixed(2)}`;
+                          return `${sign}€${absAmount.toFixed(2)}`;
                         })()}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">

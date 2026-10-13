@@ -14,6 +14,7 @@ import {
   flagUrl,
   type Destination,
 } from "@/constants/destinations";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 const included = [
   "Data-only plan — no contract, no commitment",
@@ -77,7 +78,7 @@ export const DestinationDetail = ({
       }
 
       toast.success(
-        `eSIM purchased! Installation instructions are on their way to your email. ${data.remainingPoints} Points left.`,
+        `eSIM purchased! Installation instructions are on their way to your email. ${formatEurFromPoints(data.remainingPoints)} EUR left.`,
         { duration: 6000 }
       );
       router.push("/dashboard");
@@ -96,7 +97,8 @@ export const DestinationDetail = ({
           Choose your plan
         </h2>
         <p className="mt-2 text-[15px] text-ink-soft">
-          Pick the data and validity that match your trip. Pay with Points.
+          Pick the data and validity that match your trip. Pay with your prepaid
+          EUR balance.
         </p>
 
         <div
@@ -142,7 +144,7 @@ export const DestinationDetail = ({
                 <div className="flex items-center gap-3">
                   {plan.popular && <Badge variant="gold">Popular</Badge>}
                   <span className="font-mono text-base text-ink">
-                    {plan.points} Points
+                    {formatEurFromPoints(plan.points)} EUR
                   </span>
                 </div>
               </button>
@@ -229,8 +231,8 @@ export const DestinationDetail = ({
             <div className="flex items-center justify-between border-t border-line pt-3">
               <dt className="text-sm text-ink-soft">Total</dt>
               <dd className="font-heading text-2xl font-medium text-ink">
-                {selected.points}{" "}
-                <span className="font-mono text-sm text-ink-soft">Points</span>
+                {formatEurFromPoints(selected.points)}{" "}
+                <span className="font-mono text-sm text-ink-soft">EUR</span>
               </dd>
             </div>
           </dl>
@@ -242,7 +244,7 @@ export const DestinationDetail = ({
               size="lg"
               onClick={handleBuyNow}
               disabled={isPurchasing}
-              aria-label={`Buy ${selected.data} plan for ${destination.name} for ${selected.points} Points`}
+              aria-label={`Buy ${selected.data} plan for ${destination.name} for ${formatEurFromPoints(selected.points)} EUR`}
             >
               {isPurchasing ? (
                 <>
@@ -254,15 +256,15 @@ export const DestinationDetail = ({
               )}
             </Button>
             <Button href="/dashboard" variant="secondary" size="md">
-              Top up Points
+              Top up balance
             </Button>
           </div>
 
           <Link
-            href="/pricing"
+            href="/payments"
             className="mt-5 flex items-center justify-center gap-1 font-mono text-xs uppercase tracking-[0.06em] text-green underline-offset-4 hover:underline fb-focus"
           >
-            How Points work
+            How payments work
             <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>

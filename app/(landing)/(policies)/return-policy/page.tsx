@@ -4,29 +4,29 @@ import { LegalPage, type LegalSection } from "@/components/landing/legal-page";
 export const metadata: Metadata = {
   title: "Refund & Return Policy",
   description:
-    "When FastBird offers refunds on Points and eSIM data plans, how refunds affect your Points balance, the 4-hour eSIM return window, and how to request a refund by email.",
+    "When FastBird offers refunds on top-ups and eSIM data plans, how refunds affect your EUR balance, the 4-hour eSIM return window, and how to request a refund by email.",
 };
 
 const sections: LegalSection[] = [
   {
     heading: "Our approach",
     body: [
-      "FastBird runs on a prepaid Points balance: you top up Points with a payment method, and then spend those Points on eSIM data plans. Because eSIM plans are digital goods that are delivered and can be activated almost instantly, this policy explains exactly when money can be returned, what happens to your Points when it is, and the time limits that apply.",
+      "FastBird runs on a prepaid EUR balance: you top up your balance with a payment method, and then spend that balance on eSIM data plans. Because eSIM plans are digital goods that are delivered and can be activated almost instantly, this policy explains exactly when money can be returned, what happens to your balance when it is, and the time limits that apply.",
       "We aim to be fair and clear. If something goes wrong on our side, we will always try to fix it first, and where a refund is due we will process it as described below.",
     ],
   },
   {
     heading: "Refunds to your original payment method",
     body: [
-      "Money is always refunded to the same account and payment method that was used to top up your Points balance. We cannot send a refund to a different card, bank account, wallet, or person than the one used for the original top-up.",
+      "Money is always refunded to the same account and payment method that was used to top up your EUR balance. We cannot send a refund to a different card, bank account, wallet, or person than the one used for the original top-up.",
       "Once approved, refunds are returned through our payment provider. The time it takes for the money to appear depends on your bank or card issuer and is outside FastBird's control (typically a few business days).",
     ],
   },
   {
-    heading: "What happens to your Points when you are refunded",
+    heading: "What happens to your balance when you are refunded",
     body: [
-      "Because the service is built on prepaid Points, any refund of money resets your Points balance to zero. When a refund is approved, all remaining Points on your account are voided at the same time — they cannot be used, transferred, sold, or reinstated afterwards.",
-      "In other words: a refund returns funds to your original payment method, and in exchange your Points are cleared to zero. You cannot keep Points and also receive the money back for them.",
+      "Because the service is built on a prepaid EUR balance, any refund of money resets your EUR balance to zero. When a refund is approved, all remaining balance on your account is voided at the same time — it cannot be used, transferred, sold, or reinstated afterwards.",
+      "In other words: a refund returns funds to your original payment method, and in exchange your balance is cleared to zero. You cannot keep your balance and also receive the money back for it.",
     ],
   },
   {
@@ -58,7 +58,7 @@ const sections: LegalSection[] = [
     body: [
       "All refund and return requests must be sent by email to support@myfastbird.com. Requests made through other channels may not be processed.",
       "Please include the email address on your FastBird account, the order or transaction reference, the destination and plan, and a short description of the problem (screenshots help). For eSIM issues, remember the request must be sent within 4 hours of delivery.",
-      "We will review your request, respond promptly, and — where a refund is approved — return the funds to your original payment method and reset your Points balance to zero as described above.",
+      "We will review your request, respond promptly, and — where a refund is approved — return the funds to your original payment method and reset your EUR balance to zero as described above.",
     ],
   },
 ];
@@ -66,7 +66,7 @@ const sections: LegalSection[] = [
 const RefundPolicyPage = () => (
   <LegalPage
     title="Refund & Return Policy"
-    intro="Fair and clear. Here's when money is refunded, what happens to your Points, the 4-hour eSIM return window, and how to ask."
+    intro="Fair and clear. Here's when money is refunded, what happens to your balance, the 4-hour eSIM return window, and how to ask."
     lastUpdated="September 2026"
     sections={sections}
   />

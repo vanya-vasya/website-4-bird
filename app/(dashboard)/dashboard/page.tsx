@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Wifi, MapPin, CreditCard, ArrowRight, Wallet, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/fastbird";
 import { useCredits } from "@/lib/contexts/credit-context";
+import BuyCreditsModal from "@/components/buy-credits-modal";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 const container = {
   hidden: { opacity: 0 },
@@ -50,6 +53,7 @@ const quickActions = [
 export default function DashboardHomePage() {
   const router = useRouter();
   const { remainingCredits } = useCredits();
+  const [topUpOpen, setTopUpOpen] = useState(false);
 
   return (
     <div className="space-y-12">
@@ -73,11 +77,11 @@ export default function DashboardHomePage() {
             <span className="font-medium text-sm">Balance</span>
           </div>
           <p className="mt-2 text-4xl font-bold text-ink">
-            {remainingCredits}{" "}
-            <span className="text-3xl font-semibold">Points</span>
+            {formatEurFromPoints(remainingCredits)}{" "}
+            <span className="text-3xl font-semibold">EUR</span>
           </p>
           <div className="mt-5">
-            <Button href="/pricing" variant="accent" size="sm">
+            <Button variant="accent" size="sm" onClick={() => setTopUpOpen(true)}>
               <Plus className="h-4 w-4 mr-1" aria-hidden />
               Top up
             </Button>
@@ -127,6 +131,8 @@ export default function DashboardHomePage() {
           Browse plans
         </Button>
       </div>
+
+      <BuyCreditsModal open={topUpOpen} onOpenChange={setTopUpOpen} />
     </div>
   );
 }

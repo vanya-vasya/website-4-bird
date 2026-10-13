@@ -51,7 +51,7 @@ export const faqCategories: FaqCategory[] = [
       {
         question: "How do I buy and activate a plan?",
         answer:
-          "Pick your destination, choose a data plan, and pay with your Points balance. We send a QR code right away. Scan it from your phone's settings, and switch the line on when you land.",
+          "Pick your destination, choose a data plan, and pay from your prepaid EUR balance. We send a QR code right away. Scan it from your phone's settings, and switch the line on when you land.",
       },
       {
         question: "Should I install before or after I travel?",
@@ -61,16 +61,16 @@ export const faqCategories: FaqCategory[] = [
     ],
   },
   {
-    title: "Points & billing",
+    title: "Top-ups & billing",
     eyebrow: "// HOW PAYMENT WORKS",
     items: [
       {
-        question: "What are Points?",
+        question: "How does the balance work?",
         answer:
-          "Points are your prepaid FastBird balance. You top up once, then spend Points on any destination plan. Larger top-ups carry more value, and your balance is ready whenever the next trip comes up.",
+          "Your FastBird balance is prepaid in EUR. You top up once with your card or wallet, then spend it on any destination plan. Your balance is ready whenever the next trip comes up.",
       },
       {
-        question: "Do my Points expire?",
+        question: "Does my balance expire?",
         answer:
           "Your balance is designed to stay available for your travels. Any time-bound conditions are shown clearly at top-up — we don't hide rules in the fine print.",
       },

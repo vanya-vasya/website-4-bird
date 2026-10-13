@@ -14,7 +14,7 @@ const PaymentSuccessPage = () => (
           Payment Successful
         </CardTitle>
         <CardDescription>
-          Your transaction is confirmed. Points have been added to your balance.
+          Your transaction is confirmed. Your balance has been topped up.
         </CardDescription>
       </CardHeader>
       <CardContent>

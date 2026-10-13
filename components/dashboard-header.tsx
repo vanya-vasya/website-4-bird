@@ -11,6 +11,7 @@ import { PaymentHistoryAnalytics } from "@/lib/analytics";
 import { mainNav } from "@/constants/nav";
 import { useCredits } from "@/lib/contexts/credit-context";
 import BuyCreditsModal from "@/components/buy-credits-modal";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 const dashboardNav = [
   { name: "Payments", href: "/dashboard/billing/payment-history" },
@@ -73,13 +74,13 @@ const DashboardHeader = () => {
         <div className="hidden items-center gap-4 lg:flex">
           <button
             type="button"
-            aria-label={`${remainingCredits} points — buy more`}
+            aria-label={`${formatEurFromPoints(remainingCredits)} EUR — top up balance`}
             onClick={() => setBuyModalOpen(true)}
             className="flex items-center gap-2 rounded-full bg-green px-4 py-2 text-white transition-opacity hover:opacity-90 fb-focus"
           >
             <Zap className="h-4 w-4 fill-white" aria-hidden />
-            <span className="font-semibold text-sm">{remainingCredits}</span>
-            <span className="text-sm font-normal opacity-80">points</span>
+            <span className="font-semibold text-sm">{formatEurFromPoints(remainingCredits)}</span>
+            <span className="text-sm font-normal opacity-80">EUR</span>
           </button>
           <UserDropdown />
         </div>

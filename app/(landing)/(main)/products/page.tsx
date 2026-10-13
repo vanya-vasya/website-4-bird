@@ -5,7 +5,7 @@ import { ProductsCatalog } from "@/components/landing/products-catalog";
 export const metadata: Metadata = {
   title: "eSIM destinations",
   description:
-    "Browse instant eSIM data plans for 100+ destinations. Find your country, pick a plan, and pay with Points.",
+    "Browse instant eSIM data plans for 100+ destinations. Find your country, pick a plan, and pay from your prepaid balance.",
 };
 
 const ProductsPage = () => (
@@ -18,7 +18,7 @@ const ProductsPage = () => (
         </h1>
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink-soft">
           Search by country or region, choose the plan that fits, and connect the
-          moment you land. Prices shown in Points.
+          moment you land. Prices shown in EUR.
         </p>
       </Container>
     </section>

@@ -9,8 +9,8 @@ type StartTopUpCheckoutOptions = {
   chargePoints?: number;
 };
 
-// Creates a Secure-Processor hosted checkout for a Points top-up and returns
-// the redirect URL. Mirrors the "Buy Tokens" flow so every top-up entry point
+// Creates a Secure-Processor hosted checkout for a balance top-up and returns
+// the redirect URL. Mirrors the "Buy More" flow so every top-up entry point
 // behaves the same way.
 export const startTopUpCheckout = async ({
   userId,
@@ -19,17 +19,19 @@ export const startTopUpCheckout = async ({
   chargePoints,
 }: StartTopUpCheckoutOptions): Promise<string> => {
   const charge = chargePoints ?? points;
+  const amountEur = charge * TOKEN_RATE;
 
   const response = await fetch("/api/payment/secure-processor", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      amount: charge * TOKEN_RATE,
+      amount: amountEur,
       currency: PAYMENT_CURRENCY,
       // Format matters: the webhook parses the Clerk id back out of "gen_<clerkId>_<ts>"
       orderId: `gen_${userId}_${Date.now()}`,
-      // Format matters: the webhook extracts the token count from "(N Tokens)"
-      description: `FastBird Tokens Purchase (${points} Tokens)`,
+      // Format matters: the webhook extracts the credited amount from "(N EUR)"
+      // (legacy "(N Tokens)" descriptions are still accepted).
+      description: `FastBird Top-up (${amountEur} EUR)`,
       customerEmail: email ?? "",
     }),
   });

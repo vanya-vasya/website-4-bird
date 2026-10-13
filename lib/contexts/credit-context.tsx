@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { formatEurFromPoints } from '@/constants/pricing';
 
 interface CreditContextType {
   usedGenerations: number;
@@ -131,7 +132,7 @@ export function useAIGeneration() {
       });
       return {
         success: false,
-        error: `Insufficient points. Need ${tokenCost}, have ${remainingCredits}.`,
+        error: `Insufficient balance. Need ${formatEurFromPoints(tokenCost)} EUR, have ${formatEurFromPoints(remainingCredits)} EUR.`,
       };
     }
 

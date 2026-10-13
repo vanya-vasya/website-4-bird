@@ -7,6 +7,7 @@ import {
   type ActivityType,
   type ActivityStatus,
 } from "@/constants/activities";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 const typeIcon: Record<ActivityType, typeof Wallet> = {
   order: ShoppingBag,
@@ -31,7 +32,7 @@ const formatDate = (iso: string) =>
   });
 
 const formatPoints = (delta: number) =>
-  `${delta > 0 ? "+" : ""}${delta} Points`;
+  `${delta > 0 ? "+" : ""}${formatEurFromPoints(delta)} EUR`;
 
 type ActivityTimelineProps = {
   items: Activity[];

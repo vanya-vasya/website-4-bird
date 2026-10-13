@@ -4,6 +4,7 @@ import { Settings } from "lucide-react";
 import { Heading } from "@/components/heading";
 import { getApiAvailableGenerations, getApiUsedGenerations } from "@/lib/api-limit";
 import { BuyGenerationsButton } from "@/components/buy-generations";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 const SettingsPage = async () => {
   
@@ -20,7 +21,7 @@ const SettingsPage = async () => {
       />
       <div className="px-4 lg:px-8 space-y-4">
         <div className="text-muted-foreground text-sm">
-          You have {apiAvailableGenerations-apiUsedGenerations} available tokens.
+          You have {formatEurFromPoints(apiAvailableGenerations - apiUsedGenerations)} EUR available on your balance.
         </div>
         <BuyGenerationsButton/>
       </div>

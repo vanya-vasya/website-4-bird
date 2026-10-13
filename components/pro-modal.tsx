@@ -39,7 +39,7 @@ import {
 const formSchema = z.object({
   tokens: z
     .number()
-    .min(0, { message: "Token count must be zero or greater" }),
+    .min(0, { message: "Amount must be zero or greater" }),
   currency: z.enum(currencies),
   policies: z.boolean().refine((val) => val === true, {
     message: "You must agree to the terms and conditions",
@@ -91,8 +91,8 @@ export const ProModal = () => {
     setValue("policies", checked);
   };
 
-  // Calculate total price based on token count
-  // GENERATIONS_PRICE is 0.20 GBP per token
+// Calculate total price based on amount
+          // GENERATIONS_PRICE is 0.20 per unit in the payment currency
   const calculatePrice = (tokens: number): number => {
     const currentCurrency = watch("currency");
     // For GBP, use the base price directly (0.20 per token)
@@ -111,7 +111,7 @@ export const ProModal = () => {
     proModal.onClose();
     setShowPaymentWidget(false);
     router.refresh();
-    toast.success("Tokens added successfully!");
+    toast.success("Balance topped up successfully!");
   };
 
   const handlePaymentError = (error: any) => {
@@ -158,11 +158,7 @@ export const ProModal = () => {
                 ← Back to Selection
               </Button>
               <div className="text-black text-sm">
-                {watch("tokens")} Tokens - {(() => {
-                  const curr = watch("currency");
-                  const symbol = curr === "GBP" ? "£" : curr === "EUR" ? "€" : curr === "USD" ? "$" : "";
-                  return `${symbol}${calculatePrice(watch("tokens")).toFixed(2)}`;
-                })()}
+                {(watch("tokens") * GENERATIONS_PRICE).toFixed(2)} EUR
               </div>
             </div>
             
@@ -170,7 +166,7 @@ export const ProModal = () => {
               amount={calculatePrice(watch("tokens"))}
               currency={watch("currency")}
               orderId={`gen_${userId}_${Date.now()}`}
-              description={`Yum-mi Tokens Purchase (${watch("tokens")} Tokens)`}
+              description={`FastBird Top-up (${(watch("tokens") * GENERATIONS_PRICE).toFixed(2)} EUR)`}
               customerEmail={user?.emailAddresses[0].emailAddress || ""}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
@@ -234,14 +230,14 @@ export const ProModal = () => {
                     fontFamily: 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
                   }}
                 >
-                  {calculatePrice(watch("tokens")).toFixed(2)}
+                  {(watch("tokens") * GENERATIONS_PRICE).toFixed(2)} EUR
                 </div>
               </div>
             </div>
 
-            {/* Token Amount Input */}
+            {/* Amount Input */}
             <Label htmlFor="tokens" className="text-black mb-2 block" style={{fontFamily: 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'}}>
-              Enter token amount
+              Enter amount
             </Label>
             <div className="w-full">
               <input
@@ -346,7 +342,7 @@ export const ProModal = () => {
                 type="submit"
                 className="w-full bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:from-green-500 hover:via-green-600 hover:to-green-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Buy Tokens
+                Top up balance
                 <Zap className="w-4 h-4 ml-2 fill-white" />
               </Button>
             </motion.div>
@@ -364,7 +360,7 @@ export const ProModal = () => {
               height={394}
             />
             <Label className="text-center text-black mb-2 block" style={{fontFamily: 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'}}>
-            QUICK FIT LTD - DEPT 2, 43 OWSTON ROAD, CARCROFT, DONCASTER, UNITED KINGDOM, DN6 8DA
+            Quantallin OÜ - Registrite ja Infosüsteemide Keskus, EUID EEARIREG.17505394 - Vesivärava tn 50-201, EE-10152 Tallinn
             </Label>
           </>
         )}

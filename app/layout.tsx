@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     template: "%s · FastBird",
   },
   description:
-    "Top up, tap, and you're online in minutes. FastBird sells eSIM data plans by destination on a simple prepaid Points balance.",
+    "Top up, tap, and you're online in minutes. FastBird sells eSIM data plans by destination on a simple prepaid EUR balance.",
   applicationName: "FastBird",
   openGraph: {
     type: "website",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     siteName: "FastBird",
     title: "FastBird — Travel data that just works",
     description:
-      "Instant eSIM data plans by destination. Top up your Points, get your QR, and connect anywhere.",
+      "Instant eSIM data plans by destination. Top up your balance, get your QR, and connect anywhere.",
     images: [{ url: "/images/brand/og-card.png", width: 1200, height: 630, alt: "FastBird" }],
   },
   twitter: {

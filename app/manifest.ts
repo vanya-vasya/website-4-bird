@@ -4,7 +4,7 @@ const manifest = (): MetadataRoute.Manifest => ({
   name: "FastBird",
   short_name: "FastBird",
   description:
-    "Travel data that just works — instant eSIM data plans by destination, on a simple prepaid Points balance.",
+    "Travel data that just works — instant eSIM data plans by destination, on a simple prepaid EUR balance.",
   start_url: "/",
   display: "standalone",
   background_color: "#FBFAF6",

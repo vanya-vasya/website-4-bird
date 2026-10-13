@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { useCredits } from "@/lib/contexts/credit-context";
 import { Coins, RefreshCw } from "lucide-react";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 interface UsageProgressProps {
   initialUsedGenerations: number;
@@ -42,17 +43,17 @@ export function UsageProgress({
                 <Coins className="w-3 h-3 text-white" />
               </div>
             </div>
-            <span className="font-medium">Points</span>
+            <span className="font-medium">Balance</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-black">
-              {remainingCredits} available
+              {formatEurFromPoints(remainingCredits)} EUR available
             </span>
             <button
               onClick={handleRefresh}
               disabled={isLoading}
               className="p-0.5 hover:bg-black/5 rounded transition-colors disabled:opacity-50"
-              title="Refresh points"
+              title="Refresh balance"
             >
               <RefreshCw className={`w-3 h-3 text-gray-600 ${isLoading ? 'animate-spin' : ''}`} />
             </button>

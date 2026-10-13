@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronDown } from "lucide-react";
+import { formatEurFromPoints } from "@/constants/pricing";
 
 const UserMenu = () => {
   const { user } = useUser();
@@ -130,12 +131,12 @@ const Header = () => {
             <>
               <Link
                 href="/dashboard"
-                aria-label={`${credits} points — go to dashboard`}
+                aria-label={`${formatEurFromPoints(credits)} EUR balance — go to dashboard`}
                 className="flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-surface transition-opacity hover:opacity-80 fb-focus"
               >
                 <Zap className="h-4 w-4 fill-surface" aria-hidden />
-                <span className="font-semibold text-sm">{credits}</span>
-                <span className="text-sm font-normal opacity-70">points</span>
+                <span className="font-semibold text-sm">{formatEurFromPoints(credits)}</span>
+                <span className="text-sm font-normal opacity-70">EUR</span>
               </Link>
               <UserMenu />
             </>

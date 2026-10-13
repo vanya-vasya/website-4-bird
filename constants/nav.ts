@@ -6,7 +6,6 @@ export type NavLink = {
 export const mainNav: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "eSim", href: "/products" },
-  { label: "Pricing", href: "/pricing" },
   { label: "Our Story", href: "/story" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
@@ -15,7 +14,6 @@ export const mainNav: NavLink[] = [
 export const productsMenu: NavLink[] = [
   { label: "Browse destinations", href: "/products" },
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Pricing & Points", href: "/pricing" },
   { label: "Your dashboard", href: "/dashboard" },
 ];
 
@@ -25,7 +23,7 @@ export const footerNav: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Home", href: "/" },
       { label: "eSim", href: "/products" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "Payments", href: "/payments" },
       { label: "Our Story", href: "/story" },
     ],
   },

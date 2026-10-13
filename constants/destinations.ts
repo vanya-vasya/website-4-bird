@@ -1,6 +1,7 @@
 // Seed destination catalog. Structured so a real eSIM provider/API can replace
 // this list later. Flags are rendered from flagcdn.com via the ISO 3166-1
-// alpha-2 `code`. Pricing is placeholder, expressed in FastBird Points.
+// alpha-2 `code`. Plan prices are stored in FastBird Points and displayed in
+// EUR (1 EUR = 5 Points).
 // TODO: replace with the production destination/pricing catalog.
 
 export type Region =
@@ -126,7 +127,8 @@ export const destinations: Destination[] = [
 ];
 
 // Flat Points pricing per data tier, applied to every destination. Points are
-// whole numbers because user balances are stored as integers.
+// whole numbers because user balances are stored as integers; the UI shows
+// the EUR equivalent (points / 5).
 const planTiers = [
   { data: "1 GB", validityDays: 7, points: 20 },
   { data: "3 GB", validityDays: 15, points: 30 },

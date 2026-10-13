@@ -19,12 +19,12 @@ const tracked = [
   {
     icon: ShoppingBag,
     title: "Orders",
-    body: "Every plan you buy, with destination, size, and the Points spent.",
+    body: "Every plan you buy, with destination, size, and the EUR spent.",
   },
   {
     icon: Wallet,
     title: "Top-ups",
-    body: "When you added Points and how much landed in your balance.",
+    body: "When you topped up and how much landed in your balance.",
   },
   {
     icon: Power,
@@ -48,7 +48,7 @@ const ActivitiesPage = () => (
         </h1>
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink-soft">
           Your dashboard keeps a tidy timeline of every order, top-up,
-          activation, and data session — so you always know where your Points
+          activation, and data session — so you always know where your money
           went.
         </p>
       </Container>

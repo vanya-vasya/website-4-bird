@@ -10,9 +10,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PAYMENT_CURRENCY, TOKEN_RATE } from "@/constants/pricing";
-
-const RATE_PER_TOKEN = TOKEN_RATE; // price per token in PAYMENT_CURRENCY (EUR)
+import { PAYMENT_CURRENCY } from "@/constants/pricing";
 
 interface BuyCreditsModalProps {
   open: boolean;
@@ -26,27 +24,29 @@ interface CreateCheckoutResponse {
   details?: string;
 }
 
+const MIN_EUR = 1;
+
 const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
   const { userId } = useAuth();
   const { user } = useUser();
-  const [tokenAmount, setTokenAmount] = useState(0);
+  const [eurAmount, setEurAmount] = useState(0);
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const total = (tokenAmount * RATE_PER_TOKEN).toFixed(2);
+  const validAmount = Number.isFinite(eurAmount) && eurAmount >= MIN_EUR;
 
-  const handleIncrement = () => setTokenAmount((v) => v + 1);
-  const handleDecrement = () => setTokenAmount((v) => Math.max(0, v - 1));
+  const handleIncrement = () => setEurAmount((v) => Math.round(v + 1));
+  const handleDecrement = () => setEurAmount((v) => Math.max(0, Math.round(v - 1)));
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
-    setTokenAmount(isNaN(val) || val < 0 ? 0 : val);
+    const val = Number(e.target.value);
+    setEurAmount(isNaN(val) || val < 0 ? 0 : val);
   };
 
-  const handleBuyTokens = async () => {
-    if (!agreed || tokenAmount === 0 || isSubmitting) return;
+  const handleTopUp = async () => {
+    if (!agreed || !validAmount || isSubmitting) return;
 
     if (!userId) {
-      toast.error("Please sign in to buy tokens");
+      toast.error("Please sign in to top up");
       return;
     }
 
@@ -57,12 +57,12 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: tokenAmount * RATE_PER_TOKEN,
+          amount: eurAmount,
           currency: PAYMENT_CURRENCY,
           // Format matters: the webhook parses the Clerk id back out of "gen_<clerkId>_<ts>"
           orderId: `gen_${userId}_${Date.now()}`,
-          // Format matters: the webhook extracts the token count from "(N Tokens)"
-          description: `FastBird Tokens Purchase (${tokenAmount} Tokens)`,
+          // Format matters: the webhook extracts the credited amount from "(N EUR)"
+          description: `FastBird Top-up (${eurAmount} EUR)`,
           customerEmail: user?.primaryEmailAddress?.emailAddress ?? "",
         }),
       });
@@ -89,10 +89,10 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md border-line bg-surface p-8 sm:rounded-xl">
         <DialogTitle className="text-center font-heading text-xl font-semibold text-ink">
-          Buy More
+          Top up balance
         </DialogTitle>
 
-        {/* Currency + amount */}
+        {/* Amount */}
         <div className="mt-6 flex items-center justify-center gap-4">
           <div className="rounded-xl border-2 border-ink px-5 py-2.5">
             <span className="font-mono text-sm font-semibold text-ink">
@@ -100,24 +100,25 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
             </span>
           </div>
           <span className="font-heading text-5xl font-bold text-ink tracking-tight">
-            {total}
+            {eurAmount || "0"}
           </span>
         </div>
 
-        {/* Token input */}
+        {/* Amount input */}
         <div className="mt-8 space-y-2">
           <label
-            htmlFor="token-amount"
+            htmlFor="topup-amount"
             className="font-sans text-sm text-ink-soft"
           >
-            Enter token amount
+            Enter amount in EUR
           </label>
           <div className="relative flex items-center overflow-hidden rounded-xl border border-line bg-surface focus-within:ring-2 focus-within:ring-green">
             <input
-              id="token-amount"
+              id="topup-amount"
               type="number"
               min={0}
-              value={tokenAmount}
+              step={1}
+              value={eurAmount || ""}
               onChange={handleInputChange}
               className="w-full bg-transparent py-4 pl-6 pr-14 text-center font-heading text-2xl font-semibold text-ink outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
@@ -125,7 +126,7 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
               <button
                 type="button"
                 onClick={handleIncrement}
-                aria-label="Increase token amount"
+                aria-label="Increase amount"
                 className="flex flex-1 items-center justify-center px-3 text-ink-soft transition-colors hover:bg-sand hover:text-ink"
               >
                 <svg className="h-3 w-3" viewBox="0 0 12 8" fill="none" aria-hidden>
@@ -136,7 +137,7 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
               <button
                 type="button"
                 onClick={handleDecrement}
-                aria-label="Decrease token amount"
+                aria-label="Decrease amount"
                 className="flex flex-1 items-center justify-center px-3 text-ink-soft transition-colors hover:bg-sand hover:text-ink"
               >
                 <svg className="h-3 w-3" viewBox="0 0 12 8" fill="none" aria-hidden>
@@ -145,6 +146,7 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
               </button>
             </div>
           </div>
+          <p className="font-mono text-xs text-ink-soft">minimum {MIN_EUR} EUR</p>
         </div>
 
         {/* Terms checkbox */}
@@ -180,9 +182,9 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
         {/* CTA */}
         <button
           type="button"
-          onClick={handleBuyTokens}
-          disabled={!agreed || tokenAmount === 0 || isSubmitting}
-          aria-label="Buy tokens and proceed to payment"
+          onClick={handleTopUp}
+          disabled={!agreed || !validAmount || isSubmitting}
+          aria-label="Top up balance and proceed to payment"
           className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-xl bg-ink py-4 font-heading text-base font-semibold text-on-dark transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isSubmitting ? (
@@ -192,7 +194,7 @@ const BuyCreditsModal = ({ open, onOpenChange }: BuyCreditsModalProps) => {
             </>
           ) : (
             <>
-              Buy Tokens
+              Top up
               <Zap className="h-4 w-4 fill-on-dark" aria-hidden />
             </>
           )}
