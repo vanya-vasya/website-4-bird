@@ -3,8 +3,8 @@
 // alpha-2 `code`. Prices are stored in Points (1 EUR = 5 Points) per plan tier
 // and displayed in EUR. Country pricing derives from the supplier per-GB rate
 // × 1.3, increased 1.5× (2026-10-14), rounded to whole Points at every step.
-// Europe Regional mirrors United Kingdom, Asia Regional mirrors Hong Kong,
-// and Global mirrors the most expensive country (Aruba).
+// Europe Regional and Asia Regional are priced at 0.5 × Global, and Global
+// mirrors the most expensive country (Aruba).
 // TODO: replace with the production destination/pricing catalog.
 
 export type Region =
@@ -125,8 +125,8 @@ export const destinations: Destination[] = [
   d("Barbados", "bb", "Caribbean", [21, 65, 107, 213, 428]),
   d("Aruba", "aw", "Caribbean", [35, 105, 174, 348, 696]),
   // Regional bundles
-  d("Europe Regional", "eu", "Regional", [8, 21, 35, 69, 137], true),
-  d("Asia Regional", "as", "Regional", [9, 26, 42, 86, 170]),
+  d("Europe Regional", "eu", "Regional", [18, 53, 87, 174, 348], true),
+  d("Asia Regional", "as", "Regional", [18, 53, 87, 174, 348]),
   d("Global", "un", "Regional", [35, 105, 174, 348, 696]),
 ];
 
