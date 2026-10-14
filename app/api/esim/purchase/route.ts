@@ -6,6 +6,7 @@ import { generatePdfReceipt } from '@/lib/receiptGeneration';
 import { buildEsimInstallEmail } from '@/lib/esim-install-email';
 import { getDestination, getPlan } from '@/constants/destinations';
 import { formatEurFromPoints, TOKEN_RATE } from '@/constants/pricing';
+import { discountedPoints, getPromoDiscount } from '@/constants/promo';
 
 // POST - Buy an eSIM plan with the prepaid balance ("Buy now" button).
 // Deducts the plan price from the user's balance and sends the
@@ -19,9 +20,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { destinationSlug, planId } = body as {
+    const { destinationSlug, planId, promoCode } = body as {
       destinationSlug?: string;
       planId?: string;
+      promoCode?: string;
     };
 
     if (!destinationSlug || !planId) {
@@ -39,7 +41,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unknown plan' }, { status: 400 });
     }
 
-    const pointsCost = plan.points;
+    // Promo lookup: absent code = 0%; present but unknown code = error
+    const promoPercent =
+      typeof promoCode === 'string' && promoCode.trim() !== ''
+        ? getPromoDiscount(promoCode)
+        : 0;
+    if (typeof promoCode === 'string' && promoCode.trim() !== '' && !promoPercent) {
+      return NextResponse.json(
+        { error: 'Invalid promo code' },
+        { status: 400 }
+      );
+    }
+
+    const pointsCost = discountedPoints(plan.points, promoPercent);
 
     const user = await prismadb.user.findUnique({
       where: { clerkId: userId },
@@ -85,7 +99,7 @@ export async function POST(request: NextRequest) {
           // as a negative amount so the Payments page shows the deduction
           amount: -Math.round(pointsCost * TOKEN_RATE * 100),
           currency: 'EUR',
-          description: `FastBird eSIM — ${planLabel} (${formatEurFromPoints(pointsCost)} EUR)`,
+          description: `FastBird eSIM — ${planLabel}${promoPercent ? ` — promo −${promoPercent}%` : ""} (${formatEurFromPoints(pointsCost)} EUR)`,
           type: 'esim_purchase',
           payment_method_type: 'points',
           message: `${formatEurFromPoints(pointsCost)} EUR deducted from balance for eSIM purchase`,
@@ -129,7 +143,7 @@ export async function POST(request: NextRequest) {
           year: 'numeric',
         }),
         pointsCost,
-        `FastBird eSIM — ${planLabel}`,
+        `FastBird eSIM — ${planLabel}${promoPercent ? ` — promo −${promoPercent}%` : ""}`,
         Math.round(pointsCost * TOKEN_RATE * 100),
         'EUR'
       );

@@ -15,6 +15,7 @@ import {
   type Destination,
 } from "@/constants/destinations";
 import { formatEurFromPoints } from "@/constants/pricing";
+import { discountedPoints, getPromoDiscount } from "@/constants/promo";
 
 const included = [
   "Data-only plan — no contract, no commitment",
@@ -48,6 +49,30 @@ export const DestinationDetail = ({
   );
   const [isPurchasing, setIsPurchasing] = useState(false);
   const selected = plans.find((p) => p.id === selectedId) ?? plans[0];
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    percent: number;
+  } | null>(null);
+
+  const payPoints = appliedPromo
+    ? discountedPoints(selected.points, appliedPromo.percent)
+    : selected.points;
+
+  const applyPromo = () => {
+    const code = promoInput.trim();
+    if (!code) {
+      setAppliedPromo(null);
+      return;
+    }
+    const percent = getPromoDiscount(code);
+    if (percent) {
+      setAppliedPromo({ code: code.toUpperCase(), percent });
+    } else {
+      setAppliedPromo(null);
+      toast.error("Invalid promo code");
+    }
+  };
 
   const handleBuyNow = async () => {
     if (isPurchasing) return;
@@ -66,6 +91,7 @@ export const DestinationDetail = ({
         body: JSON.stringify({
           destinationSlug: destination.slug,
           planId: selected.id,
+          promoCode: appliedPromo?.code ?? "",
         }),
       });
 
@@ -231,8 +257,35 @@ export const DestinationDetail = ({
             <div className="flex items-center justify-between border-t border-line pt-3">
               <dt className="text-sm text-ink-soft">Total</dt>
               <dd className="font-heading text-2xl font-medium text-ink">
-                {formatEurFromPoints(selected.points)}{" "}
+                {formatEurFromPoints(payPoints)}{" "}
                 <span className="font-mono text-sm text-ink-soft">EUR</span>
+                {appliedPromo && (
+                  <span className="ml-1 align-middle font-mono text-xs uppercase tracking-[0.06em] text-green">
+                    −{appliedPromo.percent}%
+                  </span>
+                )}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-sm text-ink-soft">Promocode</dt>
+              <dd className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={promoInput}
+                  onChange={(e) => setPromoInput(e.target.value)}
+                  onBlur={applyPromo}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") applyPromo();
+                  }}
+                  placeholder="Enter code"
+                  aria-label="Promocode"
+                  className="w-32 rounded-sm border border-line bg-surface px-2 py-1.5 text-right font-mono text-sm text-ink placeholder:font-mono placeholder:text-ink-soft/50 fb-focus"
+                />
+                {appliedPromo && (
+                  <span className="font-mono text-xs uppercase tracking-[0.04em] text-green">
+                    promo −{appliedPromo.percent}%
+                  </span>
+                )}
               </dd>
             </div>
           </dl>
@@ -244,7 +297,7 @@ export const DestinationDetail = ({
               size="lg"
               onClick={handleBuyNow}
               disabled={isPurchasing}
-              aria-label={`Buy ${selected.data} plan for ${destination.name} for ${formatEurFromPoints(selected.points)} EUR`}
+              aria-label={`Buy ${selected.data} plan for ${destination.name} for ${formatEurFromPoints(payPoints)} EUR`}
             >
               {isPurchasing ? (
                 <>
