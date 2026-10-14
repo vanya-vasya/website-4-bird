@@ -1,7 +1,8 @@
 // Seed destination catalog. Structured so a real eSIM provider/API can replace
 // this list later. Flags are rendered from flagcdn.com via the ISO 3166-1
-// alpha-2 `code`. Plan prices are stored in FastBird Points and displayed in
-// EUR (1 EUR = 5 Points).
+// alpha-2 `code`. Prices are stored in Points (1 EUR = 5 Points) per plan tier
+// and displayed in EUR. Country pricing derives from the supplier per-GB rate
+// × 1.3, rounded to whole Points; the three regional bundles keep flat pricing.
 // TODO: replace with the production destination/pricing catalog.
 
 export type Region =
@@ -26,7 +27,8 @@ export type Destination = {
   name: string;
   code: string; // ISO 3166-1 alpha-2, lowercase for flagcdn
   region: Region;
-  base: number; // base Points factor used to derive plans
+  // Plan prices in Points, one entry per PLAN_TIERS entry (1/3/5/10/20 GB)
+  planPoints: number[];
   popular?: boolean;
 };
 
@@ -44,107 +46,106 @@ const d = (
   name: string,
   code: string,
   region: Region,
-  base: number,
+  planPoints: number[],
   popular = false
 ): Destination => ({
   slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
   name,
   code: code.toLowerCase(),
   region,
-  base,
+  planPoints,
   popular,
 });
 
 export const destinations: Destination[] = [
   // Europe
-  d("United Kingdom", "gb", "Europe", 0.52, true),
-  d("France", "fr", "Europe", 0.54, true),
-  d("Spain", "es", "Europe", 0.5, true),
-  d("Italy", "it", "Europe", 0.55, true),
-  d("Germany", "de", "Europe", 0.56, true),
-  d("Portugal", "pt", "Europe", 0.49),
-  d("Netherlands", "nl", "Europe", 0.57),
-  d("Switzerland", "ch", "Europe", 0.72),
-  d("Greece", "gr", "Europe", 0.53),
-  d("Ireland", "ie", "Europe", 0.6),
-  d("Austria", "at", "Europe", 0.58),
-  d("Poland", "pl", "Europe", 0.45),
-  d("Sweden", "se", "Europe", 0.61),
-  d("Norway", "no", "Europe", 0.74),
-  d("Czechia", "cz", "Europe", 0.46),
-  d("Croatia", "hr", "Europe", 0.48),
-  d("Iceland", "is", "Europe", 0.79),
-  d("Belgium", "be", "Europe", 0.57),
+  d("United Kingdom", "gb", "Europe", [5, 14, 23, 46, 91], true),
+  d("France", "fr", "Europe", [4, 12, 20, 40, 81], true),
+  d("Spain", "es", "Europe", [4, 12, 20, 40, 81], true),
+  d("Italy", "it", "Europe", [4, 12, 20, 40, 81], true),
+  d("Germany", "de", "Europe", [4, 11, 19, 37, 74], true),
+  d("Portugal", "pt", "Europe", [5, 16, 26, 52, 104]),
+  d("Netherlands", "nl", "Europe", [5, 16, 26, 52, 104]),
+  d("Switzerland", "ch", "Europe", [5, 15, 25, 50, 100]),
+  d("Greece", "gr", "Europe", [4, 11, 18, 36, 72]),
+  d("Ireland", "ie", "Europe", [5, 16, 26, 52, 104]),
+  d("Austria", "at", "Europe", [5, 16, 26, 52, 104]),
+  d("Poland", "pl", "Europe", [5, 16, 26, 52, 104]),
+  d("Sweden", "se", "Europe", [5, 16, 26, 52, 104]),
+  d("Norway", "no", "Europe", [5, 16, 26, 52, 104]),
+  d("Czechia", "cz", "Europe", [5, 16, 26, 52, 104]),
+  d("Croatia", "hr", "Europe", [4, 11, 18, 36, 72]),
+  d("Iceland", "is", "Europe", [5, 16, 26, 52, 104]),
+  d("Belgium", "be", "Europe", [5, 16, 26, 52, 104]),
   // Americas
-  d("United States", "us", "Americas", 0.58, true),
-  d("Canada", "ca", "Americas", 0.6, true),
-  d("Mexico", "mx", "Americas", 0.62),
-  d("Brazil", "br", "Americas", 0.66),
-  d("Argentina", "ar", "Americas", 0.64),
-  d("Chile", "cl", "Americas", 0.63),
-  d("Colombia", "co", "Americas", 0.61),
-  d("Peru", "pe", "Americas", 0.65),
-  d("Costa Rica", "cr", "Americas", 0.7),
+  d("United States", "us", "Americas", [4, 11, 18, 35, 70], true),
+  d("Canada", "ca", "Americas", [8, 24, 40, 80, 160], true),
+  d("Mexico", "mx", "Americas", [8, 24, 40, 80, 160]),
+  d("Brazil", "br", "Americas", [5, 16, 26, 52, 104]),
+  d("Argentina", "ar", "Americas", [14, 41, 68, 137, 273]),
+  d("Chile", "cl", "Americas", [11, 34, 57, 113, 226]),
+  d("Colombia", "co", "Americas", [11, 34, 57, 113, 226]),
+  d("Peru", "pe", "Americas", [10, 30, 51, 101, 203]),
+  d("Costa Rica", "cr", "Americas", [9, 27, 45, 90, 179]),
   // Asia
-  d("Japan", "jp", "Asia", 0.55, true),
-  d("Thailand", "th", "Asia", 0.5, true),
-  d("Singapore", "sg", "Asia", 0.57),
-  d("South Korea", "kr", "Asia", 0.56),
-  d("Indonesia", "id", "Asia", 0.52),
-  d("Vietnam", "vn", "Asia", 0.48),
-  d("Malaysia", "my", "Asia", 0.5),
-  d("United Arab Emirates", "ae", "Asia", 0.78, true),
-  d("Turkey", "tr", "Asia", 0.51),
-  d("India", "in", "Asia", 0.46),
-  d("Philippines", "ph", "Asia", 0.53),
-  d("China", "cn", "Asia", 0.59),
-  d("Hong Kong", "hk", "Asia", 0.58),
-  d("Israel", "il", "Asia", 0.7),
-  d("Saudi Arabia", "sa", "Asia", 0.76),
-  d("Sri Lanka", "lk", "Asia", 0.49),
+  d("Japan", "jp", "Asia", [4, 12, 20, 40, 81], true),
+  d("Thailand", "th", "Asia", [2, 5, 9, 18, 35], true),
+  d("Singapore", "sg", "Asia", [4, 11, 18, 36, 72]),
+  d("South Korea", "kr", "Asia", [5, 14, 23, 46, 91]),
+  d("Indonesia", "id", "Asia", [5, 14, 24, 47, 95]),
+  d("Vietnam", "vn", "Asia", [5, 14, 23, 46, 91]),
+  d("Malaysia", "my", "Asia", [7, 22, 36, 73, 146]),
+  d("United Arab Emirates", "ae", "Asia", [8, 25, 42, 84, 168], true),
+  d("Turkey", "tr", "Asia", [4, 11, 18, 36, 72]),
+  d("India", "in", "Asia", [5, 15, 25, 50, 100]),
+  d("Philippines", "ph", "Asia", [5, 16, 26, 52, 104]),
+  d("China", "cn", "Asia", [4, 12, 20, 40, 81]),
+  d("Hong Kong", "hk", "Asia", [6, 17, 28, 57, 113]),
+  d("Israel", "il", "Asia", [5, 14, 23, 46, 91]),
+  d("Saudi Arabia", "sa", "Asia", [5, 14, 24, 47, 95]),
+  d("Sri Lanka", "lk", "Asia", [5, 16, 26, 52, 104]),
   // Africa
-  d("Egypt", "eg", "Africa", 0.6),
-  d("Morocco", "ma", "Africa", 0.62),
-  d("South Africa", "za", "Africa", 0.64),
-  d("Kenya", "ke", "Africa", 0.66),
-  d("Tanzania", "tz", "Africa", 0.68),
-  d("Tunisia", "tn", "Africa", 0.61),
-  d("Nigeria", "ng", "Africa", 0.67),
+  d("Egypt", "eg", "Africa", [11, 32, 54, 107, 215]),
+  d("Morocco", "ma", "Africa", [5, 16, 26, 52, 104]),
+  d("South Africa", "za", "Africa", [8, 25, 42, 84, 168]),
+  d("Kenya", "ke", "Africa", [17, 51, 85, 171, 342]),
+  d("Tanzania", "tz", "Africa", [8, 25, 42, 84, 168]),
+  d("Tunisia", "tn", "Africa", [8, 25, 42, 84, 168]),
+  d("Nigeria", "ng", "Africa", [17, 50, 83, 165, 330]),
   // Oceania
-  d("Australia", "au", "Oceania", 0.6, true),
-  d("New Zealand", "nz", "Oceania", 0.63),
-  d("Fiji", "fj", "Oceania", 0.82),
+  d("Australia", "au", "Oceania", [4, 11, 19, 37, 74], true),
+  d("New Zealand", "nz", "Oceania", [8, 24, 41, 81, 163]),
+  d("Fiji", "fj", "Oceania", [11, 34, 57, 113, 226]),
   // Caribbean
-  d("Dominican Republic", "do", "Caribbean", 0.72),
-  d("Jamaica", "jm", "Caribbean", 0.78),
-  d("Bahamas", "bs", "Caribbean", 0.85),
-  d("Barbados", "bb", "Caribbean", 0.86),
-  d("Aruba", "aw", "Caribbean", 0.84),
+  d("Dominican Republic", "do", "Caribbean", [8, 23, 38, 75, 151]),
+  d("Jamaica", "jm", "Caribbean", [13, 39, 65, 131, 261]),
+  d("Bahamas", "bs", "Caribbean", [14, 43, 71, 142, 285]),
+  d("Barbados", "bb", "Caribbean", [14, 43, 71, 142, 285]),
+  d("Aruba", "aw", "Caribbean", [23, 70, 116, 232, 464]),
   // Regional bundles
-  d("Europe Regional", "eu", "Regional", 0.44, true),
-  d("Asia Regional", "as", "Regional", 0.47),
-  d("Global", "un", "Regional", 0.95),
+  d("Europe Regional", "eu", "Regional", [20, 30, 60, 100, 200], true),
+  d("Asia Regional", "as", "Regional", [20, 30, 60, 100, 200]),
+  d("Global", "un", "Regional", [20, 30, 60, 100, 200]),
 ];
 
-// Flat Points pricing per data tier, applied to every destination. Points are
-// whole numbers because user balances are stored as integers; the UI shows
-// the EUR equivalent (points / 5).
-const planTiers = [
-  { data: "1 GB", validityDays: 7, points: 20 },
-  { data: "3 GB", validityDays: 15, points: 30 },
-  { data: "5 GB", validityDays: 30, points: 60, popular: true },
-  { data: "10 GB", validityDays: 30, points: 100 },
-  { data: "20 GB", validityDays: 30, points: 200 },
+// Plan ladder shared by every destination; prices come from each destination's
+// planPoints (Points per tier, 1 EUR = 5 Points).
+const PLAN_TIERS = [
+  { data: "1 GB", validityDays: 7 },
+  { data: "3 GB", validityDays: 15 },
+  { data: "5 GB", validityDays: 30, popular: true },
+  { data: "10 GB", validityDays: 30 },
+  { data: "20 GB", validityDays: 30 },
 ];
 
-/** Build the plan ladder for a destination. Pricing is flat across destinations. */
+/** Build the plan ladder for a destination. */
 export const buildPlans = (dest: Destination): Plan[] =>
-  planTiers.map((t, i) => ({
+  PLAN_TIERS.map((tier, i) => ({
     id: `${dest.slug}-${i}`,
-    data: t.data,
-    validityDays: t.validityDays,
-    points: t.points,
-    popular: t.popular,
+    data: tier.data,
+    validityDays: tier.validityDays,
+    points: dest.planPoints[i],
+    popular: tier.popular,
   }));
 
 export const startingPoints = (dest: Destination): number =>
