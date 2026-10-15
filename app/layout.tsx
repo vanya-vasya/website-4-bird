@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     template: "%s · FastBird",
   },
   description:
-    "Top up, tap, and you're online in minutes. FastBird sells eSIM data plans by destination on a simple prepaid EUR balance.",
+    "Pick, pay, and you're online in minutes. FastBird sells eSIM data plans by destination with direct one-time payment.",
   applicationName: "FastBird",
   openGraph: {
     type: "website",
