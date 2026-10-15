@@ -62,3 +62,22 @@ model Transaction {
   @@index([userId, createdAt])
   @@index([webhookEventId])
 }
+
+// Line items of a cart order. Rows are written as 'pending' when the cart is
+// paid at /api/esim/cart-checkout; the webhook fulfils them on payment success
+// by creating one Activity (bought eSIM) per item and emailing instructions.
+model OrderItem {
+  id              String   @id @default(cuid())
+  transactionId   String // linked Transaction.id
+  userId          String
+  destination     String // e.g. "Japan"
+  destinationSlug String // e.g. "japan", used to render the flag
+  planId          String // e.g. "japan-2"
+  planData        String // e.g. "5 GB"
+  validityDays    Int
+  points          Int // points charged for this item (promo applied)
+  priceCents      Int // EUR cents charged for this item (promo applied)
+  createdAt       DateTime @default(now())
+
+  @@index([transactionId])
+}

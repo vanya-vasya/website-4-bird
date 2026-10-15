@@ -17,6 +17,7 @@ import {
 } from "@/constants/destinations";
 import { formatEurFromPoints } from "@/constants/pricing";
 import { discountedPoints, getPromoDiscount } from "@/constants/promo";
+import { useCart } from "@/contexts/cart-context";
 
 const included = [
   "Data-only plan — no contract, no commitment",
@@ -44,6 +45,7 @@ export const DestinationDetail = ({
 }: DestinationDetailProps) => {
   const router = useRouter();
   const { isSignedIn } = useAuth();
+  const { addItem } = useCart();
   const plans = buildPlans(destination);
   const [selectedId, setSelectedId] = useState(
     plans.find((p) => p.popular)?.id ?? plans[0].id
@@ -81,6 +83,14 @@ export const DestinationDetail = ({
       return;
     }
     setCheckoutOpen(true);
+  };
+
+  const handleAddToCart = () => {
+    addItem({
+      destinationSlug: destination.slug,
+      planId: selected.id,
+    });
+    toast.success(`${destination.name} ${selected.data} added to cart`);
   };
 
   const startCheckout = async () => {
@@ -280,6 +290,14 @@ export const DestinationDetail = ({
               aria-label={`Buy ${selected.data} plan for ${destination.name} for ${formatEurFromPoints(payPoints)} EUR`}
             >
               Buy now
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={handleAddToCart}
+            >
+              Add to cart
             </Button>
           </div>
 

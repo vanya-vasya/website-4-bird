@@ -9,6 +9,158 @@ import { getDestination, getPlan } from '@/constants/destinations';
 import { formatEurFromPoints, TOKEN_RATE } from '@/constants/pricing';
 import { discountedPoints } from '@/constants/promo';
 
+// Fulfil a cart order (tracking_id "cart_<clerkId>_<ts>"). The line items
+// were persisted as pending OrderItems at /api/esim/cart-checkout — on payment
+// success mark the order completed, create one eSIM Activity per item and
+// email the installation instructions for each plan.
+async function handleCartOrder(payload: {
+  tracking_id: string;
+  amount: number;
+  currency: string;
+  email: string;
+  description: string;
+}) {
+  const { tracking_id, amount, currency, email } = payload;
+
+  // userId: "cart_user_ABC_123456" → "user_ABC"
+  const parts = tracking_id.replace('cart_', '').split('_');
+  parts.pop(); // timestamp
+  const userId = parts.join('_');
+
+  // The order was written at checkout — fulfil from the database
+  const order = await prismadb.transaction.findFirst({
+    where: { tracking_id },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (!order) {
+    console.error(`❌ Cart order not found in DB: ${tracking_id}`);
+    return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+  }
+
+  if (['completed', 'success', 'successful'].includes(order.status || '')) {
+    console.log(`   ⚠️ Cart order already fulfilled: ${order.id}`);
+    return NextResponse.json({ status: 'ok' }, { status: 200 });
+  }
+
+  const items = await prismadb.orderItem.findMany({
+    where: { transactionId: order.id },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  if (items.length === 0) {
+    console.error(`❌ Cart order ${order.id} has no line items`);
+    return NextResponse.json({ error: 'Order has no items' }, { status: 400 });
+  }
+
+  // Find the user (relink by email after a Clerk instance rotation)
+  let user = await prismadb.user.findUnique({ where: { clerkId: userId } });
+  if (!user && email) {
+    const userByEmail = await prismadb.user.findUnique({ where: { email } });
+    if (userByEmail) {
+      user = await prismadb.user.update({
+        where: { email },
+        data: { clerkId: userId },
+      });
+      console.log(`   🔗 Relinked existing account ${email} to new clerkId ${userId}`);
+    }
+  }
+  if (!user) {
+    if (!email) {
+      console.error(`❌ Cart order: user not found and webhook has no email`);
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+    user = await prismadb.user.create({
+      data: { clerkId: userId, email, photo: '', availableGenerations: 0, usedGenerations: 0 },
+    });
+    console.log(`   🆕 Provisioned missing user ${userId} (${email}) from cart webhook`);
+  }
+
+  const buyerEmail = user.email || email;
+
+  // Mark the order paid and create one Activity per paid eSIM — atomically
+  await prismadb.$transaction(async (tx) => {
+    await tx.transaction.update({
+      where: { id: order.id },
+      data: {
+        status: 'completed',
+        amount: amount,
+        currency: currency || order.currency || 'EUR',
+        paid_at: new Date(),
+        message: `${items.length} eSIM plan(s) delivered — instructions emailed`,
+      },
+    });
+
+    for (const item of items) {
+      await tx.activity.create({
+        data: {
+          userId,
+          destination: item.destination,
+          destinationSlug: item.destinationSlug,
+          planData: item.planData,
+          validityDays: item.validityDays,
+          points: item.points,
+          transactionId: order.id,
+        },
+      });
+    }
+  });
+
+  console.log(`   ✅ Cart order completed: ${items.length} plan(s), ${((amount || 0) / 100).toFixed(2)} EUR by ${userId} (tx ${order.id})`);
+
+  // One installation email per plan, each with its own receipt. The QR lives
+  // in public/ which is CDN-served but not bundled into the serverless
+  // function, so it must be fetched over HTTP.
+  let qrPng: Buffer | null = null;
+  try {
+    const qrResponse = await fetch('https://myfastbird.com/esim/install-qr.png');
+    if (qrResponse.ok) {
+      qrPng = Buffer.from(await qrResponse.arrayBuffer());
+    } else {
+      console.error(`⚠️ QR code fetch returned ${qrResponse.status}, sending emails without inline QR`);
+    }
+  } catch (qrError) {
+    console.error('⚠️ Failed to fetch QR code image:', qrError);
+  }
+
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index];
+    try {
+      const receiptId = `${order.id.slice(-8)}${String(index + 1).padStart(2, '0')}`;
+      const itemLabel = `${item.destination} ${item.planData} / ${item.validityDays} days`;
+
+      const pdfBuffer = await generatePdfReceipt(
+        receiptId,
+        buyerEmail,
+        new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }),
+        item.points,
+        `FastBird eSIM — ${itemLabel}`,
+        item.priceCents,
+        'EUR'
+      );
+
+      await transporter.sendMail(
+        buildEsimInstallEmail({
+          to: buyerEmail,
+          from: process.env.OUTBOX_EMAIL as string,
+          orderId: `${order.id}-${index + 1}`,
+          receiptId,
+          receiptPdf: pdfBuffer,
+          qrPng,
+          size: item.planData,
+          validity: `${item.validityDays} DAY`,
+        })
+      );
+      console.log(`   ✅ eSIM installation email sent for ${itemLabel} to ${buyerEmail}`);
+    } catch (emailError) {
+      // The payment itself succeeded — log and continue with the next item
+      console.error(`   ⚠️ Failed to send the eSIM email for item ${item.id}:`, emailError);
+    }
+  }
+
+  return NextResponse.json({ status: 'ok' }, { status: 200 });
+}
+
 // Fulfil a direct eSIM order (tracking_id "esim_<clerkId>_<ts>"). Instead of
 // crediting a balance, the paid plan is recorded as an eSIM purchase and the
 // installation email with the QR code is sent — this is the direct-sale flow.
@@ -301,6 +453,17 @@ export async function POST(request: NextRequest) {
             email,
             description: description || '',
             status: 'completed',
+          });
+        }
+
+        // Cart order: fulfil the persisted pending order and its line items
+        if (typeof tracking_id === 'string' && tracking_id.startsWith('cart_')) {
+          return await handleCartOrder({
+            tracking_id,
+            amount,
+            currency: currency || 'EUR',
+            email,
+            description: description || '',
           });
         }
         

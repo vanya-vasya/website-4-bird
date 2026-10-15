@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronDown } from "lucide-react";
+import { CartButton } from "@/components/cart-button";
 
 const UserMenu = () => {
   const { user } = useUser();
@@ -117,6 +118,7 @@ const Header = () => {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <CartButton />
           {isLoaded && isSignedIn ? (
             <>
               <UserMenu />
@@ -136,15 +138,18 @@ const Header = () => {
           ) : null}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          className="rounded-sm p-2 lg:hidden fb-focus text-ink"
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-1 lg:hidden">
+          <CartButton />
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            className="rounded-sm p-2 fb-focus text-ink"
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </Container>
 
       {open && (

@@ -9,6 +9,7 @@ import { UserDropdown } from "@/components/user-dropdown";
 import { GuestMobileSidebar } from "@/components/guest-mobile-sidebar";
 import { PaymentHistoryAnalytics } from "@/lib/analytics";
 import { mainNav } from "@/constants/nav";
+import { CartButton } from "@/components/cart-button";
 
 const dashboardNav = [
   { name: "Payments", href: "/dashboard/billing/payment-history" },
@@ -67,6 +68,7 @@ const DashboardHeader = () => {
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
+          <CartButton />
           <UserDropdown />
         </div>
 
