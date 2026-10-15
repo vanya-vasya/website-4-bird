@@ -48,11 +48,11 @@ export const mockActivities: Activity[] = [
   },
   {
     id: "a4",
-    type: "topup",
-    title: "Balance topped up",
-    detail: "Card top-up",
+    type: "order",
+    title: "Plan purchased — Greece",
+    detail: "1 GB · 7 days",
     date: "2026-06-14T21:55:00Z",
-    pointsDelta: 65,
+    pointsDelta: -24,
     status: "completed",
   },
   {

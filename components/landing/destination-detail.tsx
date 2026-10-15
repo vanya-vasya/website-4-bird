@@ -6,9 +6,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
-import { Check, ChevronRight, Loader2 } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge, Button, DestinationCard } from "@/components/fastbird";
+import BuyNowModal from "@/components/buy-now-modal";
 import {
   buildPlans,
   flagUrl,
@@ -47,13 +48,13 @@ export const DestinationDetail = ({
   const [selectedId, setSelectedId] = useState(
     plans.find((p) => p.popular)?.id ?? plans[0].id
   );
-  const [isPurchasing, setIsPurchasing] = useState(false);
-  const selected = plans.find((p) => p.id === selectedId) ?? plans[0];
   const [promoInput, setPromoInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<{
     code: string;
     percent: number;
   } | null>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const selected = plans.find((p) => p.id === selectedId) ?? plans[0];
 
   const payPoints = appliedPromo
     ? discountedPoints(selected.points, appliedPromo.percent)
@@ -74,45 +75,25 @@ export const DestinationDetail = ({
     }
   };
 
-  const handleBuyNow = async () => {
-    if (isPurchasing) return;
-
+  const handleBuyNow = () => {
     if (!isSignedIn) {
       router.push("/sign-in");
       return;
     }
+    setCheckoutOpen(true);
+  };
 
-    setIsPurchasing(true);
-
-    try {
-      const response = await fetch("/api/esim/purchase", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          destinationSlug: destination.slug,
-          planId: selected.id,
-          promoCode: appliedPromo?.code ?? "",
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        toast.error(data.error || "Purchase failed. Please try again.");
-        setIsPurchasing(false);
-        return;
-      }
-
-      toast.success(
-        `eSIM purchased! Installation instructions are on their way to your email. ${formatEurFromPoints(data.remainingPoints)} EUR left.`,
-        { duration: 6000 }
-      );
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("eSIM purchase request error:", error);
-      toast.error("Server connection error. Please try again.");
-      setIsPurchasing(false);
-    }
+  const startCheckout = async () => {
+    const response = await fetch("/api/esim/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        destinationSlug: destination.slug,
+        planId: selected.id,
+        promoCode: appliedPromo?.code ?? "",
+      }),
+    });
+    return await response.json();
   };
 
   return (
@@ -296,20 +277,9 @@ export const DestinationDetail = ({
               variant="accent"
               size="lg"
               onClick={handleBuyNow}
-              disabled={isPurchasing}
               aria-label={`Buy ${selected.data} plan for ${destination.name} for ${formatEurFromPoints(payPoints)} EUR`}
             >
-              {isPurchasing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-                  Processing…
-                </>
-              ) : (
-                "Buy now"
-              )}
-            </Button>
-            <Button href="/dashboard" variant="secondary" size="md">
-              Top up balance
+              Buy now
             </Button>
           </div>
 
@@ -322,6 +292,15 @@ export const DestinationDetail = ({
           </Link>
         </div>
       </aside>
+
+      <BuyNowModal
+        open={checkoutOpen}
+        onOpenChange={setCheckoutOpen}
+        planLabel={`${destination.name} — ${selected.data} / ${selected.validityDays} days`}
+        amountEur={formatEurFromPoints(payPoints)}
+        promoPercent={appliedPromo?.percent}
+        onCheckout={startCheckout}
+      />
     </div>
   );
 };

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Zap, LogOut, Settings } from "lucide-react";
+import { Menu, X, LogOut, Settings } from "lucide-react";
 import { useAuth, useUser, useClerk } from "@clerk/nextjs";
 import { Button, Container, Logo } from "@/components/fastbird";
 import { mainNav } from "@/constants/nav";
@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronDown } from "lucide-react";
-import { formatEurFromPoints } from "@/constants/pricing";
 
 const UserMenu = () => {
   const { user } = useUser();
@@ -80,7 +79,6 @@ const Header = () => {
   const pathname = usePathname();
   const { isSignedIn, isLoaded } = useAuth();
   const [open, setOpen] = useState(false);
-  const [credits, setCredits] = useState<number>(0);
 
   useEffect(() => {
     setOpen(false);
@@ -92,14 +90,6 @@ const Header = () => {
       document.body.style.overflow = "";
     };
   }, [open]);
-
-  useEffect(() => {
-    if (!isSignedIn) return;
-    fetch("/api/generations")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d && setCredits(d.remaining ?? 0))
-      .catch(() => {});
-  }, [isSignedIn]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-line bg-surface/90 backdrop-blur-md">
@@ -129,15 +119,6 @@ const Header = () => {
         <div className="hidden items-center gap-3 lg:flex">
           {isLoaded && isSignedIn ? (
             <>
-              <Link
-                href="/dashboard"
-                aria-label={`${formatEurFromPoints(credits)} EUR balance — go to dashboard`}
-                className="flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-surface transition-opacity hover:opacity-80 fb-focus"
-              >
-                <Zap className="h-4 w-4 fill-surface" aria-hidden />
-                <span className="font-semibold text-sm">{formatEurFromPoints(credits)}</span>
-                <span className="text-sm font-normal opacity-70">EUR</span>
-              </Link>
               <UserMenu />
             </>
           ) : isLoaded ? (

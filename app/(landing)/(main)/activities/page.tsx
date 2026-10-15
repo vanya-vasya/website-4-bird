@@ -12,7 +12,7 @@ import { mockActivities } from "@/constants/activities";
 export const metadata: Metadata = {
   title: "Activities",
   description:
-    "Track every order, top-up, activation, and data usage in one clear timeline inside your FastBird dashboard.",
+    "Track every order, activation, and data usage in one clear timeline inside your FastBird dashboard.",
 };
 
 const tracked = [
@@ -23,8 +23,8 @@ const tracked = [
   },
   {
     icon: Wallet,
-    title: "Top-ups",
-    body: "When you topped up and how much landed in your balance.",
+    title: "Payments",
+    body: "Every order you paid for, with the destination and the amount.",
   },
   {
     icon: Power,
@@ -47,7 +47,7 @@ const ActivitiesPage = () => (
           A clear record of everything.
         </h1>
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink-soft">
-          Your dashboard keeps a tidy timeline of every order, top-up,
+          Your dashboard keeps a tidy timeline of every order,
           activation, and data session — so you always know where your money
           went.
         </p>

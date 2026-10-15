@@ -1,13 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Wifi, MapPin, CreditCard, ArrowRight, Wallet, Plus } from "lucide-react";
+import { Wifi, MapPin, CreditCard, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/fastbird";
-import { useCredits } from "@/lib/contexts/credit-context";
-import BuyCreditsModal from "@/components/buy-credits-modal";
-import { formatEurFromPoints } from "@/constants/pricing";
 
 const container = {
   hidden: { opacity: 0 },
@@ -45,15 +41,13 @@ const quickActions = [
     id: "billing",
     label: "Billing & Payments",
     icon: CreditCard,
-    description: "Check your payment history, invoices, and top-up your balance.",
+    description: "Check your payment history and receipts for every eSIM you bought.",
     href: "/dashboard/billing/payment-history",
   },
 ];
 
 export default function DashboardHomePage() {
   const router = useRouter();
-  const { remainingCredits } = useCredits();
-  const [topUpOpen, setTopUpOpen] = useState(false);
 
   return (
     <div className="space-y-12">
@@ -65,28 +59,8 @@ export default function DashboardHomePage() {
           Welcome back.
         </h1>
         <p className="max-w-xl text-lg leading-relaxed text-ink-soft">
-          Manage your eSIM plans, top up your balance, and stay connected wherever you travel.
+          Manage your eSIM plans and stay connected wherever you travel.
         </p>
-      </div>
-
-      {/* Balance overview */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="rounded-2xl bg-white p-6 shadow-sm border border-line">
-          <div className="flex items-center gap-2 text-ink-soft">
-            <Wallet className="h-5 w-5" aria-hidden />
-            <span className="font-medium text-sm">Balance</span>
-          </div>
-          <p className="mt-2 text-4xl font-bold text-ink">
-            {formatEurFromPoints(remainingCredits)}{" "}
-            <span className="text-3xl font-semibold">EUR</span>
-          </p>
-          <div className="mt-5">
-            <Button variant="accent" size="sm" onClick={() => setTopUpOpen(true)}>
-              <Plus className="h-4 w-4 mr-1" aria-hidden />
-              Top up
-            </Button>
-          </div>
-        </div>
       </div>
 
       <motion.div
@@ -131,8 +105,6 @@ export default function DashboardHomePage() {
           Browse plans
         </Button>
       </div>
-
-      <BuyCreditsModal open={topUpOpen} onOpenChange={setTopUpOpen} />
     </div>
   );
 }

@@ -4,6 +4,172 @@ import prismadb from '@/lib/prismadb';
 import { transporter } from '@/config/nodemailer';
 import { generatePdfReceipt } from '@/lib/receiptGeneration';
 import { company } from '@/constants/company';
+import { buildEsimInstallEmail } from '@/lib/esim-install-email';
+import { getDestination, getPlan } from '@/constants/destinations';
+import { formatEurFromPoints, TOKEN_RATE } from '@/constants/pricing';
+import { discountedPoints } from '@/constants/promo';
+
+// Fulfil a direct eSIM order (tracking_id "esim_<clerkId>_<ts>"). Instead of
+// crediting a balance, the paid plan is recorded as an eSIM purchase and the
+// installation email with the QR code is sent — this is the direct-sale flow.
+async function handleEsimOrder(payload: {
+  tracking_id: string;
+  amount: number;
+  currency: string;
+  email: string;
+  description: string;
+  status: string;
+  receiptTransactionType?: string;
+}) {
+  const { tracking_id, amount, currency, email, description, status } = payload;
+
+  // userId: "esim_user_ABC_123456" → "user_ABC" (same trick as the gen_ flow)
+  const parts = tracking_id.replace('esim_', '').split('_');
+  parts.pop(); // timestamp
+  const userId = parts.join('_');
+
+  // Plan + promo come back from the description:
+  // "FastBird eSIM — <slug> <planId> [PROMOX] (<N> EUR)"
+  const match = description.match(
+    /^FastBird eSIM — ([a-z0-9-]+) ([a-z0-9-]+)(?: PROMO(\d+))? \(([\d.]+) EUR\)/i
+  );
+  if (!match) {
+    console.error(`❌ Cannot parse eSIM order from description: ${description}`);
+    return NextResponse.json({ error: 'Invalid order format' }, { status: 400 });
+  }
+  const [, destinationSlug, planId, promoPercentRaw] = match;
+  const promoPercent = promoPercentRaw ? parseInt(promoPercentRaw, 10) : 0;
+
+  const destination = getDestination(destinationSlug);
+  const plan = destination ? getPlan(destination, planId) : undefined;
+  if (!destination || !plan) {
+    console.error(`❌ Unknown eSIM plan in webhook: ${destinationSlug} ${planId}`);
+    return NextResponse.json({ error: 'Unknown plan' }, { status: 400 });
+  }
+
+  // Check for duplicate transaction (idempotency)
+  const existingTransaction = await prismadb.transaction.findFirst({
+    where: {
+      tracking_id: tracking_id,
+      userId: userId,
+      status: { in: ['completed', 'success', 'successful'] },
+    },
+  });
+  if (existingTransaction) {
+    console.log(`   ⚠️ eSIM order already fulfilled: ${existingTransaction.id}`);
+    return NextResponse.json({ status: 'ok' }, { status: 200 });
+  }
+
+  // Find the user (relink by email after a Clerk instance rotation)
+  let user = await prismadb.user.findUnique({ where: { clerkId: userId } });
+  if (!user && email) {
+    const userByEmail = await prismadb.user.findUnique({ where: { email } });
+    if (userByEmail) {
+      user = await prismadb.user.update({
+        where: { email },
+        data: { clerkId: userId },
+      });
+      console.log(`   🔗 Relinked existing account ${email} to new clerkId ${userId}`);
+    }
+  }
+  if (!user) {
+    if (!email) {
+      console.error(`❌ eSIM order: user not found and webhook has no email`);
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+    user = await prismadb.user.create({
+      data: { clerkId: userId, email, photo: '', availableGenerations: 0, usedGenerations: 0 },
+    });
+    console.log(`   🆕 Provisioned missing user ${userId} (${email}) from eSIM webhook`);
+  }
+
+  const buyerEmail = user.email || email;
+  const payPoints = discountedPoints(plan.points, promoPercent);
+  const planLabel = `${destination.name} ${plan.data} / ${plan.validityDays} days`;
+
+  // Record the transaction and the purchased eSIM atomically
+  const savedTransaction = await prismadb.$transaction(async (tx) => {
+    const created = await tx.transaction.create({
+      data: {
+        tracking_id: tracking_id,
+        userId,
+        status: status,
+        amount: amount,
+        currency: currency,
+        description: `${description}${promoPercent ? ` — promo −${promoPercent}%` : ''}`,
+        type: 'esim_purchase',
+        payment_method_type: 'card',
+        message: `${formatEurFromPoints(payPoints)} EUR paid — eSIM delivered, instructions emailed`,
+        paid_at: new Date(),
+        receipt_url: null,
+      },
+    });
+
+    // Track the purchased eSIM per user — feeds /dashboard/activity
+    await tx.activity.create({
+      data: {
+        userId,
+        destination: destination.name,
+        destinationSlug: destination.slug,
+        planData: plan.data,
+        validityDays: plan.validityDays,
+        points: payPoints,
+        transactionId: created.id,
+      },
+    });
+
+    return created;
+  });
+
+  console.log(`   ✅ eSIM order recorded: ${planLabel} for ${formatEurFromPoints(payPoints)} EUR by ${userId} (tx ${savedTransaction.id})`);
+
+  // Receipt + installation email. The QR lives in public/ which is CDN-served
+  // but not bundled into the serverless function, so it must be fetched over HTTP.
+  try {
+    const receiptId = savedTransaction.id.slice(-8);
+
+    const pdfBuffer = await generatePdfReceipt(
+      receiptId,
+      buyerEmail,
+      new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }),
+      payPoints,
+      `FastBird eSIM — ${planLabel}${promoPercent ? ` — promo −${promoPercent}%` : ''}`,
+      Math.round(payPoints * TOKEN_RATE * 100),
+      'EUR'
+    );
+
+    let qrPng: Buffer | null = null;
+    try {
+      const qrResponse = await fetch('https://myfastbird.com/esim/install-qr.png');
+      if (qrResponse.ok) {
+        qrPng = Buffer.from(await qrResponse.arrayBuffer());
+      } else {
+        console.error(`⚠️ QR code fetch returned ${qrResponse.status}, sending email without inline QR`);
+      }
+    } catch (qrError) {
+      console.error('⚠️ Failed to fetch QR code image:', qrError);
+    }
+
+    await transporter.sendMail(
+      buildEsimInstallEmail({
+        to: buyerEmail,
+        from: process.env.OUTBOX_EMAIL as string,
+        orderId: savedTransaction.id,
+        receiptId,
+        receiptPdf: pdfBuffer,
+        qrPng,
+        size: plan.data,
+        validity: `${plan.validityDays} DAY`,
+      })
+    );
+    console.log(`   ✅ eSIM installation email sent to ${buyerEmail}`);
+  } catch (emailError) {
+    // The payment itself succeeded — don't fail the webhook over a mail error
+    console.error('   ⚠️ Failed to send the eSIM installation email:', emailError);
+  }
+
+  return NextResponse.json({ status: 'ok' }, { status: 200 });
+}
 
 // Функция для верификации подписи webhook согласно документации Secure-Processor
 function verifyWebhookSignature(data: Record<string, any>, signature: string, secretKey: string): boolean {
@@ -125,6 +291,18 @@ export async function POST(request: NextRequest) {
       case 'successful': // Secure-Processor uses "successful" not "completed"
         console.log(`✅ Payment SUCCESSFUL for order ${tracking_id}`);
         console.log(`   Amount: ${amount} cents = ${(amount / 100).toFixed(2)} ${currency}`);
+
+        // Direct eSIM sale: fulfil the plan order instead of crediting a balance
+        if (typeof tracking_id === 'string' && tracking_id.startsWith('esim_')) {
+          return await handleEsimOrder({
+            tracking_id,
+            amount,
+            currency: currency || 'EUR',
+            email,
+            description: description || '',
+            status: 'completed',
+          });
+        }
         
         // Save transaction to database
         try {
@@ -273,8 +451,8 @@ export async function POST(request: NextRequest) {
             timestamp: new Date().toISOString(),
           }, null, 2));
 
-          // Top-up stream: send the receipt + thank-you email only.
-          // The eSIM activation email is sent separately by /api/esim/purchase.
+          // Legacy top-up stream (no longer reachable from the UI, kept so any
+          // in-flight orders still settle): send the receipt + thank-you email.
           try {
             const transactionId = token?.slice(-8) || savedTransaction.id.slice(-8);
             const pdfBuffer = await generatePdfReceipt(

@@ -6,7 +6,7 @@ import { Container, Eyebrow, Section, Card, Button } from "@/components/fastbird
 export const metadata: Metadata = {
   title: "Payments",
   description:
-    "How FastBird payments and balance top-ups work — accepted methods, security, receipts, and refunds.",
+    "How FastBird payments work — accepted methods, security, receipts, and refunds.",
 };
 
 const methods = ["Visa", "Mastercard", "Amex", "Apple Pay", "Google Pay"];
@@ -24,8 +24,8 @@ const assurances = [
   },
   {
     icon: Receipt,
-    title: "Receipts for every top-up",
-    body: "Each top-up generates a receipt in your dashboard, so expensing a trip is straightforward.",
+    title: "Receipts for every order",
+    body: "Every purchase generates a receipt, so expensing a trip is straightforward.",
   },
 ];
 
@@ -35,11 +35,12 @@ const PaymentsPage = () => (
       <Container className="py-16 lg:py-20">
         <Eyebrow>// PAYMENTS</Eyebrow>
         <h1 className="mt-4 max-w-2xl font-heading text-h1 font-medium text-ink">
-          Top up with confidence.
+          Pay with confidence.
         </h1>
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink-soft">
-          Top up with the card or wallet you already use. Here&apos;s exactly
-          how payment works and how we keep it secure.
+          Pay directly with the card or wallet you already use — no deposits,
+          no prepaid balance. Here&apos;s exactly how it works and how we keep
+          it secure.
         </p>
       </Container>
     </section>
@@ -49,12 +50,12 @@ const PaymentsPage = () => (
         <Card>
           <Coins className="h-6 w-6 text-green" aria-hidden />
           <h2 className="mt-4 font-heading text-h3 font-medium text-ink">
-            How top-ups work
+            How payment works
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
-            Choose a custom amount, pay once, and your balance
-            updates instantly. Your EUR sits in your wallet until you spend it on a
-            destination plan — there&apos;s no per-purchase card juggling.
+            Pick your destination and plan, apply a promo code if you have
+            one, and pay once at checkout. There&apos;s no wallet, no
+            balance to manage — just a one-time payment for the plan you want.
           </p>
           <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
             The final price in EUR is always shown before you confirm.

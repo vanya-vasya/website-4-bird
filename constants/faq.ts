@@ -51,7 +51,7 @@ export const faqCategories: FaqCategory[] = [
       {
         question: "How do I buy and activate a plan?",
         answer:
-          "Pick your destination, choose a data plan, and pay from your prepaid EUR balance. We send a QR code right away. Scan it from your phone's settings, and switch the line on when you land.",
+          "Pick your destination, choose a data plan, and pay directly at checkout. We send a QR code right away. Scan it from your phone's settings, and switch the line on when you land.",
       },
       {
         question: "Should I install before or after I travel?",
@@ -61,18 +61,18 @@ export const faqCategories: FaqCategory[] = [
     ],
   },
   {
-    title: "Top-ups & billing",
+    title: "Payment & billing",
     eyebrow: "// HOW PAYMENT WORKS",
     items: [
       {
-        question: "How does the balance work?",
+        question: "How does payment work?",
         answer:
-          "Your FastBird balance is prepaid in EUR. You top up once with your card or wallet, then spend it on any destination plan. Your balance is ready whenever the next trip comes up.",
+          "You pay for each plan directly at checkout with your card or wallet. There is no prepaid balance — one payment, one plan. Promo codes can reduce the price at checkout.",
       },
       {
-        question: "Does my balance expire?",
+        question: "When does my plan start?",
         answer:
-          "Your balance is designed to stay available for your travels. Any time-bound conditions are shown clearly at top-up — we don't hide rules in the fine print.",
+          "Your plan activates when the eSIM first connects to the network at your destination (or automatically after 60 days). The validity of each plan is shown before you pay.",
       },
       {
         question: "Can I get a refund?",

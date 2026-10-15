@@ -5,7 +5,7 @@ import { Button } from "@/components/fastbird";
 
 const topics = [
   { value: "general", label: "General question" },
-  { value: "billing", label: "Billing & top-ups" },
+  { value: "billing", label: "Billing & payments" },
   { value: "troubleshooting", label: "Troubleshooting" },
 ];
 

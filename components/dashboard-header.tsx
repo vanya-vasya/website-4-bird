@@ -3,15 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Zap } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Container, Logo } from "@/components/fastbird";
 import { UserDropdown } from "@/components/user-dropdown";
 import { GuestMobileSidebar } from "@/components/guest-mobile-sidebar";
 import { PaymentHistoryAnalytics } from "@/lib/analytics";
 import { mainNav } from "@/constants/nav";
-import { useCredits } from "@/lib/contexts/credit-context";
-import BuyCreditsModal from "@/components/buy-credits-modal";
-import { formatEurFromPoints } from "@/constants/pricing";
 
 const dashboardNav = [
   { name: "Payments", href: "/dashboard/billing/payment-history" },
@@ -21,8 +18,6 @@ const dashboardNav = [
 const DashboardHeader = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [buyModalOpen, setBuyModalOpen] = useState(false);
-  const { remainingCredits } = useCredits();
 
   useEffect(() => {
     setOpen(false);
@@ -72,20 +67,8 @@ const DashboardHeader = () => {
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <button
-            type="button"
-            aria-label={`${formatEurFromPoints(remainingCredits)} EUR — top up balance`}
-            onClick={() => setBuyModalOpen(true)}
-            className="flex items-center gap-2 rounded-full bg-green px-4 py-2 text-white transition-opacity hover:opacity-90 fb-focus"
-          >
-            <Zap className="h-4 w-4 fill-white" aria-hidden />
-            <span className="font-semibold text-sm">{formatEurFromPoints(remainingCredits)}</span>
-            <span className="text-sm font-normal opacity-80">EUR</span>
-          </button>
           <UserDropdown />
         </div>
-
-        <BuyCreditsModal open={buyModalOpen} onOpenChange={setBuyModalOpen} />
 
         <div className="flex items-center gap-2 lg:hidden">
           <GuestMobileSidebar />

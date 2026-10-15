@@ -14,7 +14,7 @@ const PaymentSuccessPage = () => (
           Payment Successful
         </CardTitle>
         <CardDescription>
-          Your transaction is confirmed. Your balance has been topped up.
+          Your transaction is confirmed. Your eSIM is on its way — installation instructions are being sent to your email.
         </CardDescription>
       </CardHeader>
       <CardContent>

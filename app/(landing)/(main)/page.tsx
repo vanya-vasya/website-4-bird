@@ -51,8 +51,8 @@ const valueCards = [
 const steps = [
   {
     n: "01",
-    title: "Top up your balance",
-    body: "Top up your wallet with EUR once. Use it on any destination, any time.",
+    title: "Pay for your plan directly",
+    body: "Choose your data and pay by card or wallet in one step — no balance, no wallet.",
     img: "/images/spots/step-topup.webp",
   },
   {
@@ -94,7 +94,7 @@ const benefits = [
   {
     icon: SlidersHorizontal,
     title: "Easy to manage",
-    body: "Track usage, top up, and view every order from one place.",
+    body: "Track usage and view every order you've paid for from one place.",
   },
   {
     icon: Wifi,
@@ -129,7 +129,7 @@ const HomePage = () => (
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-on-dark/80">
             FastBird gives you instant eSIM data wherever you travel — no plastic
-            SIMs to swap, no roaming shocks when you get home. Top up, scan, and
+            SIMs to swap, no roaming shocks when you get home. Pay, scan, and
             connect in minutes.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-4">
