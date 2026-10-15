@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     siteName: "FastBird",
     title: "FastBird — Travel data that just works",
     description:
-      "Instant eSIM data plans by destination. Top up your balance, get your QR, and connect anywhere.",
+      "Instant eSIM data plans by destination. Pay directly for your plan, get your QR, and connect anywhere.",
     images: [{ url: "/images/brand/og-card.png", width: 1200, height: 630, alt: "FastBird" }],
   },
   twitter: {
