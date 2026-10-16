@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Newsreader, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
 
 import { ModalProvider } from "@/components/modal-provider";
@@ -14,28 +14,46 @@ import NextTopLoader from "nextjs-toploader";
 
 import { GoogleAnalytics } from "@next/third-parties/google";
 
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
+// Self-hosted copies of the Google Fonts files (latin subset) — avoids the
+// build-time fetch of fonts.googleapis.com, which fails intermittently on
+// Vercel build machines and crashes next/font/google in Next 14.
+// Regenerate with `node scripts/download-fonts.mjs`.
+const newsreader = localFont({
+  src: [
+    { path: "./fonts/newsreader-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/newsreader-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/newsreader-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/newsreader-400-italic.woff2", weight: "400", style: "italic" },
+    { path: "./fonts/newsreader-500-italic.woff2", weight: "500", style: "italic" },
+    { path: "./fonts/newsreader-600-italic.woff2", weight: "600", style: "italic" },
+  ],
   variable: "--font-newsreader",
   display: "swap",
   // Next.js doesn't have size-adjust overrides for Newsreader yet — suppress the warning
   adjustFontFallback: false,
 });
 
-const plexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const plexSans = localFont({
+  src: [
+    { path: "./fonts/ibm-plex-sans-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/ibm-plex-sans-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/ibm-plex-sans-600-normal.woff2", weight: "600", style: "normal" },
+  ],
   variable: "--font-plex-sans",
   display: "swap",
+  adjustFontFallback: "Arial",
 });
 
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const plexMono = localFont({
+  src: [
+    { path: "./fonts/ibm-plex-mono-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/ibm-plex-mono-500-normal.woff2", weight: "500", style: "normal" },
+  ],
   variable: "--font-plex-mono",
   display: "swap",
+  // Next 14 only types "Arial" | "Times New Roman" for localFont fallback metrics,
+  // neither fits a mono face — skip fallback adjustment instead
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
