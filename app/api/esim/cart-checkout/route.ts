@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { items, promoCode } = body as {
-      items?: { destinationSlug: string; planId: string }[];
+      items?: { destinationSlug: string; planId: string; quantity?: number }[];
       promoCode?: string;
     };
 
@@ -35,10 +35,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 });
     }
 
-    // Resolve every line server-side
+    // Resolve every line server-side; quantity is clamped to 1..100 per line
     const lines: {
       destination: ReturnType<typeof getDestination>;
       plan: ReturnType<typeof getPlan>;
+      qty: number;
       payPoints: number;
       priceCents: number;
     }[] = [];
@@ -51,17 +52,23 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+      const qty =
+        typeof item.quantity === 'number' && Number.isFinite(item.quantity)
+          ? Math.min(100, Math.max(1, Math.round(item.quantity)))
+          : 1;
       const payPoints = discountedPoints(plan.points, promoPercent);
       lines.push({
         destination,
         plan,
+        qty,
         payPoints,
         priceCents: Math.round(payPoints * TOKEN_RATE * 100),
       });
     }
 
-    const totalCents = lines.reduce((sum, l) => sum + l.priceCents, 0);
+    const totalCents = lines.reduce((sum, l) => sum + l.priceCents * l.qty, 0);
     const totalEur = totalCents / 100;
+    const totalQty = lines.reduce((sum, l) => sum + l.qty, 0);
 
     // Keep the user row present and current for the webhook
     const emailFromBody = typeof body.email === 'string' ? body.email : undefined;
@@ -93,9 +100,9 @@ export async function POST(request: NextRequest) {
     const testMode = (process.env.SECURE_PROCESSOR_TEST_MODE || '').toLowerCase() === 'true';
 
     const tracking_id = `cart_${userId}_${Date.now()}`;
-    const description = `FastBird eSIM cart — ${lines.length} plan(s)${
+    const description = `FastBird eSIM cart — ${totalQty} eSIM(s) in ${lines.length} plan(s)${
       promoPercent ? ` PROMO${promoPercent}` : ''
-    } (${formatEurFromPoints(lines.reduce((s, l) => s + l.payPoints, 0))} EUR)`;
+    } (${formatEurFromPoints(lines.reduce((s, l) => s + l.payPoints * l.qty, 0))} EUR)`;
 
     // 1. Persist the pending order atomically (header + line items)
     const savedTransaction = await prismadb.$transaction(async (tx) => {
@@ -109,26 +116,30 @@ export async function POST(request: NextRequest) {
           description,
           type: 'esim_cart',
           payment_method_type: 'card',
-          message: `Cart with ${lines.length} eSIM plan(s) — awaiting payment`,
+          message: `Cart with ${totalQty} eSIM(s) across ${lines.length} plan(s) — awaiting payment`,
           paid_at: null,
           receipt_url: null,
         },
       });
 
+      // One row per purchased eSIM — the webhook creates one Activity
+      // (bought eSIM) and sends one activation email per row
       for (const line of lines) {
-        await tx.orderItem.create({
-          data: {
-            transactionId: created.id,
-            userId,
-            destination: line.destination!.name,
-            destinationSlug: line.destination!.slug,
-            planId: line.plan!.id,
-            planData: line.plan!.data,
-            validityDays: line.plan!.validityDays,
-            points: line.payPoints,
-            priceCents: line.priceCents,
-          },
-        });
+        for (let i = 0; i < line.qty; i++) {
+          await tx.orderItem.create({
+            data: {
+              transactionId: created.id,
+              userId,
+              destination: line.destination!.name,
+              destinationSlug: line.destination!.slug,
+              planId: line.plan!.id,
+              planData: line.plan!.data,
+              validityDays: line.plan!.validityDays,
+              points: line.payPoints,
+              priceCents: line.priceCents,
+            },
+          });
+        }
       }
 
       return created;

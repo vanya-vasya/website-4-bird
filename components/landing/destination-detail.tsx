@@ -95,8 +95,13 @@ export const DestinationDetail = ({
     addItem({
       destinationSlug: destination.slug,
       planId: selected.id,
+      qty,
     });
-    toast.success(`${destination.name} ${selected.data} added to cart`);
+    toast.success(
+      qty > 1
+        ? `${qty} × ${destination.name} ${selected.data} added to cart`
+        : `${destination.name} ${selected.data} added to cart`
+    );
   };
 
   const startCheckout = async () => {

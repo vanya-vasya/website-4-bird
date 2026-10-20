@@ -127,10 +127,21 @@ async function handleCartOrder(payload: {
   }
 
   const receiptId = order.id.slice(-8);
-  const confirmationItems = items.map((item) => ({
-    label: `${item.destination} — ${item.planData} / ${item.validityDays} days`,
-    qty: 1,
-    priceEur: (item.priceCents / 100).toFixed(2),
+  // Aggregate identical rows so a line bought ×N shows once with qty N
+  const aggregated = new Map<string, { label: string; qty: number; priceCents: number }>();
+  for (const item of items) {
+    const label = `${item.destination} — ${item.planData} / ${item.validityDays} days`;
+    const existing = aggregated.get(label);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      aggregated.set(label, { label, qty: 1, priceCents: item.priceCents });
+    }
+  }
+  const confirmationItems = Array.from(aggregated.values()).map((entry) => ({
+    label: entry.label,
+    qty: entry.qty,
+    priceEur: (entry.priceCents / 100).toFixed(2),
   }));
 
   try {

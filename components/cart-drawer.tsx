@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
-import { Loader2, ShoppingCart, X } from "lucide-react";
+import { Loader2, Minus, Plus, ShoppingCart, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,7 @@ type CartLine = {
   key: string;
   destination: Destination;
   plan: Plan;
+  qty: number;
 };
 
 interface CheckoutResult {
@@ -37,7 +38,8 @@ interface CheckoutResult {
 export const CartDrawer = () => {
   const router = useRouter();
   const { isSignedIn } = useAuth();
-  const { items, removeItem, clear, isOpen, setOpen, hydrated } = useCart();
+  const { items, setItemQty, removeItem, clear, isOpen, setOpen, hydrated } =
+    useCart();
   const [agreed, setAgreed] = useState(false);
   const [promoInput, setPromoInput] = useState("");
   const [promoPercent, setPromoPercent] = useState(0);
@@ -47,22 +49,26 @@ export const CartDrawer = () => {
   const lines: CartLine[] = useMemo(
     () =>
       items
-        .map(({ destinationSlug, planId }) => {
+        .map(({ destinationSlug, planId, qty }) => {
           const destination = getDestination(destinationSlug);
           const plan = destination ? getPlan(destination, planId) : undefined;
           return destination && plan
-            ? { key: `${destinationSlug}::${planId}`, destination, plan }
+            ? { key: `${destinationSlug}::${planId}`, destination, plan, qty }
             : null;
         })
         .filter((x): x is CartLine => x !== null),
     [items]
   );
 
-  const lineTotalPoints = lines.reduce((sum, l) => sum + l.plan.points, 0);
-  const payPointsTotal = lines.reduce(
-    (sum, l) => sum + discountedPoints(l.plan.points, promoPercent),
+  const lineTotalPoints = lines.reduce(
+    (sum, l) => sum + l.plan.points * l.qty,
     0
   );
+  const payPointsTotal = lines.reduce(
+    (sum, l) => sum + discountedPoints(l.plan.points, promoPercent) * l.qty,
+    0
+  );
+  const totalQty = lines.reduce((sum, l) => sum + l.qty, 0);
 
   const applyPromo = () => {
     const code = promoInput.trim();
@@ -98,9 +104,9 @@ export const CartDrawer = () => {
           items: lines.map((l) => ({
             destinationSlug: l.destination.slug,
             planId: l.plan.id,
+            quantity: l.qty,
           })),
-          promoCode:
-            promoPercent > 0 ? `PROMO${promoPercent}` : "",
+          promoCode: promoPercent > 0 ? `PROMO${promoPercent}` : "",
         }),
       });
       const data: CheckoutResult = await response.json();
@@ -135,49 +141,109 @@ export const CartDrawer = () => {
           </p>
         ) : (
           <>
-            {/* Items */}
+            {/* Items — one line per plan, quantity adjusted in place */}
             <ul className="mt-6 space-y-3">
-              {lines.map((line) => (
-                <li
-                  key={line.key}
-                  className="flex items-center gap-3 rounded-md border border-line bg-surface-card p-3"
-                >
-                  <span className="relative h-7 w-10 shrink-0 overflow-hidden rounded-sm ring-1 ring-line">
-                    <Image
-                      src={flagUrl(line.destination.code, 80)}
-                      alt={`${line.destination.name} flag`}
-                      fill
-                      sizes="40px"
-                      className="object-cover"
-                    />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-heading text-[15px] font-medium text-ink">
-                      {line.destination.name}
-                    </p>
-                    <p className="font-mono text-xs text-ink-soft">
-                      {line.plan.data} · {line.plan.validityDays} days ·{" "}
-                      {formatEurFromPoints(
-                        discountedPoints(line.plan.points, promoPercent)
-                      )}{" "}
-                      {PAYMENT_CURRENCY}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      removeItem({
-                        destinationSlug: line.destination.slug,
-                        planId: line.plan.id,
-                      })
-                    }
-                    aria-label={`Remove ${line.destination.name} ${line.plan.data} from cart`}
-                    className="rounded-sm p-1.5 text-ink-soft transition-colors hover:bg-sand hover:text-ink fb-focus"
+              {lines.map((line) => {
+                const perEsimPoints = discountedPoints(
+                  line.plan.points,
+                  promoPercent
+                );
+                return (
+                  <li
+                    key={line.key}
+                    className="rounded-md border border-line bg-surface-card p-3"
                   >
-                    <X className="h-4 w-4" aria-hidden />
-                  </button>
-                </li>
-              ))}
+                    <div className="flex items-center gap-3">
+                      <span className="relative h-7 w-10 shrink-0 overflow-hidden rounded-sm ring-1 ring-line">
+                        <Image
+                          src={flagUrl(line.destination.code, 80)}
+                          alt={`${line.destination.name} flag`}
+                          fill
+                          sizes="40px"
+                          className="object-cover"
+                        />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-heading text-[15px] font-medium text-ink">
+                          {line.destination.name}
+                        </p>
+                        <p className="font-mono text-xs text-ink-soft">
+                          {line.plan.data} · {line.plan.validityDays} days ·{" "}
+                          {formatEurFromPoints(perEsimPoints)}{" "}
+                          {PAYMENT_CURRENCY}/eSIM
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeItem({
+                            destinationSlug: line.destination.slug,
+                            planId: line.plan.id,
+                          })
+                        }
+                        aria-label={`Remove ${line.destination.name} ${line.plan.data} from cart`}
+                        className="rounded-sm p-1.5 text-ink-soft transition-colors hover:bg-sand hover:text-ink fb-focus"
+                      >
+                        <X className="h-4 w-4" aria-hidden />
+                      </button>
+                    </div>
+
+                    {/* Per-line quantity stepper */}
+                    <div className="mt-2 flex items-center justify-between border-t border-line pt-2">
+                      <span className="font-mono text-xs text-ink-soft">
+                        eSIMs
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setItemQty(
+                              {
+                                destinationSlug: line.destination.slug,
+                                planId: line.plan.id,
+                              },
+                              line.qty - 1
+                            )
+                          }
+                          disabled={line.qty <= 1}
+                          aria-label={`Decrease ${line.destination.name} ${line.plan.data} count`}
+                          className="flex h-6 w-6 items-center justify-center rounded-sm border border-line bg-surface fb-focus transition-colors hover:bg-sand disabled:opacity-40 disabled:hover:bg-surface"
+                        >
+                          <Minus className="h-3 w-3" aria-hidden />
+                        </button>
+                        <span
+                          className="w-10 text-center font-mono text-sm text-ink"
+                          aria-live="polite"
+                          aria-label={`${line.destination.name} ${line.plan.data} count: ${line.qty}`}
+                        >
+                          {line.qty}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setItemQty(
+                              {
+                                destinationSlug: line.destination.slug,
+                                planId: line.plan.id,
+                              },
+                              line.qty + 1
+                            )
+                          }
+                          disabled={line.qty >= 100}
+                          aria-label={`Increase ${line.destination.name} ${line.plan.data} count`}
+                          className="flex h-6 w-6 items-center justify-center rounded-sm border border-line bg-surface fb-focus transition-colors hover:bg-sand disabled:opacity-40 disabled:hover:bg-surface"
+                        >
+                          <Plus className="h-3 w-3" aria-hidden />
+                        </button>
+                        <span className="font-mono text-xs text-ink">
+                          {formatEurFromPoints(perEsimPoints * line.qty)}{" "}
+                          {PAYMENT_CURRENCY}
+                        </span>
+                    </div>
+                  </div>
+                  </li>
+                );
+              })}
             </ul>
 
             {/* Promo */}
@@ -203,7 +269,9 @@ export const CartDrawer = () => {
 
             {/* Total */}
             <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
-              <span className="text-sm text-ink-soft">Total</span>
+              <span className="text-sm text-ink-soft">
+                Total · {totalQty} eSIM{totalQty === 1 ? "" : "s"}
+              </span>
               <span className="font-heading text-2xl font-medium text-ink">
                 {formatEurFromPoints(payPointsTotal)}{" "}
                 <span className="font-mono text-sm text-ink-soft">
