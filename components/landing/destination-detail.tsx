@@ -104,15 +104,21 @@ export const DestinationDetail = ({
     );
   };
 
-  const startCheckout = async () => {
+  const startCheckout = async ({
+    quantity,
+    promoCode,
+  }: {
+    quantity: number;
+    promoCode: string;
+  }) => {
     const response = await fetch("/api/esim/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         destinationSlug: destination.slug,
         planId: selected.id,
-        promoCode: appliedPromo?.code ?? "",
-        quantity: qty,
+        promoCode,
+        quantity,
       }),
     });
     return await response.json();
@@ -356,9 +362,10 @@ export const DestinationDetail = ({
       <BuyNowModal
         open={checkoutOpen}
         onOpenChange={setCheckoutOpen}
-        planLabel={`${destination.name} — ${selected.data} / ${selected.validityDays} days${qty > 1 ? ` × ${qty}` : ""}`}
-        amountEur={formatEurFromPoints(totalPoints)}
-        promoPercent={appliedPromo?.percent}
+        destination={destination}
+        plan={selected}
+        initialQty={qty}
+        initialPromo={appliedPromo}
         onCheckout={startCheckout}
       />
     </div>
