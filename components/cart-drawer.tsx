@@ -45,20 +45,25 @@ export const CartDrawer = () => {
   const [promoPercent, setPromoPercent] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Prices resolve from the catalog on every render — no stale cart pricing
-  const lines: CartLine[] = useMemo(
-    () =>
-      items
-        .map(({ destinationSlug, planId, qty }) => {
-          const destination = getDestination(destinationSlug);
-          const plan = destination ? getPlan(destination, planId) : undefined;
-          return destination && plan
-            ? { key: `${destinationSlug}::${planId}`, destination, plan, qty }
-            : null;
-        })
-        .filter((x): x is CartLine => x !== null),
-    [items]
-  );
+  // Prices resolve from the catalog on every render — no stale cart pricing.
+  // Identical plans are merged into one line with a summed qty, so even a
+  // legacy cart with duplicate rows renders as a single "× N" line.
+  const lines: CartLine[] = useMemo(() => {
+    const merged = new Map<string, CartLine>();
+    for (const { destinationSlug, planId, qty } of items) {
+      const destination = getDestination(destinationSlug);
+      const plan = destination ? getPlan(destination, planId) : undefined;
+      if (!destination || !plan) continue;
+      const key = `${destinationSlug}::${planId}`;
+      const existing = merged.get(key);
+      if (existing) {
+        existing.qty = Math.min(100, existing.qty + qty);
+      } else {
+        merged.set(key, { key, destination, plan, qty });
+      }
+    }
+    return Array.from(merged.values());
+  }, [items]);
 
   const lineTotalPoints = lines.reduce(
     (sum, l) => sum + l.plan.points * l.qty,
@@ -141,8 +146,9 @@ export const CartDrawer = () => {
           </p>
         ) : (
           <>
-            {/* Items — one line per plan, quantity adjusted in place */}
-            <ul className="mt-6 space-y-3">
+            {/* Items — one line per plan (identical plans merged × qty); the list
+              scrolls so the promo, total and Pay button always stay reachable */}
+            <ul className="mt-6 max-h-[45vh] space-y-3 overflow-y-auto pr-1">
               {lines.map((line) => {
                 const perEsimPoints = discountedPoints(
                   line.plan.points,
