@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Loader2, Zap } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
   Dialog,
@@ -136,10 +136,7 @@ const BuyNowModal = ({
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             </>
           ) : (
-            <>
-              Pay {amountEur} {PAYMENT_CURRENCY}
-              <Zap className="h-4 w-4 fill-on-dark" aria-hidden />
-            </>
+            <>Pay {amountEur} {PAYMENT_CURRENCY}</>
           )}
         </button>
 

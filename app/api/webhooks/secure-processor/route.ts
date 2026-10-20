@@ -5,6 +5,7 @@ import { transporter } from '@/config/nodemailer';
 import { generatePdfReceipt } from '@/lib/receiptGeneration';
 import { company } from '@/constants/company';
 import { buildEsimInstallEmail } from '@/lib/esim-install-email';
+import { buildOrderConfirmationEmail } from '@/lib/order-confirmation-email';
 import { getDestination, getPlan } from '@/constants/destinations';
 import { formatEurFromPoints, TOKEN_RATE } from '@/constants/pricing';
 import { discountedPoints } from '@/constants/promo';
@@ -108,9 +109,11 @@ async function handleCartOrder(payload: {
 
   console.log(`   ✅ Cart order completed: ${items.length} plan(s), ${((amount || 0) / 100).toFixed(2)} EUR by ${userId} (tx ${order.id})`);
 
-  // One installation email per plan, each with its own receipt. The QR lives
-  // in public/ which is CDN-served but not bundled into the serverless
-  // function, so it must be fetched over HTTP.
+  // Email structure for every order: exactly ONE payment-confirmation email
+  // (receipt attached, order summary inside) plus one activation email per
+  // purchased eSIM (QR + install instructions, no receipt). The QR lives in
+  // public/ which is CDN-served but not bundled into the serverless function,
+  // so it must be fetched over HTTP.
   let qrPng: Buffer | null = null;
   try {
     const qrResponse = await fetch('https://myfastbird.com/esim/install-qr.png');
@@ -123,35 +126,57 @@ async function handleCartOrder(payload: {
     console.error('⚠️ Failed to fetch QR code image:', qrError);
   }
 
+  const receiptId = order.id.slice(-8);
+  const confirmationItems = items.map((item) => ({
+    label: `${item.destination} — ${item.planData} / ${item.validityDays} days`,
+    qty: 1,
+    priceEur: (item.priceCents / 100).toFixed(2),
+  }));
+
+  try {
+    const confirmationPdf = await generatePdfReceipt(
+      receiptId,
+      buyerEmail,
+      new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }),
+      items.reduce((sum, item) => sum + item.points, 0),
+      `FastBird eSIM order — ${items.length} plan(s)`,
+      amount,
+      currency || 'EUR'
+    );
+
+    await transporter.sendMail(
+      buildOrderConfirmationEmail({
+        to: buyerEmail,
+        from: process.env.OUTBOX_EMAIL as string,
+        receiptId,
+        totalEur: ((amount || 0) / 100).toFixed(2),
+        activationEmails: items.length,
+        items: confirmationItems,
+        receiptPdf: confirmationPdf,
+      })
+    );
+    console.log(`   ✅ Payment confirmation email sent to ${buyerEmail}`);
+  } catch (emailError) {
+    console.error('   ⚠️ Failed to send the payment confirmation email:', emailError);
+  }
+
   for (let index = 0; index < items.length; index++) {
     const item = items[index];
     try {
-      const receiptId = `${order.id.slice(-8)}${String(index + 1).padStart(2, '0')}`;
       const itemLabel = `${item.destination} ${item.planData} / ${item.validityDays} days`;
-
-      const pdfBuffer = await generatePdfReceipt(
-        receiptId,
-        buyerEmail,
-        new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }),
-        item.points,
-        `FastBird eSIM — ${itemLabel}`,
-        item.priceCents,
-        'EUR'
-      );
 
       await transporter.sendMail(
         buildEsimInstallEmail({
           to: buyerEmail,
           from: process.env.OUTBOX_EMAIL as string,
           orderId: `${order.id}-${index + 1}`,
-          receiptId,
-          receiptPdf: pdfBuffer,
+          receiptId: `${receiptId}${String(index + 1).padStart(2, '0')}`,
           qrPng,
           size: item.planData,
           validity: `${item.validityDays} DAY`,
         })
       );
-      console.log(`   ✅ eSIM installation email sent for ${itemLabel} to ${buyerEmail}`);
+      console.log(`   ✅ eSIM activation email sent for ${itemLabel} to ${buyerEmail}`);
     } catch (emailError) {
       // The payment itself succeeded — log and continue with the next item
       console.error(`   ⚠️ Failed to send the eSIM email for item ${item.id}:`, emailError);
@@ -180,17 +205,19 @@ async function handleEsimOrder(payload: {
   parts.pop(); // timestamp
   const userId = parts.join('_');
 
-  // Plan + promo come back from the description:
-  // "FastBird eSIM — <slug> <planId> [PROMOX] (<N> EUR)"
+  // Plan, promo and eSIM count come back from the description:
+  // "FastBird eSIM — <slug> <planId> [PROMOX] [x<qty>] (<N> EUR)"
   const match = description.match(
-    /^FastBird eSIM — ([a-z0-9-]+) ([a-z0-9-]+)(?: PROMO(\d+))? \(([\d.]+) EUR\)/i
+    /^FastBird eSIM — ([a-z0-9-]+) ([a-z0-9-]+)(?: PROMO(\d+))?(?: x(\d+))? \(([\d.]+) EUR\)/i
   );
   if (!match) {
     console.error(`❌ Cannot parse eSIM order from description: ${description}`);
     return NextResponse.json({ error: 'Invalid order format' }, { status: 400 });
   }
-  const [, destinationSlug, planId, promoPercentRaw] = match;
+  const [, destinationSlug, planId, promoPercentRaw, qtyRaw] = match;
   const promoPercent = promoPercentRaw ? parseInt(promoPercentRaw, 10) : 0;
+  // eSIM count purchased in this order (1..100)
+  const qty = Math.min(100, Math.max(1, qtyRaw ? parseInt(qtyRaw, 10) : 1));
 
   const destination = getDestination(destinationSlug);
   const plan = destination ? getPlan(destination, planId) : undefined;
@@ -236,10 +263,11 @@ async function handleEsimOrder(payload: {
   }
 
   const buyerEmail = user.email || email;
-  const payPoints = discountedPoints(plan.points, promoPercent);
+  const payPoints = discountedPoints(plan.points, promoPercent); // per eSIM
+  const totalPoints = payPoints * qty;
   const planLabel = `${destination.name} ${plan.data} / ${plan.validityDays} days`;
 
-  // Record the transaction and the purchased eSIM atomically
+  // Record the transaction and one Activity row per purchased eSIM
   const savedTransaction = await prismadb.$transaction(async (tx) => {
     const created = await tx.transaction.create({
       data: {
@@ -251,73 +279,102 @@ async function handleEsimOrder(payload: {
         description: `${description}${promoPercent ? ` — promo −${promoPercent}%` : ''}`,
         type: 'esim_purchase',
         payment_method_type: 'card',
-        message: `${formatEurFromPoints(payPoints)} EUR paid — eSIM delivered, instructions emailed`,
+        message: `${qty} eSIM(s) — ${formatEurFromPoints(totalPoints)} EUR paid, instructions emailed`,
         paid_at: new Date(),
         receipt_url: null,
       },
     });
 
-    // Track the purchased eSIM per user — feeds /dashboard/activity
-    await tx.activity.create({
-      data: {
-        userId,
-        destination: destination.name,
-        destinationSlug: destination.slug,
-        planData: plan.data,
-        validityDays: plan.validityDays,
-        points: payPoints,
-        transactionId: created.id,
-      },
-    });
+    // Track each purchased eSIM per user — feeds /dashboard/activity
+    for (let i = 0; i < qty; i++) {
+      await tx.activity.create({
+        data: {
+          userId,
+          destination: destination.name,
+          destinationSlug: destination.slug,
+          planData: plan.data,
+          validityDays: plan.validityDays,
+          points: payPoints,
+          transactionId: created.id,
+        },
+      });
+    }
 
     return created;
   });
 
-  console.log(`   ✅ eSIM order recorded: ${planLabel} for ${formatEurFromPoints(payPoints)} EUR by ${userId} (tx ${savedTransaction.id})`);
+  console.log(`   ✅ eSIM order recorded: ${planLabel}${qty > 1 ? ` x${qty}` : ''} for ${formatEurFromPoints(totalPoints)} EUR by ${userId} (tx ${savedTransaction.id})`);
 
-  // Receipt + installation email. The QR lives in public/ which is CDN-served
-  // but not bundled into the serverless function, so it must be fetched over HTTP.
+  // Email structure: exactly ONE payment-confirmation email (receipt attached,
+  // order summary inside) plus one activation email per purchased eSIM (QR +
+  // install instructions, no receipt). The QR lives in public/ which is
+  // CDN-served but not bundled into the serverless function, so it must be
+  // fetched over HTTP.
+  const receiptId = savedTransaction.id.slice(-8);
+
   try {
-    const receiptId = savedTransaction.id.slice(-8);
-
-    const pdfBuffer = await generatePdfReceipt(
+    const confirmationPdf = await generatePdfReceipt(
       receiptId,
       buyerEmail,
       new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }),
-      payPoints,
-      `FastBird eSIM — ${planLabel}${promoPercent ? ` — promo −${promoPercent}%` : ''}`,
-      Math.round(payPoints * TOKEN_RATE * 100),
+      totalPoints,
+      `FastBird eSIM — ${planLabel}${qty > 1 ? ` x${qty}` : ''}${promoPercent ? ` — promo −${promoPercent}%` : ''}`,
+      Math.round(totalPoints * TOKEN_RATE * 100),
       'EUR'
     );
 
-    let qrPng: Buffer | null = null;
-    try {
-      const qrResponse = await fetch('https://myfastbird.com/esim/install-qr.png');
-      if (qrResponse.ok) {
-        qrPng = Buffer.from(await qrResponse.arrayBuffer());
-      } else {
-        console.error(`⚠️ QR code fetch returned ${qrResponse.status}, sending email without inline QR`);
-      }
-    } catch (qrError) {
-      console.error('⚠️ Failed to fetch QR code image:', qrError);
-    }
-
     await transporter.sendMail(
-      buildEsimInstallEmail({
+      buildOrderConfirmationEmail({
         to: buyerEmail,
         from: process.env.OUTBOX_EMAIL as string,
-        orderId: savedTransaction.id,
         receiptId,
-        receiptPdf: pdfBuffer,
-        qrPng,
-        size: plan.data,
-        validity: `${plan.validityDays} DAY`,
+        totalEur: formatEurFromPoints(totalPoints),
+        activationEmails: qty,
+        items: [
+          {
+            label: `${destination.name} — ${plan.data} / ${plan.validityDays} days`,
+            qty,
+            priceEur: formatEurFromPoints(payPoints),
+          },
+        ],
+        receiptPdf: confirmationPdf,
       })
     );
-    console.log(`   ✅ eSIM installation email sent to ${buyerEmail}`);
+    console.log(`   ✅ Payment confirmation email sent to ${buyerEmail}`);
   } catch (emailError) {
-    // The payment itself succeeded — don't fail the webhook over a mail error
-    console.error('   ⚠️ Failed to send the eSIM installation email:', emailError);
+    console.error('   ⚠️ Failed to send the payment confirmation email:', emailError);
+  }
+
+  let qrPng: Buffer | null = null;
+  try {
+    const qrResponse = await fetch('https://myfastbird.com/esim/install-qr.png');
+    if (qrResponse.ok) {
+      qrPng = Buffer.from(await qrResponse.arrayBuffer());
+    } else {
+      console.error(`⚠️ QR code fetch returned ${qrResponse.status}, sending emails without inline QR`);
+    }
+  } catch (qrError) {
+    console.error('⚠️ Failed to fetch QR code image:', qrError);
+  }
+
+  for (let i = 0; i < qty; i++) {
+    try {
+      await transporter.sendMail(
+        buildEsimInstallEmail({
+          to: buyerEmail,
+          from: process.env.OUTBOX_EMAIL as string,
+          orderId: `${savedTransaction.id}-${i + 1}`,
+          receiptId: `${receiptId}${String(i + 1).padStart(2, '0')}`,
+          qrPng,
+          size: plan.data,
+          validity: `${plan.validityDays} DAY`,
+        })
+      );
+      console.log(`   ✅ eSIM activation email ${i + 1}/${qty} sent to ${buyerEmail}`);
+    } catch (emailError) {
+      // The payment itself succeeded — log and continue with the next eSIM
+      console.error(`   ⚠️ Failed to send the activation email ${i + 1}/${qty}:`, emailError);
+    }
   }
 
   return NextResponse.json({ status: 'ok' }, { status: 200 });

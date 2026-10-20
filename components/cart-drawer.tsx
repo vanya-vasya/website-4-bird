@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
-import { Loader2, ShoppingCart, X, Zap } from "lucide-react";
+import { Loader2, ShoppingCart, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -263,10 +263,7 @@ export const CartDrawer = () => {
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                 </>
               ) : (
-                <>
-                  Pay {formatEurFromPoints(payPointsTotal)} {PAYMENT_CURRENCY}
-                  <Zap className="h-4 w-4 fill-on-dark" aria-hidden />
-                </>
+                <>Pay {formatEurFromPoints(payPointsTotal)} {PAYMENT_CURRENCY}</>
               )}
             </button>
           </>

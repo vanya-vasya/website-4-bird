@@ -18,10 +18,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { destinationSlug, planId, promoCode } = body as {
+    const { destinationSlug, planId, promoCode, quantity } = body as {
       destinationSlug?: string;
       planId?: string;
       promoCode?: string;
+      quantity?: number;
     };
 
     if (!destinationSlug || !planId) {
@@ -30,6 +31,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // eSIM count for this order — whole number between 1 and 100
+    const qty =
+      typeof quantity === 'number' && Number.isFinite(quantity)
+        ? Math.min(100, Math.max(1, Math.round(quantity)))
+        : 1;
 
     const destination = getDestination(destinationSlug);
     const plan = destination ? getPlan(destination, planId) : undefined;
@@ -46,9 +53,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 });
     }
 
-    // Price in EUR = charge points × 0.2 (points are 1/5 EUR)
+    // Price in EUR = charge points × 0.2 (points are 1/5 EUR); the order
+    // charges payPoints per eSIM × qty
     const payPoints = discountedPoints(plan.points, promoPercent);
-    const amountEur = payPoints * TOKEN_RATE;
+    const totalPoints = payPoints * qty;
+    const amountEur = totalPoints * TOKEN_RATE;
 
     // Buyer email: keep the user row present and current for the webhook
     const emailFromBody = typeof body.email === 'string' ? body.email : undefined;
@@ -79,11 +88,11 @@ export async function POST(request: NextRequest) {
       .replace(/\/ctp\/api\/checkouts\/?$/, '');
     const testMode = (process.env.SECURE_PROCESSOR_TEST_MODE || '').toLowerCase() === 'true';
 
-    // The webhook parses the plan and promo back out of the description:
-    // "FastBird eSIM — <slug> <planId> [PROMOX] (<N> EUR)"
+    // The webhook parses the plan, promo and eSIM count back out of the
+    // description: "FastBird eSIM — <slug> <planId> [PROMOX] [x<qty>] (<N> EUR)"
     const description = `FastBird eSIM — ${destination.slug} ${plan.id}${
       promoPercent ? ` PROMO${promoPercent}` : ''
-    } (${formatEurFromPoints(payPoints)} EUR)`;
+    }${qty > 1 ? ` x${qty}` : ''} (${formatEurFromPoints(totalPoints)} EUR)`;
 
     const amountInCents = Math.round(amountEur * 100);
     const requestData = {
@@ -139,7 +148,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       redirect_url: checkout.redirect_url,
-      amount: formatEurFromPoints(payPoints),
+      amount: formatEurFromPoints(totalPoints),
     });
   } catch (error) {
     console.error('[ESIM_CHECKOUT_ERROR]', error);

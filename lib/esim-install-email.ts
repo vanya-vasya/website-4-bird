@@ -21,7 +21,8 @@ interface EsimInstallEmailParams {
   from: string;
   orderId: string;
   receiptId: string;
-  receiptPdf: Buffer;
+  /** Receipt PDF; when omitted the activation email carries only the QR + instructions. */
+  receiptPdf?: Buffer | null;
   qrPng: Buffer | null;
   /** Purchased plan size, e.g. "5 GB". Defaults to the supplier plan. */
   size?: string;
@@ -29,7 +30,7 @@ interface EsimInstallEmailParams {
   validity?: string;
 }
 
-const buildText = (orderId: string, size: string, validity: string): string => `How to Install Your FastBird eSIM
+const buildText = (orderId: string, size: string, validity: string, hasReceipt: boolean): string => `How to Install Your FastBird eSIM
 
 Hi!
 
@@ -38,8 +39,7 @@ Thank you for your purchase of the following eSIM plan:
 Size: ${size}
 Validity: ${validity}
 ICCID: ${ESIM_PLAN.iccid}
-
-You can find your order confirmation in the attachment.
+${hasReceipt ? "\nYou can find your order confirmation in the attachment." : ""}
 
 Now here's how you get connected! Make sure you're connected to Wi-Fi or have stable data connection.
 
@@ -96,7 +96,8 @@ const buildHtml = (
   orderId: string,
   hasQr: boolean,
   size: string,
-  validity: string
+  validity: string,
+  hasReceipt: boolean
 ): string => `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" /></head>
@@ -123,7 +124,7 @@ const buildHtml = (
       </tr>
     </table>
 
-    <p style="margin:0 0 16px;">You can find your order confirmation in the attachment.</p>
+    <p style="margin:0 0 16px;">${hasReceipt ? "You can find your order confirmation in the attachment." : "Your payment confirmation and receipt were sent in a separate email."}</p>
     <p style="margin:0 0 8px;">Now here's how you get connected! Make sure you're connected to Wi-Fi or have stable data connection.</p>
 
     ${sectionTitle("Install Your eSIM")}
@@ -197,16 +198,10 @@ export const buildEsimInstallEmail = ({
   size = ESIM_PLAN.size,
   validity = ESIM_PLAN.validity,
 }: EsimInstallEmailParams): SendMailOptions => {
-  const attachments: SendMailOptions["attachments"] = [
-    {
-      filename: `receipt-${receiptId}.pdf`,
-      content: receiptPdf,
-      contentType: "application/pdf",
-    },
-  ];
+  const attachments: SendMailOptions["attachments"] = [];
 
   if (qrPng) {
-    attachments.unshift({
+    attachments.push({
       filename: "esim-install-qr.png",
       content: qrPng,
       contentType: "image/png",
@@ -214,12 +209,20 @@ export const buildEsimInstallEmail = ({
     });
   }
 
+  if (receiptPdf) {
+    attachments.push({
+      filename: `receipt-${receiptId}.pdf`,
+      content: receiptPdf,
+      contentType: "application/pdf",
+    });
+  }
+
   return {
     from,
     to,
     subject: "How to Install Your FastBird eSIM",
-    text: buildText(orderId, size, validity),
-    html: buildHtml(orderId, Boolean(qrPng), size, validity),
+    text: buildText(orderId, size, validity, Boolean(receiptPdf)),
+    html: buildHtml(orderId, Boolean(qrPng), size, validity, Boolean(receiptPdf)),
     attachments,
   };
 };

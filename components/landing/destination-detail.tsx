@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge, Button, DestinationCard } from "@/components/fastbird";
 import BuyNowModal from "@/components/buy-now-modal";
@@ -56,11 +56,17 @@ export const DestinationDetail = ({
     percent: number;
   } | null>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [qty, setQty] = useState(1);
   const selected = plans.find((p) => p.id === selectedId) ?? plans[0];
 
+  // Per-eSIM price (promo applied); the order total is this × qty
   const payPoints = appliedPromo
     ? discountedPoints(selected.points, appliedPromo.percent)
     : selected.points;
+  const totalPoints = payPoints * qty;
+
+  const decreaseQty = () => setQty((v) => Math.max(1, v - 1));
+  const increaseQty = () => setQty((v) => Math.min(100, v + 1));
 
   const applyPromo = () => {
     const code = promoInput.trim();
@@ -101,6 +107,7 @@ export const DestinationDetail = ({
         destinationSlug: destination.slug,
         planId: selected.id,
         promoCode: appliedPromo?.code ?? "",
+        quantity: qty,
       }),
     });
     return await response.json();
@@ -248,13 +255,43 @@ export const DestinationDetail = ({
             <div className="flex items-center justify-between border-t border-line pt-3">
               <dt className="text-sm text-ink-soft">Total</dt>
               <dd className="font-heading text-2xl font-medium text-ink">
-                {formatEurFromPoints(payPoints)}{" "}
+                {formatEurFromPoints(totalPoints)}{" "}
                 <span className="font-mono text-sm text-ink-soft">EUR</span>
                 {appliedPromo && (
                   <span className="ml-1 align-middle font-mono text-xs uppercase tracking-[0.06em] text-green">
                     −{appliedPromo.percent}%
                   </span>
                 )}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-sm text-ink-soft">eSIMs</dt>
+              <dd className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={decreaseQty}
+                  disabled={qty <= 1}
+                  aria-label="Decrease eSIM count"
+                  className="flex h-7 w-7 items-center justify-center rounded-sm border border-line bg-surface-card fb-focus transition-colors hover:bg-sand disabled:opacity-40 disabled:hover:bg-surface-card"
+                >
+                  <Minus className="h-3.5 w-3.5" aria-hidden />
+                </button>
+                <span
+                  className="w-10 text-center font-mono text-sm text-ink"
+                  aria-live="polite"
+                  aria-label={`Number of eSIMs: ${qty}`}
+                >
+                  {qty}
+                </span>
+                <button
+                  type="button"
+                  onClick={increaseQty}
+                  disabled={qty >= 100}
+                  aria-label="Increase eSIM count"
+                  className="flex h-7 w-7 items-center justify-center rounded-sm border border-line bg-surface-card fb-focus transition-colors hover:bg-sand disabled:opacity-40 disabled:hover:bg-surface-card"
+                >
+                  <Plus className="h-3.5 w-3.5" aria-hidden />
+                </button>
               </dd>
             </div>
             <div className="flex items-center justify-between">
@@ -287,7 +324,7 @@ export const DestinationDetail = ({
               variant="accent"
               size="lg"
               onClick={handleBuyNow}
-              aria-label={`Buy ${selected.data} plan for ${destination.name} for ${formatEurFromPoints(payPoints)} EUR`}
+              aria-label={`Buy ${qty > 1 ? `${qty} ` : ""}${selected.data} eSIM plan${qty > 1 ? "s" : ""} for ${destination.name} for ${formatEurFromPoints(totalPoints)} EUR`}
             >
               Buy now
             </Button>
@@ -314,8 +351,8 @@ export const DestinationDetail = ({
       <BuyNowModal
         open={checkoutOpen}
         onOpenChange={setCheckoutOpen}
-        planLabel={`${destination.name} — ${selected.data} / ${selected.validityDays} days`}
-        amountEur={formatEurFromPoints(payPoints)}
+        planLabel={`${destination.name} — ${selected.data} / ${selected.validityDays} days${qty > 1 ? ` × ${qty}` : ""}`}
+        amountEur={formatEurFromPoints(totalPoints)}
         promoPercent={appliedPromo?.percent}
         onCheckout={startCheckout}
       />
